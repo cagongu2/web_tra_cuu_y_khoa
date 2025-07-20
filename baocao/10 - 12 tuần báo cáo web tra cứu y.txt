@@ -1,0 +1,142 @@
+10 - 12 tuẩn báo cáo web tra cứu y khoa (springboot + reactjs + python)
+tham khảo https://youmed.vn/
+tuần 1 erd + db | research model 
+tuần 2 giao diện reactjs + vite (trang chủ, trang bài viết, trang trợ lý ai) lấy data train
+tuần 3 giao diện reactjs + vite + cào bài viết
+tuần 4 + 5 làm be | train model
+tuần 6 mockdata + reponsive | đánh giá giám sát
+tuần 7 trang admin 1 trang thêm bài viết | viết api python
+tuần 8 pipeline + readme
+
+2.Đặc tả cho Use Case Diagram
+a)Các Actors
+Guest (Khách truy cập):
+Mô tả: Bất kỳ người dùng nào truy cập trang web mà không cần đăng nhập.
+Mục tiêu: Khám phá nội dung công khai của trang web.
+
+User (Người dùng):
+Mô tả: Người dùng đã đăng ký tài khoản và đăng nhập vào hệ thống. Kế thừa tất cả các quyền của guest.
+Mục tiêu: Sử dụng các tính năng tương tác có yêu cầu xác thực.
+
+Admin (Quản trị viên):
+Mô tả: Người dùng có quyền quản trị hệ thống. Kế thừa tất cả các quyền của user (và do đó cả guest).
+Mục tiêu: Quản lý nội dung và cấu hình của trang web.
+
+b)Các Use Cases
+i.Nhóm Use Cases cho guest (và kế thừa cho user, admin)
+Search for medical articles (Tìm kiếm bài viết y khoa)
+Mục tiêu: Cho phép người dùng tìm kiếm bài viết y khoa bằng từ khóa.
+Actor chính: guest
+Luồng sự kiện chính:
+Người dùng nhập từ khóa vào ô tìm kiếm.
+Hệ thống hiển thị danh sách các bài viết phù hợp với từ khóa.
+Người dùng có thể nhấp vào một bài viết để xem chi tiết.
+Điều kiện hậu: Danh sách bài viết tìm kiếm được hiển thị.
+
+2. View medical article (Xem bài viết y khoa)
+Mục tiêu: Cho phép người dùng đọc nội dung chi tiết của một bài viết y khoa.
+Actor chính: guest
+Luồng sự kiện chính:
+Người dùng chọn một bài viết từ danh sách (ví dụ: từ kết quả tìm kiếm, danh mục, hoặc trang chủ).
+Hệ thống hiển thị toàn bộ nội dung, hình ảnh và thông tin liên quan của bài viết.
+Điều kiện hậu: Nội dung bài viết được hiển thị đầy đủ.
+
+3. View article categories (Xem danh mục bài viết)
+Mục tiêu: Cho phép người dùng duyệt qua các danh mục bài viết để tìm nội dung theo chủ đề.
+Actor chính: guest
+Luồng sự kiện chính:
+Người dùng truy cập trang danh mục.
+Hệ thống hiển thị danh sách các danh mục bài viết.
+Người dùng có thể nhấp vào một danh mục để xem các bài viết trong đó.
+Điều kiện hậu: Danh sách các danh mục bài viết được hiển thị.
+
+4. Register account (Đăng ký tài khoản)
+Mục tiêu: Cho phép khách truy cập tạo một tài khoản người dùng mới.
+Actor chính: guest
+Luồng sự kiện chính:
+Người dùng truy cập trang đăng ký.
+Người dùng nhập các thông tin cần thiết (tên người dùng, email, mật khẩu).
+Hệ thống xác thực thông tin và tạo tài khoản mới.
+Hệ thống thông báo đăng ký thành công và có thể tự động đăng nhập.
+Điều kiện hậu: Tài khoản người dùng mới được tạo.
+ii.Nhóm Use Cases cho user (và kế thừa cho admin)
+5.login (Đăng nhập)
+Mục tiêu: Xác thực danh tính của người dùng để truy cập các chức năng yêu cầu quyền.
+Actor chính: user (và admin thông qua mối quan hệ tổng quát hóa)
+Luồng sự kiện chính:
+Người dùng truy cập trang đăng nhập.
+Người dùng nhập tên đăng nhập/email và mật khẩu.
+Hệ thống kiểm tra thông tin đăng nhập.
+Nếu thông tin hợp lệ, hệ thống cấp quyền truy cập các chức năng của user hoặc admin.
+Luồng thay thế:
+A1. Sai thông tin đăng nhập: Hệ thống hiển thị thông báo lỗi. Người dùng có thể thử lại hoặc "quên mật khẩu".
+Điều kiện hậu: Người dùng được xác thực và có quyền truy cập các chức năng tương ứng.
+Lưu ý: Đây là Use Case được <<include>> bởi các Use Case khác yêu cầu xác thực.
+
+6. Interact with Chatbot (Tương tác với Chatbot)
+Mục tiêu: Cho phép người dùng đã đăng nhập hỏi đáp các vấn đề liên quan đến y khoa thông qua chatbot.
+Actor chính: user
+Mối quan hệ: <<include>> login
+Luồng sự kiện chính:
+Người dùng đăng nhập thành công.
+Người dùng truy cập mục "Trợ lý Y khoa" hoặc mở chatbox.
+Người dùng nhập câu hỏi vào chatbox.
+Hệ thống chatbot (được nhúng) xử lý câu hỏi và trả về câu trả lời.
+Người dùng xem câu trả lời.
+Điều kiện tiên quyết: Người dùng đã đăng nhập.
+Điều kiện hậu: Người dùng nhận được phản hồi từ chatbot
+iii.Nhóm Use Cases cho admin
+7. Post medical articles (Đăng bài viết y khoa)
+Mục tiêu: Cho phép quản trị viên tạo và xuất bản các bài viết y khoa mới.
+Actor chính: admin
+Mối quan hệ: <<include>> login
+Luồng sự kiện chính:
+Quản trị viên đăng nhập thành công.
+Quản trị viên truy cập trang "Đăng bài viết mới".
+Quản trị viên nhập tiêu đề, nội dung, chọn danh mục, tải ảnh, và các thông tin khác.
+Quản trị viên chọn trạng thái (ví dụ: bản nháp, xuất bản).
+Quản trị viên lưu/xuất bản bài viết.
+Điều kiện tiên quyết: Quản trị viên đã đăng nhập.
+Điều kiện hậu: Bài viết mới được lưu vào cơ sở dữ liệu và có thể hiển thị công khai tùy theo trạng thái.
+
+8. Medical article editing (Chỉnh sửa bài viết y khoa)
+Mục tiêu: Cho phép quản trị viên sửa đổi nội dung và thông tin của các bài viết y khoa đã có.
+Actor chính: admin
+Mối quan hệ: <<include>> login
+Luồng sự kiện chính:
+Quản trị viên đăng nhập thành công.
+Quản trị viên tìm và chọn một bài viết cần chỉnh sửa.
+Hệ thống hiển thị form chỉnh sửa với dữ liệu hiện có của bài viết.
+Quản trị viên thực hiện thay đổi.
+Quản trị viên lưu các thay đổi.
+Điều kiện tiên quyết: Quản trị viên đã đăng nhập.
+Điều kiện hậu: Bài viết đã được cập nhật trong cơ sở dữ liệu.
+
+9. Delete medical article (Xóa bài viết y khoa)
+Mục tiêu: Cho phép quản trị viên xóa vĩnh viễn một bài viết y khoa khỏi hệ thống.
+Actor chính: admin
+Mối quan hệ: <<include>> login
+Luồng sự kiện chính:
+Quản trị viên đăng nhập thành công.
+Quản trị viên tìm và chọn một hoặc nhiều bài viết cần xóa.
+Hệ thống yêu cầu xác nhận xóa.
+Quản trị viên xác nhận.
+Hệ thống xóa bài viết khỏi cơ sở dữ liệu.
+Điều kiện tiên quyết: Quản trị viên đã đăng nhập.
+Điều kiện hậu: Bài viết đã bị xóa khỏi hệ thống.
+
+10. Manage article categories (Quản lý danh mục bài viết)
+Mục tiêu: Cho phép quản trị viên thêm, sửa, xóa và sắp xếp các danh mục bài viết.
+Actor chính: admin
+Mối quan hệ: <<include>> login
+Luồng sự kiện chính:
+Quản trị viên đăng nhập thành công.
+Quản trị viên truy cập trang quản lý danh mục.
+Quản trị viên có thể:
+Thêm danh mục mới (nhập tên, mô tả, chọn danh mục cha nếu có).
+Chỉnh sửa thông tin danh mục hiện có.
+Xóa danh mục (cần xử lý các bài viết thuộc danh mục đó, ví dụ: gán lại danh mục mặc định hoặc xóa bài viết).
+Sắp xếp thứ tự/cấu trúc phân cấp của danh mục.
+Quản trị viên lưu các thay đổi.
+Điều kiện tiên quyết: Quản trị viên đã đăng nhập.
+Điều kiện hậu: Cấu trúc danh mục bài viết được cập nhật.
