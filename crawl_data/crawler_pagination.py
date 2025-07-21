@@ -5,6 +5,8 @@ import json
 import os
 from bs4 import Tag, NavigableString
 from tqdm import tqdm
+import concurrent.futures
+import random
 
 
 def get_links(url, prefix="https://youmed.vn/tin-tuc/"):
@@ -69,35 +71,59 @@ def extract_article_content(article_soup):
     return (parse_element(article), groupts)
 
 
-def crawl_and_save_articles(list_links, output_dir):
-    os.makedirs(output_dir, exist_ok=True)
-    for link in tqdm(list_links):
-        try:
-            resp = requests.get(link)
-            soup = BeautifulSoup(resp.content, "html.parser")
-            result = extract_article_content(soup)
-            if result is not None:
-                content, groupts = result
-                if content and isinstance(content, dict) and "article" in content:
-                    content = content["article"][:-1]
-                else:
-                    content = None
+def get_fake_headers():
+    user_agents = [
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15",
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:115.0) Gecko/20100101 Firefox/115.0",
+    ]
+    return {
+        "User-Agent": random.choice(user_agents),
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Connection": "keep-alive",
+    }
+
+
+def crawl_single_article(link_output):
+    link, output_dir = link_output
+    try:
+        resp = requests.get(link, headers=get_fake_headers(), timeout=10)
+        soup = BeautifulSoup(resp.content, "html.parser")
+        result = extract_article_content(soup)
+        if result is not None:
+            content, groupts = result
+            if content and isinstance(content, dict) and "article" in content:
+                content = content["article"][:-1]
             else:
                 content = None
-                groupts = []
-            if content:
-                # Add groupts to the content dict
-                if isinstance(content, list):
-                    content = {"content": content, "groupts": groupts}
-                # Tạo tên file từ slug cuối của link
-                slug = link.rstrip("/").split("/")[-1]
-                out_path = os.path.join(output_dir, f"{slug}.json")
-                with open(out_path, "w", encoding="utf-8") as f:
-                    json.dump(content, f, ensure_ascii=False, indent=2)
-            else:
-                print(f"Không tìm thấy nội dung article cho: {link}")
-        except Exception as e:
-            print(f"Lỗi với link {link}: {e}")
+        else:
+            content = None
+            groupts = []
+        if content:
+            if isinstance(content, list):
+                content = {"content": content, "groupts": groupts}
+            slug = link.rstrip("/").split("/")[-1]
+            out_path = os.path.join(output_dir, f"{slug}.json")
+            # with open(out_path, "w", encoding="utf-8") as f:
+            #     json.dump(content, f, ensure_ascii=False, indent=2)
+        else:
+            print(f"Không tìm thấy nội dung article cho: {link}")
+    except Exception as e:
+        print(f"Lỗi với link {link}: {e}")
+
+
+def crawl_and_save_articles(list_links, output_dir, max_workers=8):
+    os.makedirs(output_dir, exist_ok=True)
+    link_outputs = [(link, output_dir) for link in list_links]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        list(
+            tqdm(
+                executor.map(crawl_single_article, link_outputs),
+                total=len(link_outputs),
+            )
+        )
 
 
 def get_max_page(url):
@@ -153,7 +179,7 @@ if __name__ == "__main__":
     ###### Mang thai & Nuôi dạy con
     # url = "https://youmed.vn/tin-tuc/nuoi-day-con/"
     # max_page = get_max_page(url)
-    os.makedirs("./data/Mang thai & Nuôi dạy con/", exist_ok=True)
+    # os.makedirs("./data/Mang thai & Nuôi dạy con/", exist_ok=True)
     # data_link = [
     #     {
     #         "url": f"https://youmed.vn/tin-tuc/nuoi-day-con/page/{d}/",
