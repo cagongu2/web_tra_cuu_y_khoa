@@ -1,6 +1,7 @@
 import React from 'react'
 import App from "../App";
 import { createBrowserRouter } from 'react-router-dom'
+import { SearchPage } from '../pages/SearchPage';
 
 const router = createBrowserRouter([  {
         path: "/",
@@ -9,6 +10,10 @@ const router = createBrowserRouter([  {
             {
                 path: "/",
                 element: <div>Home</div>,
+            },
+            {
+                path: "/tra-cuu/:slug",
+                element: <SearchPage/>,
             },
             {
                 path: "/orders",
