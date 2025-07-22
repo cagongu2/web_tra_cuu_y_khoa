@@ -1,5 +1,6 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { useNavigate, useParams } from "react-router-dom";
 
 const mockApi = {
   id: 1,
@@ -8,25 +9,158 @@ const mockApi = {
   level: 0,
   parent_id: null,
   children: [
-    { id: 2, name: "Răng - Hàm - Mặt", level: 2, parent_id: 1, slug: "rang-ham-mat", description: "Thông tin về các bệnh liên quan đến răng, hàm và mặt" },
-    { id: 3, name: "Tai - Mũi - Họng", level: 2, parent_id: 1, slug: "tai-mui-hong", description: "Các bệnh thường gặp về tai, mũi, họng" },
-    { id: 4, name: "Da liễu", level: 2, parent_id: 1, slug: "da-lieu", description: "Các vấn đề về da, dị ứng và viêm da" },
-    { id: 5, name: "Nhãn khoa", level: 2, parent_id: 1, slug: "nhan-khoa", description: "Các bệnh về mắt và thị giác" },
-    { id: 6, name: "Cơ Xương Khớp", level: 2, parent_id: 1, slug: "co-xuong-khop", description: "Thông tin về khớp, xương, cột sống" },
-    { id: 7, name: "Dinh Dưỡng", level: 2, parent_id: 1, slug: "dinh-duong", description: "Chế độ ăn uống và dinh dưỡng hợp lý" },
-    { id: 8, name: "Sức khỏe nam giới", level: 2, parent_id: 1, slug: "suc-khoe-nam-gioi", description: "Các bệnh lý thường gặp ở nam giới" },
-    { id: 9, name: "Sức khoẻ nữ giới", level: 2, parent_id: 1, slug: "suc-khoe-nu-gioi", description: "Thông tin sức khoẻ dành cho nữ giới" },
-    { id: 10, name: "Sức khỏe tình dục", level: 2, parent_id: 1, slug: "suc-khoe-tinh-duc", description: "Vấn đề về sinh lý và tình dục" },
-    { id: 11, name: "Thần kinh", level: 2, parent_id: 1, slug: "than-kinh", description: "Thông tin về các bệnh thần kinh" },
-    { id: 12, name: "Hô hấp", level: 2, parent_id: 1, slug: "ho-hap", description: "Bệnh về đường hô hấp" },
-    { id: 13, name: "Dị ứng", level: 2, parent_id: 1, slug: "di-ung", description: "Nguyên nhân và điều trị dị ứng" },
-    { id: 14, name: "Nội tiết", level: 2, parent_id: 1, slug: "noi-tiet", description: "Các rối loạn nội tiết và hormon" },
-    { id: 15, name: "Tiêu hóa - Gan mật", level: 2, parent_id: 1, slug: "tieu-hoa-gan-mat", description: "Vấn đề về hệ tiêu hoá, gan, mật" },
-    { id: 16, name: "Thận - Tiết niệu", level: 2, parent_id: 1, slug: "than-tiet-nieu", description: "Các bệnh lý về thận và hệ tiết niệu" },
-    { id: 17, name: "Ung bướu", level: 2, parent_id: 1, slug: "ung-buou", description: "Thông tin về ung thư và u lành tính" },
-    { id: 18, name: "Xét nghiệm", level: 2, parent_id: 1, slug: "xet-nghiem", description: "Các loại xét nghiệm y học phổ biến" },
-    { id: 19, name: "Thể dục thể thao", level: 2, parent_id: 1, slug: "the-duc-the-thao", description: "Tập luyện thể chất, thể thao và sức khoẻ" },
-    { id: 20, name: "Thực phẩm chức năng", level: 2, parent_id: 1, slug: "thuc-pham-chuc-nang", description: "Thông tin về thực phẩm bổ sung và chức năng" },
+    {
+      id: 2,
+      name: "Răng - Hàm - Mặt",
+      level: 2,
+      parent_id: 1,
+      slug: "rang-ham-mat",
+      description: "Thông tin về các bệnh liên quan đến răng, hàm và mặt",
+    },
+    {
+      id: 3,
+      name: "Tai - Mũi - Họng",
+      level: 2,
+      parent_id: 1,
+      slug: "tai-mui-hong",
+      description: "Các bệnh thường gặp về tai, mũi, họng",
+    },
+    {
+      id: 4,
+      name: "Da liễu",
+      level: 2,
+      parent_id: 1,
+      slug: "da-lieu",
+      description: "Các vấn đề về da, dị ứng và viêm da",
+    },
+    {
+      id: 5,
+      name: "Nhãn khoa",
+      level: 2,
+      parent_id: 1,
+      slug: "nhan-khoa",
+      description: "Các bệnh về mắt và thị giác",
+    },
+    {
+      id: 6,
+      name: "Cơ Xương Khớp",
+      level: 2,
+      parent_id: 1,
+      slug: "co-xuong-khop",
+      description: "Thông tin về khớp, xương, cột sống",
+    },
+    {
+      id: 7,
+      name: "Dinh Dưỡng",
+      level: 2,
+      parent_id: 1,
+      slug: "dinh-duong",
+      description: "Chế độ ăn uống và dinh dưỡng hợp lý",
+    },
+    {
+      id: 8,
+      name: "Sức khỏe nam giới",
+      level: 2,
+      parent_id: 1,
+      slug: "suc-khoe-nam-gioi",
+      description: "Các bệnh lý thường gặp ở nam giới",
+    },
+    {
+      id: 9,
+      name: "Sức khoẻ nữ giới",
+      level: 2,
+      parent_id: 1,
+      slug: "suc-khoe-nu-gioi",
+      description: "Thông tin sức khoẻ dành cho nữ giới",
+    },
+    {
+      id: 10,
+      name: "Sức khỏe tình dục",
+      level: 2,
+      parent_id: 1,
+      slug: "suc-khoe-tinh-duc",
+      description: "Vấn đề về sinh lý và tình dục",
+    },
+    {
+      id: 11,
+      name: "Thần kinh",
+      level: 2,
+      parent_id: 1,
+      slug: "than-kinh",
+      description: "Thông tin về các bệnh thần kinh",
+    },
+    {
+      id: 12,
+      name: "Hô hấp",
+      level: 2,
+      parent_id: 1,
+      slug: "ho-hap",
+      description: "Bệnh về đường hô hấp",
+    },
+    {
+      id: 13,
+      name: "Dị ứng",
+      level: 2,
+      parent_id: 1,
+      slug: "di-ung",
+      description: "Nguyên nhân và điều trị dị ứng",
+    },
+    {
+      id: 14,
+      name: "Nội tiết",
+      level: 2,
+      parent_id: 1,
+      slug: "noi-tiet",
+      description: "Các rối loạn nội tiết và hormon",
+    },
+    {
+      id: 15,
+      name: "Tiêu hóa - Gan mật",
+      level: 2,
+      parent_id: 1,
+      slug: "tieu-hoa-gan-mat",
+      description: "Vấn đề về hệ tiêu hoá, gan, mật",
+    },
+    {
+      id: 16,
+      name: "Thận - Tiết niệu",
+      level: 2,
+      parent_id: 1,
+      slug: "than-tiet-nieu",
+      description: "Các bệnh lý về thận và hệ tiết niệu",
+    },
+    {
+      id: 17,
+      name: "Ung bướu",
+      level: 2,
+      parent_id: 1,
+      slug: "ung-buou",
+      description: "Thông tin về ung thư và u lành tính",
+    },
+    {
+      id: 18,
+      name: "Xét nghiệm",
+      level: 2,
+      parent_id: 1,
+      slug: "xet-nghiem",
+      description: "Các loại xét nghiệm y học phổ biến",
+    },
+    {
+      id: 19,
+      name: "Thể dục thể thao",
+      level: 2,
+      parent_id: 1,
+      slug: "the-duc-the-thao",
+      description: "Tập luyện thể chất, thể thao và sức khoẻ",
+    },
+    {
+      id: 20,
+      name: "Thực phẩm chức năng",
+      level: 2,
+      parent_id: 1,
+      slug: "thuc-pham-chuc-nang",
+      description: "Thông tin về thực phẩm bổ sung và chức năng",
+    },
   ],
   description: "Danh mục tra cứu thông tin bệnh lý theo chuyên khoa",
 };
@@ -49,6 +183,23 @@ export const SearchPage = () => {
     }
   });
 
+  const navigate = useNavigate();
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmit = async (data) => {
+    const searchQuery = data["search-title"]?.trim();
+
+    if (searchQuery) {
+      navigate(`/tra-cuu?s=${encodeURIComponent(searchQuery)}`);
+    }
+  };
+
   if (!parentCategory) {
     return <div className="text-red-500 p-4">Danh mục không tồn tại.</div>;
   }
@@ -58,7 +209,9 @@ export const SearchPage = () => {
       <div className="max-w-[1130px] mx-auto pt-4 px-4 text-left">
         {/* Breadcrumb */}
         <div className="text-sm text-gray-600">
-          <a className="text-blue-500" href="/">Trang chủ</a>
+          <a className="text-blue-500" href="/">
+            Trang chủ
+          </a>
         </div>
 
         {/* Tiêu đề */}
@@ -70,11 +223,14 @@ export const SearchPage = () => {
 
         {/* Input + A-Z */}
         <section>
-          <form>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <div className="input-group flex flex-row gap-2">
               <input
                 type="text"
+                {...register("search-title", { required: true })}
                 placeholder="Nhập thông tin"
+                name="search-title"
+                id="search-title"
                 className="w-full py-3 px-6 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
               />
             </div>
@@ -91,7 +247,7 @@ export const SearchPage = () => {
                       .getElementById(`a-z-listing-letter-${letter}`)
                       ?.scrollIntoView({ behavior: "smooth" })
                   }
-                  className="w-full h-full bg-slate-100 rounded"
+                  className="cursor-pointer w-full h-full bg-slate-100 rounded"
                 >
                   {letter}
                 </button>
@@ -105,7 +261,11 @@ export const SearchPage = () => {
             if (group.length === 0) return null;
 
             return (
-              <div key={letter} className="mb-8" id={`a-z-listing-letter-${letter}`}>
+              <div
+                key={letter}
+                className="mb-8"
+                id={`a-z-listing-letter-${letter}`}
+              >
                 <h2 className="mb-4 font-semibold text-xl border-b border-gray-200">
                   {letter}
                 </h2>
@@ -122,7 +282,10 @@ export const SearchPage = () => {
                   ))}
                 </ul>
                 <div className="text-right mt-2">
-                  <a href={`#a-z-listing-letter-${letter}`} className="text-sm text-gray-500 hover:underline">
+                  <a
+                    href={`#a-z-listing-letter-${letter}`}
+                    className="text-sm text-gray-500 hover:underline"
+                  >
                     Back to top
                   </a>
                 </div>
