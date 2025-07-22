@@ -1,5 +1,7 @@
 import React, { useState } from "react";
+import { useForm } from "react-hook-form";
 import { GoHomeFill } from "react-icons/go";
+import { useNavigate } from "react-router-dom";
 
 const categories = [
   {
@@ -541,6 +543,23 @@ export const Header = () => {
     );
   };
 
+  const navigate = useNavigate();
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm();
+
+  const onSubmit = async (data) => {
+    const searchQuery = data["search-title"]?.trim();
+
+    if (searchQuery) {
+      navigate(`/tra-cuu?s=${encodeURIComponent(searchQuery)}`);
+    }
+  };
+
   return (
     <>
       <header className="bg-white shadow-sm w-full">
@@ -570,13 +589,16 @@ export const Header = () => {
             </div>
             <h1 className="text-2xl font-bold text-blue-600">YouMed</h1>
           </div>
-          <div className="relative w-100">
+          <form className="relative w-100 " onSubmit={handleSubmit(onSubmit)}>
             <input
               type="text"
+              {...register("search-title", { required: true })}
               placeholder="Tìm kiếm bài viết, thông tin bệnh, thuốc ..."
+              name="search-title"
+              id="search-title"
               className="w-full py-3 px-6 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-            <button className="absolute right-3 top-2 text-gray-400">
+            <button className="absolute right-3 top-4 text-gray-400">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -592,7 +614,7 @@ export const Header = () => {
                 />
               </svg>
             </button>
-          </div>
+          </form>
         </div>
 
         <div className="hidden lg:block border-1 border-gray-100"></div>
