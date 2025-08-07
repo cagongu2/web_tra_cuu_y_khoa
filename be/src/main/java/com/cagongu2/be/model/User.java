@@ -1,5 +1,6 @@
 package com.cagongu2.be.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -41,5 +42,6 @@ public class User {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Post> posts;
 }

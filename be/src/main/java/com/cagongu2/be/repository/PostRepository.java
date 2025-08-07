@@ -1,8 +1,6 @@
 package com.cagongu2.be.repository;
 
-import com.cagongu2.be.model.Category;
 import com.cagongu2.be.model.Post;
-import com.cagongu2.be.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -12,9 +10,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     Optional<Post> findBySlug(String slug);
 
-    List<Post> findByCategory(Category category);
+    List<Post> findByCategoryId(Long categoryId);
 
-    List<Post> findByAuthor(User author);
+    List<Post> findByAuthorId(Long authorId);
 
     List<Post> findByStatus(String status);
 }
