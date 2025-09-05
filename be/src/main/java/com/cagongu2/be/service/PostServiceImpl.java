@@ -9,6 +9,7 @@ import com.cagongu2.be.repository.PostRepository;
 import com.cagongu2.be.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +31,7 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid author ID"));
 
         Post post = new Post();
+        post.setName(postDTO.getName());
         post.setTitle(postDTO.getTitle());
         post.setSlug(postDTO.getSlug());
         post.setContent(postDTO.getContent());
@@ -77,10 +79,25 @@ public class PostServiceImpl implements PostService {
     public Post updatePost(Long id, PostDTO postDTO) {
         Post post = getPostById(id);
 
-        post.setTitle(postDTO.getTitle());
-        post.setSlug(postDTO.getSlug());
-        post.setContent(postDTO.getContent());
-        post.setStatus(postDTO.getStatus());
+        if (StringUtils.hasText(postDTO.getTitle())) {
+            post.setTitle(postDTO.getTitle());
+        }
+
+        if (StringUtils.hasText(postDTO.getSlug())) {
+            post.setSlug(postDTO.getSlug());
+        }
+
+        if (StringUtils.hasText(postDTO.getContent())) {
+            post.setContent(postDTO.getContent());
+        }
+
+        if (StringUtils.hasText(postDTO.getStatus())) {
+            post.setStatus(postDTO.getStatus());
+        }
+
+        if (StringUtils.hasText(postDTO.getName())) {
+            post.setName(postDTO.getName());
+        }
 
         if (postDTO.getCategoryId() != null) {
             Category category = categoryRepository.findById(postDTO.getCategoryId())
