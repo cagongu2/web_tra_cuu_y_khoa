@@ -23,6 +23,11 @@ const categoriesApi = createApi({
             providesTags: ['Categories']
         }),
 
+        getAllCategoriesFlat: builder.query({
+            query: () => `/flat`,
+            providesTags: ['Categories']
+        }),
+
         getCategoryById: builder.query({
             query: (id) => `/${id}`,
             providesTags: (result, error, id) => [{ type: 'Categories', id }]
@@ -78,6 +83,7 @@ export const {
     useGetCategoryByIdQuery,
     useGetCategoryBySlugQuery,
     useGetChildrenQuery,
+    useGetAllCategoriesFlatQuery, 
     useCreateCategoryMutation,
     useUpdateCategoryMutation,
     useDeleteCategoryMutation } = categoriesApi;

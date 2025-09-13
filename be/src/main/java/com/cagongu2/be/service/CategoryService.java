@@ -1,6 +1,7 @@
 package com.cagongu2.be.service;
 
 import com.cagongu2.be.dto.CategoryDTO;
+import com.cagongu2.be.dto.CategoryFlatDTO;
 import com.cagongu2.be.model.Category;
 
 import java.util.List;
@@ -18,6 +19,9 @@ public interface CategoryService {
     Optional<Category> getCategoryBySlug(String slug);
 
     List<Category> getAllCategoriesByLevel(int level);
+
+    List<CategoryFlatDTO> getAllCategoriesFlat();
+
 
     List<Category> getChildren(Long parentId);
 }

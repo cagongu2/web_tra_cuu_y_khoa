@@ -1,6 +1,7 @@
 package com.cagongu2.be.service;
 
 import com.cagongu2.be.dto.CategoryDTO;
+import com.cagongu2.be.dto.CategoryFlatDTO;
 import com.cagongu2.be.model.Category;
 import com.cagongu2.be.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -87,6 +88,11 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<Category> getAllCategoriesByLevel(int level) {
         return categoryRepository.findByLevel(level);
+    }
+
+    @Override
+    public List<CategoryFlatDTO> getAllCategoriesFlat() {
+        return categoryRepository.findAllFlat();
     }
 
     @Override

@@ -4,6 +4,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { SearchPage } from "../pages/SearchPage";
 import { SinglePost } from "../pages/SinglePost";
 import { SearchList } from "../pages/SearchList";
+import DashBoard from "../pages/dashboard/Dashboard";
 
 const router = createBrowserRouter([
   {
@@ -24,9 +25,14 @@ const router = createBrowserRouter([
       },
       {
         path: "/tra-cuu",
-        element: <SearchList/>,
+        element: <SearchList />,
       },
     ],
+  },
+  // admin router
+  {
+    path: "/dashboard",
+    element: <DashBoard />,
   },
 ]);
 export default router;
