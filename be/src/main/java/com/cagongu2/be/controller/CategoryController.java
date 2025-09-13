@@ -1,6 +1,7 @@
 package com.cagongu2.be.controller;
 
 import com.cagongu2.be.dto.CategoryDTO;
+import com.cagongu2.be.dto.CategoryFlatDTO;
 import com.cagongu2.be.model.Category;
 import com.cagongu2.be.service.CategoryService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,12 @@ public class CategoryController {
     public ResponseEntity<List<Category>> getAllCategories(@RequestParam int level) {
         return ResponseEntity.ok(categoryService.getAllCategoriesByLevel(level));
     }
+
+    @GetMapping("/flat")
+    public ResponseEntity<List<CategoryFlatDTO>> getFlatCategories() {
+        return ResponseEntity.ok(categoryService.getAllCategoriesFlat());
+    }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {

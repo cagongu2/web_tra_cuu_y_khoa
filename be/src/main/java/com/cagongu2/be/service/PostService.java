@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface PostService {
     Post createPost(PostDTO postDTO);
-    List<Post> getAllPosts();
+    List<PostDTO> getAllPosts();
     Post getPostById(Long id);
     Post getPostBySlug(String slug);
     List<Post> getPostsByCategory(Long categoryId);

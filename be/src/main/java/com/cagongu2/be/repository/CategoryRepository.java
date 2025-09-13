@@ -1,5 +1,6 @@
 package com.cagongu2.be.repository;
 
+import com.cagongu2.be.dto.CategoryFlatDTO;
 import com.cagongu2.be.model.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,4 +18,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     @Query("SELECT c FROM Category c WHERE c.level = :level")
     List<Category> findByLevel(@Param("level") int level);
+
+    @Query("SELECT new com.cagongu2.be.dto.CategoryFlatDTO(c.id, c.name) FROM Category c")
+    List<CategoryFlatDTO> findAllFlat();
+
 }

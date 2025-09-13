@@ -45,9 +45,12 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<Post> getAllPosts() {
-        return postRepository.findAll();
+    public List<PostDTO> getAllPosts() {
+        List<PostDTO> posts = postRepository.findAllPostDTOs();
+        posts.forEach(System.out::println);
+        return posts;
     }
+
 
     @Override
     public Post getPostById(Long id) {
