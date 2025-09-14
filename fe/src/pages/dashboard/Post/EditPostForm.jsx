@@ -1,48 +1,45 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import { useForm } from "react-hook-form";
 import { IoMdClose } from "react-icons/io";
 import { useUpdatePostMutation } from "../../../redux/features/post/postAPI";
 import { useGetAllCategoriesFlatQuery } from "../../../redux/features/categories/categoryAPI";
+import { useUploadImageMutation } from "../../../redux/features/upload/uploadApi";
 
 const EditPostForm = ({ post, onClose, onSave }) => {
   const {
     register,
     handleSubmit,
     setValue,
-    // watch,
     formState: { errors },
   } = useForm();
 
   const { data: categories, isLoading: isCategoriesLoading } =
     useGetAllCategoriesFlatQuery();
   const [updatePost, { isLoading: isUpdating }] = useUpdatePostMutation();
-
+  const [uploadImage] = useUploadImageMutation();
   const [content, setContent] = useState(post?.content || "");
   const quillRef = useRef(null);
 
-  // Thiết lập modules cho Quill Editor
+  // Quill Editor modules configuration
   const modules = {
     toolbar: [
       [{ header: [1, 2, 3, 4, 5, 6, false] }],
       [{ font: [] }],
       [{ size: [] }],
       ["bold", "italic", "underline", "strike", "blockquote"],
-      [
-        { list: "ordered" },
-        { list: "bullet" },
-        { indent: "-1" },
-        { indent: "+1" },
-      ],
+      [{ list: "ordered" }, { indent: "-1" }, { indent: "+1" }],
       ["link", "image", "video"],
       ["clean"],
     ],
+
     clipboard: {
       matchVisual: false,
     },
   };
 
+  // Quill allowed formats
   const formats = [
     "header",
     "font",
@@ -53,13 +50,13 @@ const EditPostForm = ({ post, onClose, onSave }) => {
     "strike",
     "blockquote",
     "list",
-    "bullet",
     "indent",
     "link",
     "image",
     "video",
   ];
 
+  // Populate form fields when post data is available
   useEffect(() => {
     if (post) {
       setValue("name", post.name);
@@ -71,26 +68,28 @@ const EditPostForm = ({ post, onClose, onSave }) => {
     }
   }, [post, setValue]);
 
+  // Handle form submission
   const onSubmit = async (data) => {
     try {
       await updatePost({
         id: post.id,
         ...data,
-        content: content,
+        content: content, // include Quill content
       }).unwrap();
-
       onSave({
         ...data,
         content: content,
         id: post.id,
       });
     } catch (error) {
-      console.error("Lỗi khi cập nhật bài viết:", error);
+      console.error("Error updating post:", error);
     }
   };
 
+  // Generate slug from title
   const generateSlug = (title) => {
     if (!title) return "";
+
     return title
       .toLowerCase()
       .normalize("NFD")
@@ -101,13 +100,115 @@ const EditPostForm = ({ post, onClose, onSave }) => {
       .trim();
   };
 
+  // Update title and slug on input change
   const handleTitleChange = (e) => {
     const title = e.target.value;
     setValue("title", title);
     setValue("slug", generateSlug(title));
   };
 
-  // Hàm xử lý chèn ảnh
+  // Upload image to server and return URL
+  const uploadImageToServer = useCallback(
+    async (file) => {
+      try {
+        const response = await uploadImage({ file, type: "posts" }).unwrap();
+        return `http://localhost:8080/${response.relativePath}`;
+      } catch (error) {
+        console.error("Image upload failed:", error);
+        throw new Error("Tải ảnh lên thất bại");
+      }
+    },
+    [uploadImage]
+  );
+
+  // Compress large images before upload
+  const compressImage = async (file, maxWidth = 1200, quality = 0.7) => {
+    return new Promise((resolve) => {
+      if (file.size <= 300 * 1024) {
+        resolve(file); // Skip compression for small images
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (blob) => {
+              const compressedFile = new File([blob], file.name, {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            },
+            "image/jpeg",
+            quality
+          );
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Process image file with loading state
+  const processImageFile = useCallback(
+    async (file) => {
+      if (!quillRef.current) return;
+
+      const quill = quillRef.current.getEditor();
+      const range = quill.getSelection(true);
+
+      // Insert temporary loading image
+      quill.insertEmbed(range.index, "image", "/loading-image.gif");
+
+      try {
+        // Validate file type and size
+        if (!file.type.startsWith("image/")) {
+          throw new Error("File không phải là hình ảnh");
+        }
+
+        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+        if (file.size > MAX_FILE_SIZE) {
+          throw new Error("Kích thước file không được vượt quá 5MB");
+        }
+
+        const compressedFile = await compressImage(file);
+        const imageUrl = await uploadImageToServer(compressedFile);
+
+        // Replace loading image with actual image
+        quill.deleteText(range.index, 1);
+        quill.insertEmbed(range.index, "image", imageUrl);
+        quill.setSelection(range.index + 1);
+
+        // Update content state
+        setContent(quill.root.innerHTML);
+      } catch (error) {
+        // Remove loading image on error
+        quill.deleteText(range.index, 1);
+        console.error("Image processing error:", error);
+        alert(error.message || "Có lỗi xảy ra khi xử lý ảnh");
+      }
+    },
+    [uploadImageToServer]
+  );
+
+  // Custom image handler for toolbar
   const imageHandler = () => {
     const input = document.createElement("input");
     input.setAttribute("type", "file");
@@ -117,16 +218,56 @@ const EditPostForm = ({ post, onClose, onSave }) => {
     input.onchange = async () => {
       const file = input.files[0];
       if (file) {
-        // Implement image upload logic here
-        const imageUrl = URL.createObjectURL(file);
-        const quill = quillRef.current.getEditor();
-        const range = quill.getSelection();
-        quill.insertEmbed(range.index, "image", imageUrl);
+        await processImageFile(file);
       }
     };
   };
 
-  // Cập nhật modules để thêm imageHandler
+  // Handle paste event for images
+  const handlePaste = useCallback(
+    (event) => {
+      const items = event.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.type.indexOf("image") !== -1) {
+          event.preventDefault();
+          const file = item.getAsFile();
+          if (file) {
+            processImageFile(file);
+          }
+          break;
+        }
+      }
+    },
+    [processImageFile]
+  );
+
+  // Handle drop event for images
+  const handleDrop = useCallback(
+    (event) => {
+      event.preventDefault();
+      const files = event.dataTransfer?.files;
+      if (!files || files.length === 0) return;
+
+      const quill = quillRef.current?.getEditor();
+      if (quill) {
+        quill.focus();
+      }
+
+      const imageFiles = Array.from(files).filter((file) =>
+        file.type.startsWith("image/")
+      );
+
+      if (imageFiles.length > 0) {
+        processImageFile(imageFiles[0]);
+      }
+    },
+    [processImageFile]
+  );
+
+  // Quill modules including custom image handler and paste handler
   const updatedModules = {
     ...modules,
     toolbar: {
@@ -135,18 +276,17 @@ const EditPostForm = ({ post, onClose, onSave }) => {
         [{ font: [] }],
         [{ size: [] }],
         ["bold", "italic", "underline", "strike", "blockquote"],
-        [
-          { list: "ordered" },
-          { list: "bullet" },
-          { indent: "-1" },
-          { indent: "+1" },
-        ],
+        [{ list: "ordered" }, { indent: "-1" }, { indent: "+1" }],
         ["link", "image", "video"],
         ["clean"],
       ],
       handlers: {
-        image: imageHandler,
+        image: imageHandler, // attach custom handler
       },
+    },
+
+    clipboard: {
+      matchVisual: false,
     },
   };
 
@@ -157,6 +297,7 @@ const EditPostForm = ({ post, onClose, onSave }) => {
           <h2 className="text-xl font-semibold text-gray-800">
             Chỉnh sửa bài viết
           </h2>
+
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -167,17 +308,21 @@ const EditPostForm = ({ post, onClose, onSave }) => {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-4">
+          {/* Post Name & Title */}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tên bài viết *
               </label>
+
               <input
                 type="text"
                 {...register("name", { required: "Tên bài viết là bắt buộc" })}
                 className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={isUpdating}
               />
+
               {errors.name && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.name.message}
@@ -189,6 +334,7 @@ const EditPostForm = ({ post, onClose, onSave }) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tiêu đề *
               </label>
+
               <input
                 type="text"
                 {...register("title", { required: "Tiêu đề là bắt buộc" })}
@@ -196,6 +342,7 @@ const EditPostForm = ({ post, onClose, onSave }) => {
                 className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={isUpdating}
               />
+
               {errors.title && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.title.message}
@@ -204,17 +351,20 @@ const EditPostForm = ({ post, onClose, onSave }) => {
             </div>
           </div>
 
+          {/* Slug & Status */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Slug *
               </label>
+
               <input
                 type="text"
                 {...register("slug", { required: "Slug là bắt buộc" })}
                 className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={isUpdating}
               />
+
               {errors.slug && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.slug.message}
@@ -226,14 +376,17 @@ const EditPostForm = ({ post, onClose, onSave }) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Trạng thái *
               </label>
+
               <select
                 {...register("status", { required: "Trạng thái là bắt buộc" })}
                 className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={isUpdating}
               >
                 <option value="hidden">Ẩn</option>
+
                 <option value="show">Hiện</option>
               </select>
+
               {errors.status && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.status.message}
@@ -242,14 +395,15 @@ const EditPostForm = ({ post, onClose, onSave }) => {
             </div>
           </div>
 
+          {/* Category */}
+
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Danh mục *
             </label>
+
             <select
-              {...register("categoryId", {
-                required: "Danh mục là bắt buộc",
-              })}
+              {...register("categoryId", { required: "Danh mục là bắt buộc" })}
               className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={isCategoriesLoading}
             >
@@ -259,6 +413,7 @@ const EditPostForm = ({ post, onClose, onSave }) => {
                 </option>
               ))}
             </select>
+
             {errors.category && (
               <p className="text-red-500 text-xs mt-1">
                 {errors.category.message}
@@ -266,24 +421,34 @@ const EditPostForm = ({ post, onClose, onSave }) => {
             )}
           </div>
 
+          {/* Content */}
+
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Nội dung *
             </label>
-            <ReactQuill
-              ref={quillRef}
-              value={content}
-              onChange={setContent}
-              modules={updatedModules}
-              formats={formats}
-              theme="snow"
-              className="h-64 mb-12"
-              readOnly={isUpdating}
-            />
+            <div
+              onPaste={handlePaste}
+              onDrop={handleDrop}
+              onDragOver={(e) => e.preventDefault()}
+            >
+              <ReactQuill
+                ref={quillRef}
+                value={content}
+                onChange={setContent}
+                modules={updatedModules}
+                formats={formats}
+                theme="snow"
+                readOnly={isUpdating}
+              />
+            </div>
+
             {!content && (
               <p className="text-red-500 text-xs mt-1">Nội dung là bắt buộc</p>
             )}
           </div>
+
+          {/* Buttons */}
 
           <div className="flex justify-end space-x-3 pt-4 border-t">
             <button
@@ -294,6 +459,7 @@ const EditPostForm = ({ post, onClose, onSave }) => {
             >
               Hủy
             </button>
+
             <button
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
