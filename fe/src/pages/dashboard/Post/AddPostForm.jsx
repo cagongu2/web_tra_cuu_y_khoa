@@ -1,10 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import { useForm } from "react-hook-form";
 import { IoMdClose } from "react-icons/io";
 import { useCreatePostMutation } from "../../../redux/features/post/postAPI";
 import { useGetAllCategoriesFlatQuery } from "../../../redux/features/categories/categoryAPI";
+import { useUploadImageMutation } from "../../../redux/features/upload/uploadApi";
 
 const AddPostForm = ({ onClose, onSave }) => {
   const {
@@ -17,30 +18,28 @@ const AddPostForm = ({ onClose, onSave }) => {
   const { data: categories, isLoading: isCategoriesLoading } =
     useGetAllCategoriesFlatQuery();
   const [createPost, { isLoading }] = useCreatePostMutation();
+  const [uploadImage] = useUploadImageMutation();
   const [content, setContent] = useState("");
   const quillRef = useRef(null);
 
-  // Thiết lập modules cho Quill Editor
+  // Quill Editor modules configuration
   const modules = {
     toolbar: [
       [{ header: [1, 2, 3, 4, 5, 6, false] }],
       [{ font: [] }],
       [{ size: [] }],
       ["bold", "italic", "underline", "strike", "blockquote"],
-      [
-        { list: "ordered" },
-        // { list: "bullet" },
-        { indent: "-1" },
-        { indent: "+1" },
-      ],
+      [{ list: "ordered" }, { indent: "-1" }, { indent: "+1" }],
       ["link", "image", "video"],
       ["clean"],
     ],
+
     clipboard: {
       matchVisual: false,
     },
   };
 
+  // Quill allowed formats
   const formats = [
     "header",
     "font",
@@ -51,7 +50,6 @@ const AddPostForm = ({ onClose, onSave }) => {
     "strike",
     "blockquote",
     "list",
-    // "bullet",
     "indent",
     "link",
     "image",
@@ -64,7 +62,6 @@ const AddPostForm = ({ onClose, onSave }) => {
         ...data,
         content: content,
       }).unwrap();
-      // console.log(data);
 
       onSave({
         ...data,
@@ -93,7 +90,108 @@ const AddPostForm = ({ onClose, onSave }) => {
     setValue("slug", generateSlug(title));
   };
 
-  // Hàm xử lý chèn ảnh
+  // Upload image to server and return URL
+  const uploadImageToServer = useCallback(
+    async (file) => {
+      try {
+        const response = await uploadImage({ file, type: "posts" }).unwrap();
+        return `http://localhost:8080/${response.relativePath}`;
+      } catch (error) {
+        console.error("Image upload failed:", error);
+        throw new Error("Tải ảnh lên thất bại");
+      }
+    },
+    [uploadImage]
+  );
+
+  // Compress large images before upload
+  const compressImage = async (file, maxWidth = 1200, quality = 0.7) => {
+    return new Promise((resolve) => {
+      if (file.size <= 300 * 1024) {
+        resolve(file); // Skip compression for small images
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob(
+            (blob) => {
+              const compressedFile = new File([blob], file.name, {
+                type: "image/jpeg",
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            },
+            "image/jpeg",
+            quality
+          );
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Process image file with loading state
+  const processImageFile = useCallback(
+    async (file) => {
+      if (!quillRef.current) return;
+
+      const quill = quillRef.current.getEditor();
+      const range = quill.getSelection(true);
+
+      // Insert temporary loading image
+      quill.insertEmbed(range.index, "image", "/loading-image.gif");
+
+      try {
+        // Validate file type and size
+        if (!file.type.startsWith("image/")) {
+          throw new Error("File không phải là hình ảnh");
+        }
+
+        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+        if (file.size > MAX_FILE_SIZE) {
+          throw new Error("Kích thước file không được vượt quá 5MB");
+        }
+
+        const compressedFile = await compressImage(file);
+        const imageUrl = await uploadImageToServer(compressedFile);
+
+        // Replace loading image with actual image
+        quill.deleteText(range.index, 1);
+        quill.insertEmbed(range.index, "image", imageUrl);
+        quill.setSelection(range.index + 1);
+
+        // Update content state
+        setContent(quill.root.innerHTML);
+      } catch (error) {
+        // Remove loading image on error
+        quill.deleteText(range.index, 1);
+        console.error("Image processing error:", error);
+        alert(error.message || "Có lỗi xảy ra khi xử lý ảnh");
+      }
+    },
+    [uploadImageToServer]
+  );
+
+  // Custom image handler for toolbar
   const imageHandler = () => {
     const input = document.createElement("input");
     input.setAttribute("type", "file");
@@ -103,15 +201,56 @@ const AddPostForm = ({ onClose, onSave }) => {
     input.onchange = async () => {
       const file = input.files[0];
       if (file) {
-        const imageUrl = URL.createObjectURL(file);
-        const quill = quillRef.current.getEditor();
-        const range = quill.getSelection();
-        quill.insertEmbed(range.index, "image", imageUrl);
+        await processImageFile(file);
       }
     };
   };
 
-  // Cập nhật modules để thêm imageHandler
+  // Handle paste event for images
+  const handlePaste = useCallback(
+    (event) => {
+      const items = event.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.type.indexOf("image") !== -1) {
+          event.preventDefault();
+          const file = item.getAsFile();
+          if (file) {
+            processImageFile(file);
+          }
+          break;
+        }
+      }
+    },
+    [processImageFile]
+  );
+
+  // Handle drop event for images
+  const handleDrop = useCallback(
+    (event) => {
+      event.preventDefault();
+      const files = event.dataTransfer?.files;
+      if (!files || files.length === 0) return;
+
+      const quill = quillRef.current?.getEditor();
+      if (quill) {
+        quill.focus();
+      }
+
+      const imageFiles = Array.from(files).filter((file) =>
+        file.type.startsWith("image/")
+      );
+
+      if (imageFiles.length > 0) {
+        processImageFile(imageFiles[0]);
+      }
+    },
+    [processImageFile]
+  );
+
+  // Quill modules including custom image handler and paste handler
   const updatedModules = {
     ...modules,
     toolbar: {
@@ -120,18 +259,17 @@ const AddPostForm = ({ onClose, onSave }) => {
         [{ font: [] }],
         [{ size: [] }],
         ["bold", "italic", "underline", "strike", "blockquote"],
-        [
-          { list: "ordered" },
-          // { list: "bullet" },
-          { indent: "-1" },
-          { indent: "+1" },
-        ],
+        [{ list: "ordered" }, { indent: "-1" }, { indent: "+1" }],
         ["link", "image", "video"],
         ["clean"],
       ],
       handlers: {
-        image: imageHandler,
+        image: imageHandler, // attach custom handler
       },
+    },
+
+    clipboard: {
+      matchVisual: false,
     },
   };
 
@@ -152,13 +290,8 @@ const AddPostForm = ({ onClose, onSave }) => {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-4">
-
           {/* config value when intergration user context */}
-          <input
-            type="hidden"
-            {...register("authorId")}
-            value={1} 
-          />
+          <input type="hidden" {...register("authorId")} value={1} />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
@@ -261,16 +394,22 @@ const AddPostForm = ({ onClose, onSave }) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Nội dung *
             </label>
-            <ReactQuill
-              ref={quillRef}
-              value={content}
-              onChange={setContent}
-              modules={updatedModules}
-              formats={formats}
-              theme="snow"
-              className="h-64 mb-12"
-              readOnly={isLoading}
-            />
+            <div
+              onPaste={handlePaste}
+              onDrop={handleDrop}
+              onDragOver={(e) => e.preventDefault()}
+            >
+              <ReactQuill
+                ref={quillRef}
+                value={content}
+                onChange={setContent}
+                modules={updatedModules}
+                formats={formats}
+                theme="snow"
+                className="h-64 mb-12"
+                readOnly={isLoading}
+              />
+            </div>
             {!content && (
               <p className="text-red-500 text-xs mt-1">Nội dung là bắt buộc</p>
             )}

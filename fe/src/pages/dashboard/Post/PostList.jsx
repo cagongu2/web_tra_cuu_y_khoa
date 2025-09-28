@@ -17,13 +17,13 @@ import {
   useGetAllPostsQuery,
   useUpdatePostMutation,
 } from "../../../redux/features/post/postAPI";
+import { Link } from "react-router-dom";
 
 const PostList = () => {
   const { register, handleSubmit } = useForm();
 
   // RTK query hooks
   const { data: posts = [], error, isLoading, refetch } = useGetAllPostsQuery();
-  console.log(posts);
   const [deletePost] = useDeletePostMutation();
   const [updatePost] = useUpdatePostMutation();
 
@@ -377,7 +377,16 @@ const PostList = () => {
                   {index + 1}
                 </td>
                 <td className="p-3">{post.categoryName || "Chưa phân loại"}</td>
-                <td className="p-3 font-medium text-blue-700">{post.title}</td>
+                <td className="p-3 font-medium text-blue-700">
+                  <Link
+                    to={`/tin-tuc/${post.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline"
+                  >
+                    {post.title}
+                  </Link>
+                </td>
                 {/* <td className="p-3 text-center">
                   <ToggleSwitch 
                     isOn={post.featured} 
@@ -418,7 +427,7 @@ const PostList = () => {
 
       {/* Mobile view - Cards */}
       <div className="mt-2 md:hidden space-y-3">
-        {posts.map((post) => (
+        {posts.map((post, index) => (
           <div key={post.id} className="bg-white rounded-lg shadow p-4">
             <div className="flex justify-between items-start">
               <div className="flex items-center">
@@ -429,7 +438,9 @@ const PostList = () => {
                   onChange={() => handleSelectPost(post.id)}
                 />
                 <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
-                  #{post.order || post.id}
+                  #
+                  {/* {post.order || post.id} */}
+                  {index + 1}
                 </span>
               </div>
               <div className="flex space-x-2">
@@ -450,7 +461,14 @@ const PostList = () => {
 
             <div className="mt-3">
               <h3 className="font-medium text-blue-700 text-sm">
-                {post.title}
+                <Link
+                  to={`/tin-tuc/${post.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
+                  {post.title}
+                </Link>
               </h3>
               <p className="text-gray-600 text-xs mt-1">
                 {post.category?.name || "Chưa phân loại"}
