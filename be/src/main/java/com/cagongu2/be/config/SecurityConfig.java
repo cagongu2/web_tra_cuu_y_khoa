@@ -23,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/api/authenticate/**", "/api/posts/**" , "/api/categories/**"
+            "/api/authenticate/**", "/api/posts/**" , "/api/categories/**", "/api/upload/**", "/images/**"
     };
     private final CustomJwtDecoder customJwtDecoder;
 
@@ -34,6 +34,7 @@ public class SecurityConfig {
                         request.requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                                 .anyRequest()
                                 .authenticated());
+//                                .permitAll());
 
         httpSecurity.oauth2ResourceServer(
                 oauth2 ->
