@@ -39,9 +39,14 @@ public class CategoryServiceImpl implements CategoryService {
                 .slug(category.getSlug())
                 .description(category.getDescription())
                 .isActive(category.getIsActive())
-                .level(category.getLevel())
                 .parent(parentCategory.orElse(null))
                 .build();
+
+        if (newCategory.getParent() == null) {
+            newCategory.setLevel(1);
+        } else {
+            newCategory.setLevel(0);
+        }
 
         return categoryRepository.save(newCategory);
     }
@@ -60,9 +65,6 @@ public class CategoryServiceImpl implements CategoryService {
             if (StringUtils.hasText(newCategory.getDescription()))
                 existing.setDescription(newCategory.getDescription());
 
-            if (newCategory.getLevel() != existing.getLevel())
-                existing.setLevel(newCategory.getLevel());
-
             if (newCategory.getIsActive() != null && !existing.getIsActive().equals(newCategory.getIsActive())) {
                 existing.setIsActive(newCategory.getIsActive());
             }
@@ -70,7 +72,12 @@ public class CategoryServiceImpl implements CategoryService {
             if (newCategory.getParent() != null) {
                 Category parentCategory = categoryRepository.findById(newCategory.getParent())
                         .orElseThrow(() -> new RuntimeException("Parent category not found"));
+                existing.setLevel(1);
+
                 existing.setParent(parentCategory);
+            }else{
+                existing.setParent(null);
+                existing.setLevel(0);
             }
 
 
@@ -117,12 +124,13 @@ public class CategoryServiceImpl implements CategoryService {
             if (category.getId() != null) {
                 List<Post> listPost = postRepository.findByCategoryId(category.getId());
                 List<PostDTO> listPostDTO = new ArrayList<>();
-                for(Post post : listPost){
+                for (Post post : listPost) {
                     listPostDTO.add(PostDTO.builder().id(post.getId()).name(post.getName()).slug(post.getSlug()).build());
                 }
                 var tmp = new GetAllCategoriesAndPostDTO(
                         category.getId(),
                         category.getName(),
+                        category.getIsActive(),
                         category.getParentId(),
                         listPostDTO
                 );

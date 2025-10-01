@@ -2,6 +2,7 @@ package com.cagongu2.be.controller;
 
 import com.cagongu2.be.dto.PostResponse;
 import com.cagongu2.be.model.Post;
+import com.cagongu2.be.model.elasticsearch.PostDocument;
 import com.cagongu2.be.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,6 +25,11 @@ public class PostController {
         return ResponseEntity.ok(createdPost);
     }
 
+    @GetMapping("/search-post")
+    public ResponseEntity<List<PostDocument>> searchPost(@RequestParam String query){
+        return  ResponseEntity.ok(postService.searchPosts(query));
+    }
+
     @GetMapping
     public ResponseEntity<Page<PostResponse>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
@@ -31,6 +37,17 @@ public class PostController {
         Pageable pageable = PageRequest.of(page,size);
         return ResponseEntity.ok(postService.getAllPosts(pageable));
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<PostResponse>> searchPostResponsesByTitle(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(postService.searchPostResponsesByTitle(keyword, pageable));
+    }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Post> getPostById(@PathVariable Long id) {

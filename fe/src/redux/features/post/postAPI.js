@@ -23,6 +23,15 @@ const postApi = createApi({
                 `?page=${page}&size=${size}`,
         }),
 
+        searchPostsByTitleIslikeIgnoreCase: builder.query({
+            query: ({ keyword, page = 0, size = 10 }) =>
+                `/search?keyword=${keyword}&page=${page}&size=${size}`,
+        }),
+
+        searchPost: builder.query({
+            query: (query) => `/search-post?query=${query}`,
+        }),
+
         getPostById: builder.query({
             query: (id) => `/${id}`,
             providesTags: (result, error, id) => [{ type: "Posts", id }],
@@ -84,6 +93,8 @@ const postApi = createApi({
 
 export const {
     useGetAllPostsQuery,
+    useSearchPostsByTitleIslikeIgnoreCaseQuery,
+    useSearchPostQuery,
     useGetPostByIdQuery,
     useGetPostBySlugQuery,
     useGetPostsByCategoryQuery,
