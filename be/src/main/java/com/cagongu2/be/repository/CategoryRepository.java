@@ -20,7 +20,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     @Query("SELECT c FROM Category c WHERE c.level = :level")
     List<Category> findByLevel(@Param("level") int level);
 
-    @Query("SELECT new com.cagongu2.be.dto.CategoryFlatDTO(c.id, c.name, p.id) " +
+    @Query("SELECT new com.cagongu2.be.dto.CategoryFlatDTO(c.id, c.name, c.slug, c.description, c.isActive, p.id) " +
             "FROM Category c LEFT JOIN c.parent p")
     List<CategoryFlatDTO> findAllFlat();
 

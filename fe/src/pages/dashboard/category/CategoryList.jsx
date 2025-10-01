@@ -1,101 +1,75 @@
 import React, { useEffect, useMemo, useState } from "react";
+import {
+  useDeleteCategoryMutation,
+  useGetAllCategoriesFlatQuery,
+  useUpdateCategoryMutation,
+} from "../../../redux/features/categories/categoryAPI";
 import { useForm } from "react-hook-form";
 import {
-  FaHome,
-  FaSearch,
   FaBars,
+  FaHome,
   FaPlus,
-  FaTrash,
+  FaSearch,
   FaSync,
+  FaTrash,
 } from "react-icons/fa";
-import { MdEdit } from "react-icons/md";
 import { IoMdClose } from "react-icons/io";
-import EditPostForm from "./EditPostForm";
-import AddPostForm from "./AddPostForm";
+import { MdEdit } from "react-icons/md";
+import AddCategoryForm from "./AddCategoryForm";
+import EditCategoryForm from "./EditCategoryForm";
 
-import { Link } from "react-router-dom";
-import { useDeletePostMutation, useGetAllPostsQuery, useSearchPostsByTitleIslikeIgnoreCaseQuery, useUpdatePostMutation } from "../../../redux/features/post/postAPI";
-
-const PostList = () => {
-  const [page, setPage] = useState(0);
-  const size = 10;
+export const CategoryList = () => {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
-  // --- RTK query hooks ---
-  const { data, isLoading, error, refetch } = useGetAllPostsQuery({
-    page,
-    size,
-  });
+  const { data, isLoading, error, refetch } = useGetAllCategoriesFlatQuery();
 
-  const {
-    data: searchData,
-    isLoading: isSearchLoading,
-    error: searchError,
-  } = useSearchPostsByTitleIslikeIgnoreCaseQuery(
-    {
-      keyword: searchKeyword,
-      page,
-      size,
-    },
-    {
-      skip: !isSearching || !searchKeyword.trim(),
-    }
-  );
-  console.log(searchData)
+  const searchData = useMemo(() => {
+    if (!searchKeyword.trim()) return null;
+    return data.filter((item) =>
+      item.name.toLowerCase().includes(searchKeyword.toLowerCase())
+    );
+  }, [searchKeyword, data]);
 
   // Use search data if searching, otherwise use normal data
-  const currentData = isSearching ? searchData : data;
-  const posts = useMemo(() => {
-  return searchKeyword
-    ? searchData?.content || []
-    : data?.content || [];
-}, [searchKeyword, searchData, data]);
-
-  const totalPages = currentData?.totalPages || 0;
-  const currentPage = currentData?.number || 0;
+  const categories = useMemo(() => {
+    return searchKeyword ? searchData || [] : data || [];
+  }, [searchKeyword, searchData, data]);
 
   const { register, handleSubmit, watch } = useForm();
-  const [deletePost] = useDeletePostMutation();
-  const [updatePost] = useUpdatePostMutation();
+  const [deleteCategory] = useDeleteCategoryMutation();
+  const [updateCategory] = useUpdateCategoryMutation();
 
   const [showFilters, setShowFilters] = useState(false);
-  const [editingPost, setEditingPost] = useState(null);
+  const [editingCategory, setEditingCategory] = useState(null);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
-  const [selectedPosts, setSelectedPosts] = useState([]);
+  const [selectedCategories, setSelectedcategories] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [notification, setNotification] = useState({ type: "", message: "" });
 
   const searchInputValue = watch("search-title");
 
   useEffect(() => {
-    if (error || searchError) {
+    if (error) {
       setNotification({
         type: "error",
-        message: "Lỗi khi tải dữ liệu bài viết",
+        message: "Lỗi khi tải dữ liệu danh mục",
       });
     }
-  }, [error, searchError]);
+  }, [error]);
 
   useEffect(() => {
     // Reset selection when data changes
-    setSelectedPosts([]);
+    setSelectedcategories([]);
     setSelectAll(false);
-  }, [posts]);
-
-  const handlePageChange = (newPage) => {
-    if (newPage >= 0 && newPage < totalPages) {
-      setPage(newPage);
-    }
-  };
+  }, [categories]);
 
   const onSubmit = (data) => {
     const keyword = data["search-title"]?.trim();
     if (keyword) {
       setSearchKeyword(keyword);
       setIsSearching(true);
-      setPage(0); // Reset to first page when searching
       showNotification("info", `Đang tìm kiếm: "${keyword}"`);
     } else {
       // If search is empty, switch back to normal list
@@ -106,7 +80,6 @@ const PostList = () => {
   const handleClearSearch = () => {
     setSearchKeyword("");
     setIsSearching(false);
-    setPage(0);
     if (searchInputValue) {
       showNotification("info", "Đã xóa tìm kiếm");
     }
@@ -117,22 +90,17 @@ const PostList = () => {
     setTimeout(() => setNotification({ type: "", message: "" }), 3000);
   };
 
-  const ToggleSwitch = ({ isOn, onToggle, postId, type }) => {
+  const ToggleSwitch = ({ isOn, onToggle, categoryId: id, type }) => {
     // Convert string variable to boolean
     const isActive = isOn === "show" || isOn === true;
 
     const handleToggle = async () => {
       try {
         // Determine the new value based on the type
-        let updatedValue;
-        if (type === "status") {
-          updatedValue = isActive ? "hidden" : "show";
-        } else {
-          updatedValue = !isActive;
-        }
+       const updatedValue = !isActive;
 
-        await updatePost({
-          id: postId,
+        await updateCategory({
+          id: id,
           [type]: updatedValue,
         }).unwrap();
 
@@ -166,8 +134,9 @@ const PostList = () => {
   };
 
   // Function to handle when the edit button is pressed
-  const handleEditClick = (post) => {
-    setEditingPost(post);
+  const handleEditClick = (category) => {
+    setEditingCategory(category);
+    console.log(category)
     setIsEditFormOpen(true);
   };
 
@@ -175,37 +144,37 @@ const PostList = () => {
   const handleCloseForm = () => {
     setIsEditFormOpen(false);
     setIsAddFormOpen(false);
-    setEditingPost(null);
+    setEditingCategory(null);
   };
 
   // Function to handle when save the post
-  const handleSavePost = async (postData) => {
+  const handleSavePost = async (categoryData) => {
     try {
-      await updatePost({
-        id: postData.id,
-        ...postData,
+      await updateCategory({
+        id: categoryData.id,
+        ...categoryData,
       }).unwrap();
 
       setIsEditFormOpen(false);
-      setEditingPost(null);
-      showNotification("success", "Cập nhật bài viết thành công");
+      setEditingCategory(null);
+      showNotification("success", "Cập nhật danh mục thành công");
       refetch(); // Refresh data after update
     } catch (error) {
-      console.error("Lỗi khi cập nhật bài viết:", error);
-      showNotification("error", "Lỗi khi cập nhật bài viết");
+      console.error("Lỗi khi cập nhật danh mục:", error);
+      showNotification("error", "Lỗi khi cập nhật danh mục");
     }
   };
 
   // Function to handle when add new post
-  const handleAddPost = async (postData) => {
+  const handleAddCategory = async () => {
     try {
       // This would be handled by the AddPostForm component
       setIsAddFormOpen(false);
-      showNotification("success", "Thêm bài viết thành công");
+      showNotification("success", "Thêm danh mục thành công");
       refetch(); // Refresh data after add
     } catch (error) {
-      console.error("Lỗi khi thêm bài viết:", error);
-      showNotification("error", "Lỗi khi thêm bài viết");
+      console.error("Lỗi khi thêm danh mục:", error);
+      showNotification("error", "Lỗi khi thêm danh mục");
     }
   };
 
@@ -215,66 +184,66 @@ const PostList = () => {
   };
 
   // Function to handle when check or uncheck post
-  const handleSelectPost = (postId) => {
-    if (selectedPosts.includes(postId)) {
-      setSelectedPosts(selectedPosts.filter((id) => id !== postId));
+  const handleSelectCategory = (postId) => {
+    if (selectedCategories.includes(postId)) {
+      setSelectedcategories(selectedCategories.filter((id) => id !== postId));
     } else {
-      setSelectedPosts([...selectedPosts, postId]);
+      setSelectedcategories([...selectedCategories, postId]);
     }
   };
 
   // Function to handle when check or uncheck all post
   const handleSelectAll = () => {
     if (selectAll) {
-      setSelectedPosts([]);
+      setSelectedcategories([]);
     } else {
-      setSelectedPosts(posts.map((post) => post.id));
+      setSelectedcategories(categories.map((post) => post.id));
     }
     setSelectAll(!selectAll);
   };
 
-  const handleDeletePost = async (postId) => {
-    if (window.confirm(`Bạn có chắc chắn muốn xóa bài viết đã chọn?`)) {
+  const handleDeleteCategory = async (postId) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa danh mục đã chọn?`)) {
       try {
-        await deletePost(postId).unwrap();
+        await deleteCategory(postId).unwrap();
 
-        showNotification("success", "Đã xóa bài viết thành công");
+        showNotification("success", "Đã xóa danh mục thành công");
         refetch(); // Refresh data after delete
       } catch (error) {
-        console.error("Lỗi khi xóa bài viết:", error);
-        showNotification("error", "Lỗi khi xóa bài viết");
+        console.error("Lỗi khi xóa danh mục:", error);
+        showNotification("error", "Lỗi khi xóa danh mục");
       }
     }
   };
 
   // Function to handle when deleting button is pressed
   const handleDeleteClick = async () => {
-    if (selectedPosts.length === 0) {
-      showNotification("warning", "Vui lòng chọn ít nhất một bài viết để xóa");
+    if (selectedCategories.length === 0) {
+      showNotification("warning", "Vui lòng chọn ít nhất một danh mục để xóa");
       return;
     }
 
     if (
       window.confirm(
-        `Bạn có chắc chắn muốn xóa ${selectedPosts.length} bài viết đã chọn?`
+        `Bạn có chắc chắn muốn xóa ${selectedCategories.length} danh mục đã chọn?`
       )
     ) {
       try {
-        const deletePromises = selectedPosts.map((id) =>
-          deletePost(id).unwrap()
+        const deletePromises = selectedCategories.map((id) =>
+          deleteCategory(id).unwrap()
         );
         await Promise.all(deletePromises);
 
-        setSelectedPosts([]);
+        setSelectedcategories([]);
         setSelectAll(false);
         showNotification(
           "success",
-          `Đã xóa ${selectedPosts.length} bài viết thành công`
+          `Đã xóa ${selectedCategories.length} danh mục thành công`
         );
         refetch(); // Refresh data after delete
       } catch (error) {
-        console.error("Lỗi khi xóa bài viết:", error);
-        showNotification("error", "Lỗi khi xóa bài viết");
+        console.error("Lỗi khi xóa danh mục:", error);
+        showNotification("error", "Lỗi khi xóa danh mục");
       }
     }
   };
@@ -289,7 +258,7 @@ const PostList = () => {
     }
   };
 
-  const isLoadingState = isLoading || (isSearching && isSearchLoading);
+  const isLoadingState = isLoading;
 
   if (isLoadingState) {
     return (
@@ -324,7 +293,7 @@ const PostList = () => {
           <FaHome />
         </div>
         <div className="text-sm md:text-base">
-          Danh sách bài viết
+          Danh sách danh mục
           {isSearching && (
             <span className="ml-2 text-blue-600">
               - Tìm kiếm: "{searchKeyword}"
@@ -347,7 +316,7 @@ const PostList = () => {
           onClick={handleDeleteClick}
         >
           <FaTrash size={10} />
-          <span>Chọn Xóa ({selectedPosts.length})</span>
+          <span>Chọn Xóa ({selectedCategories.length})</span>
         </button>
         <button
           className="bg-green-600 py-1 px-2 rounded text-xs md:text-sm flex items-center gap-1"
@@ -406,14 +375,14 @@ const PostList = () => {
                   className="w-full pl-8 pr-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
-              <button 
+              <button
                 type="submit"
                 className="w-full md:w-auto bg-blue-600 py-1 px-4 rounded text-white text-sm whitespace-nowrap"
               >
                 Tìm Kiếm
               </button>
               {isSearching && (
-                <button 
+                <button
                   type="button"
                   onClick={handleClearSearch}
                   className="w-full md:w-auto bg-gray-500 py-1 px-4 rounded text-white text-sm whitespace-nowrap"
@@ -430,9 +399,10 @@ const PostList = () => {
       {isSearching && (
         <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded">
           <p className="text-sm text-blue-800">
-            Đang hiển thị kết quả tìm kiếm cho: <strong>"{searchKeyword}"</strong>
-            {posts.length > 0 && (
-              <span> - Tìm thấy {posts.length} kết quả</span>
+            Đang hiển thị kết quả tìm kiếm cho:{" "}
+            <strong>"{searchKeyword}"</strong>
+            {categories.length > 0 && (
+              <span> - Tìm thấy {categories.length} kết quả</span>
             )}
           </p>
         </div>
@@ -454,15 +424,12 @@ const PostList = () => {
               <th className="p-3 border-b border-blue-100 text-center w-28">
                 Thứ tự
               </th>
-              <th className="p-3 border-b border-blue-100 text-left">
+              <th className="p-3 border-b border-blue-100 text-center">
                 Danh mục
               </th>
-              <th className="p-3 border-b border-blue-100 text-left">
-                Tiêu đề bài viết
+              <th className="p-3 border-b border-blue-100 text-center w-28">
+                Cấp
               </th>
-              {/* <th className="p-3 border-b border-blue-100 text-center w-28">
-                Nổi bật
-              </th> */}
               <th className="p-3 border-b border-blue-100 text-center w-28">
                 Ẩn/Hiện
               </th>
@@ -472,61 +439,46 @@ const PostList = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {posts.length > 0 ? (
-              posts.map((post, index) => (
+            {categories.length > 0 ? (
+              categories.map((category, index) => (
                 <tr
-                  key={post.id}
+                  key={category.id}
                   className="hover:bg-blue-50 transition-colors duration-150"
                 >
                   <td className="p-3 text-center">
                     <input
                       type="checkbox"
                       className="w-4 h-4 accent-blue-500 cursor-pointer"
-                      checked={selectedPosts.includes(post.id)}
-                      onChange={() => handleSelectPost(post.id)}
+                      checked={selectedCategories.includes(category.id)}
+                      onChange={() => handleSelectCategory(category.id)}
                     />
                   </td>
-                  <td className="p-3 text-center font-mono">
-                    {index + 1 + page * size}
-                  </td>
-                  <td className="p-3">{post.categoryName || "Chưa phân loại"}</td>
+                  <td className="p-3 text-center font-mono">{index + 1}</td>
+
                   <td className="p-3 font-medium text-blue-700">
-                    <Link
-                      to={`/tin-tuc/${post.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:underline"
-                    >
-                      {post.title}
-                    </Link>
+                    {category.name}
                   </td>
-                  {/* <td className="p-3 text-center">
-                  <ToggleSwitch 
-                    isOn={post.featured} 
-                    onToggle={() => {}} 
-                    postId={post.id}
-                    type="featured"
-                  />
-                </td> */}
+                  <td className="p-3">{category.parentId ? 1 : 0}</td>
+
                   <td className="p-3 text-center">
                     <ToggleSwitch
-                      isOn={post.status}
+                      isOn={category.isActive}
                       onToggle={() => {}}
-                      postId={post.id}
-                      type="status"
+                      categoryId={category.id}
+                      type="isActive"
                     />
                   </td>
                   <td className="p-3 text-center">
                     <div className="flex justify-center space-x-2">
                       <button
                         className="p-2 bg-blue-100 text-blue-600 hover:bg-blue-200 rounded transition-colors duration-150"
-                        onClick={() => handleEditClick(post)}
+                        onClick={() => handleEditClick(category)}
                       >
                         <MdEdit className="h-4 w-4" />
                       </button>
                       <button
                         className="p-2 bg-red-100 text-red-600 hover:bg-red-200 rounded transition-colors duration-150"
-                        onClick={() => handleDeletePost(post.id)}
+                        onClick={() => handleDeleteCategory(category.id)}
                       >
                         <IoMdClose className="h-4 w-4" />
                       </button>
@@ -537,7 +489,9 @@ const PostList = () => {
             ) : (
               <tr>
                 <td colSpan="6" className="p-4 text-center text-gray-500">
-                  {isSearching ? "Không tìm thấy bài viết nào phù hợp" : "Không có bài viết nào"}
+                  {isSearching
+                    ? "Không tìm thấy danh mục nào phù hợp"
+                    : "Không có danh mục nào"}
                 </td>
               </tr>
             )}
@@ -547,31 +501,31 @@ const PostList = () => {
 
       {/* Mobile view - Cards */}
       <div className="mt-2 md:hidden space-y-3">
-        {posts.length > 0 ? (
-          posts.map((post, index) => (
-            <div key={post.id} className="bg-white rounded-lg shadow p-4">
+        {categories.length > 0 ? (
+          categories.map((category, index) => (
+            <div key={category.id} className="bg-white rounded-lg shadow p-4">
               <div className="flex justify-between items-start">
                 <div className="flex items-center">
                   <input
                     type="checkbox"
                     className="w-4 h-4 accent-blue-500 cursor-pointer mr-2"
-                    checked={selectedPosts.includes(post.id)}
-                    onChange={() => handleSelectPost(post.id)}
+                    checked={selectedCategories.includes(category.id)}
+                    onChange={() => handleSelectCategory(category.id)}
                   />
                   <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
-                    #{index + 1 + page * size}
+                    #{index + 1}
                   </span>
                 </div>
                 <div className="flex space-x-2">
                   <button
                     className="p-1 bg-blue-100 text-blue-600 rounded"
-                    onClick={() => handleEditClick(post)}
+                    onClick={() => handleEditClick(category)}
                   >
                     <MdEdit className="h-4 w-4" />
                   </button>
                   <button
                     className="p-1 bg-red-100 text-red-600 rounded"
-                    onClick={() => handleDeletePost(post.id)}
+                    onClick={() => handleDeleteCategory(category.id)}
                   >
                     <IoMdClose className="h-4 w-4" />
                   </button>
@@ -580,37 +534,21 @@ const PostList = () => {
 
               <div className="mt-3">
                 <h3 className="font-medium text-blue-700 text-sm">
-                  <Link
-                    to={`/tin-tuc/${post.slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline"
-                  >
-                    {post.title}
-                  </Link>
+                  {category.name}
                 </h3>
                 <p className="text-gray-600 text-xs mt-1">
-                  {post.category?.name || "Chưa phân loại"}
+                  {category.parentId ? 1 : 0}
                 </p>
               </div>
 
               <div className="mt-3 flex justify-between items-center">
-                {/* <div>
-                <span className="text-xs text-gray-500 mr-2">Nổi bật:</span>
-                <ToggleSwitch
-                  isOn={post.featured}
-                  onToggle={() => {}}
-                  postId={post.id}
-                  type="featured"
-                />
-              </div> */}
                 <div>
                   <span className="text-xs text-gray-500 mr-2">Hiển thị:</span>
                   <ToggleSwitch
-                    isOn={post.status}
+                    isOn={category.isActive}
                     onToggle={() => {}}
-                    postId={post.id}
-                    type="status"
+                    categoryId={category.id}
+                    type="isActive"
                   />
                 </div>
               </div>
@@ -618,52 +556,17 @@ const PostList = () => {
           ))
         ) : (
           <div className="bg-white rounded-lg shadow p-4 text-center text-gray-500">
-            {isSearching ? "Không tìm thấy bài viết nào phù hợp" : "Không có bài viết nào"}
+            {isSearching
+              ? "Không tìm thấy danh mục nào phù hợp"
+              : "Không có danh mục nào"}
           </div>
         )}
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="mt-4 flex justify-center">
-          <div className="flex items-center space-x-1">
-            <button
-              disabled={currentPage === 0}
-              onClick={() => handlePageChange(currentPage - 1)}
-              className="px-3 py-1 rounded border text-sm bg-white hover:bg-gray-100 disabled:opacity-50"
-            >
-              Trước
-            </button>
-
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i}
-                onClick={() => handlePageChange(i)}
-                className={`px-3 py-1 rounded border text-sm ${
-                  i === currentPage
-                    ? "bg-blue-500 text-white"
-                    : "bg-white hover:bg-gray-100"
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))}
-
-            <button
-              disabled={currentPage + 1 === totalPages}
-              onClick={() => handlePageChange(currentPage + 1)}
-              className="px-3 py-1 rounded border text-sm bg-white hover:bg-gray-100 disabled:opacity-50"
-            >
-              Sau
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Show editing form when isEditFormOpen = true */}
       {isEditFormOpen && (
-        <EditPostForm
-          post={editingPost}
+        <EditCategoryForm
+          category={editingCategory}
           onClose={handleCloseForm}
           onSave={handleSavePost}
         />
@@ -671,10 +574,10 @@ const PostList = () => {
 
       {/* Show adding form when isAddFormOpen = true */}
       {isAddFormOpen && (
-        <AddPostForm onClose={handleCloseForm} onSave={handleAddPost} />
+        <AddCategoryForm onClose={handleCloseForm} onSave={handleAddCategory} />
       )}
     </div>
   );
 };
 
-export default PostList;
+export default CategoryList;

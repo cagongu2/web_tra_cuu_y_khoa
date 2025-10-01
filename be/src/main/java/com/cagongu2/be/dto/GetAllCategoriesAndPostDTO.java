@@ -15,6 +15,7 @@ import java.util.List;
 public class GetAllCategoriesAndPostDTO {
     private Long id;
     private String name;
+    private Boolean isActive;
     private Long parentId;
     @Builder.Default
     private List<PostDTO> postList = new ArrayList<>();
