@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class CategoryFlatDTO {
     private Long id;
     private String name;
+    private Long parentId;
 }

@@ -20,10 +20,20 @@ import {
 import { Link } from "react-router-dom";
 
 const PostList = () => {
-  const { register, handleSubmit } = useForm();
+  const [page, setPage] = useState(0);
+  const size = 10;
 
-  // RTK query hooks
-  const { data: posts = [], error, isLoading, refetch } = useGetAllPostsQuery();
+  // --- RTK query hooks ---
+  const { data, isLoading, error, refetch } = useGetAllPostsQuery({
+    page,
+    size,
+  });
+  console.log(data);
+  const posts = data?.content || [];
+  const totalPages = data?.totalPages || 0;
+  const currentPage = data?.number || 0;
+
+  const { register, handleSubmit } = useForm();
   const [deletePost] = useDeletePostMutation();
   const [updatePost] = useUpdatePostMutation();
 
@@ -43,6 +53,12 @@ const PostList = () => {
       });
     }
   }, [error]);
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      setPage(newPage);
+    }
+  };
 
   const onSubmit = (data) => {
     console.log("Tìm kiếm:", data);
@@ -438,8 +454,7 @@ const PostList = () => {
                   onChange={() => handleSelectPost(post.id)}
                 />
                 <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
-                  #
-                  {/* {post.order || post.id} */}
+                  #{/* {post.order || post.id} */}
                   {index + 1}
                 </span>
               </div>
@@ -502,19 +517,33 @@ const PostList = () => {
       {/* Pagination */}
       <div className="mt-4 flex justify-center">
         <div className="flex items-center space-x-1">
-          <button className="px-3 py-1 rounded border text-sm bg-white hover:bg-gray-100">
+          <button
+            disabled={currentPage === 0}
+            onClick={() => handlePageChange(currentPage - 1)}
+            className="px-3 py-1 rounded border text-sm bg-white hover:bg-gray-100 disabled:opacity-50"
+          >
             Trước
           </button>
-          <button className="px-3 py-1 rounded border text-sm bg-blue-500 text-white">
-            1
-          </button>
-          <button className="px-3 py-1 rounded border text-sm bg-white hover:bg-gray-100">
-            2
-          </button>
-          <button className="px-3 py-1 rounded border text-sm bg-white hover:bg-gray-100">
-            3
-          </button>
-          <button className="px-3 py-1 rounded border text-sm bg-white hover:bg-gray-100">
+
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              onClick={() => handlePageChange(i)}
+              className={`px-3 py-1 rounded border text-sm ${
+                i === currentPage
+                  ? "bg-blue-500 text-white"
+                  : "bg-white hover:bg-gray-100"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          <button
+            disabled={currentPage + 1 === totalPages}
+            onClick={() => handlePageChange(currentPage + 1)}
+            className="px-3 py-1 rounded border text-sm bg-white hover:bg-gray-100 disabled:opacity-50"
+          >
             Sau
           </button>
         </div>

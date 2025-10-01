@@ -58,8 +58,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     public AuthenticationResponse authenticate(AuthenticationRequest request) throws Exception {
         try {
-            var user = userRepository.findByEmail(request.getEmail())
-                    .orElseThrow(() -> new Exception("User not found with email: " + request.getEmail()));
+            var user = userRepository.findByUsername(request.getUsername())
+                    .orElseThrow(() -> new Exception("User not found with username: " + request.getUsername()));
 
             boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
@@ -71,15 +71,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 throw new Exception("User account is inactive");
             }
 
-           var userResponse = UserResponse.builder()
-                   .id(user.getId())
-                   .phone(user.getPhone())
-                   .email(user.getEmail())
-                   .username(user.getUsername())
-                   .createdAt(user.getCreatedAt())
-                   .updatedAt(user.getUpdatedAt())
-                   .roleSlugs(user.getRoles().stream().filter(Role::getIsActive).map(Role::getSlug).toList())
-                   .build();
+            var userResponse = UserResponse.builder()
+                    .id(user.getId())
+                    .phone(user.getPhone())
+                    .email(user.getEmail())
+                    .username(user.getUsername())
+                    .createdAt(user.getCreatedAt())
+                    .updatedAt(user.getUpdatedAt())
+                    .roleSlugs(user.getRoles().stream().filter(Role::getIsActive).map(Role::getSlug).toList())
+                    .build();
             var accessToken = generateToken(user, userResponse.getRoleSlugs());
             var refreshToken = generateRefreshToken(user);
             RefreshToken refreshTokenEntity = RefreshToken.builder()

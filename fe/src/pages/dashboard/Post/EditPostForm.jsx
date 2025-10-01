@@ -276,18 +276,20 @@ const EditPostForm = ({ post, onClose, onSave }) => {
         [{ font: [] }],
         [{ size: [] }],
         ["bold", "italic", "underline", "strike", "blockquote"],
-        [{ list: "ordered" }, { indent: "-1" }, { indent: "+1" }],
+        [
+          { list: "ordered" },
+          { list: "bullet" },
+          { indent: "-1" },
+          { indent: "+1" },
+        ],
         ["link", "image", "video"],
         ["clean"],
       ],
       handlers: {
-        image: imageHandler, // attach custom handler
+        image: imageHandler,
       },
     },
-
-    clipboard: {
-      matchVisual: false,
-    },
+    clipboard: { matchVisual: false },
   };
 
   return (

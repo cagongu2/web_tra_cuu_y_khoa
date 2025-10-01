@@ -1,9 +1,12 @@
 package com.cagongu2.be.controller;
 
-import com.cagongu2.be.dto.PostDTO;
+import com.cagongu2.be.dto.PostResponse;
 import com.cagongu2.be.model.Post;
 import com.cagongu2.be.service.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,14 +19,17 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping
-    public ResponseEntity<Post> createPost(@RequestBody PostDTO postDTO) {
-        Post createdPost = postService.createPost(postDTO);
+    public ResponseEntity<Post> createPost(@RequestBody PostResponse postResponse) {
+        Post createdPost = postService.createPost(postResponse);
         return ResponseEntity.ok(createdPost);
     }
 
     @GetMapping
-    public ResponseEntity<List<PostDTO>> getAllPosts() {
-        return ResponseEntity.ok(postService.getAllPosts());
+    public ResponseEntity<Page<PostResponse>> getAllPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page,size);
+        return ResponseEntity.ok(postService.getAllPosts(pageable));
     }
 
     @GetMapping("/{id}")
@@ -52,8 +58,8 @@ public class PostController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody PostDTO postDTO) {
-        Post updatedPost = postService.updatePost(id, postDTO);
+    public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody PostResponse postResponse) {
+        Post updatedPost = postService.updatePost(id, postResponse);
         return ResponseEntity.ok(updatedPost);
     }
 
