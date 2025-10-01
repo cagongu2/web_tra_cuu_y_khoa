@@ -19,8 +19,8 @@ const postApi = createApi({
     tagTypes: ["Posts"],
     endpoints: (builder) => ({
         getAllPosts: builder.query({
-            query: () => ``,
-            providesTags: ["Posts"],
+            query: ({ page = 0, size = 10 }) =>
+                `?page=${page}&size=${size}`,
         }),
 
         getPostById: builder.query({
@@ -31,7 +31,7 @@ const postApi = createApi({
         getPostBySlug: builder.query({
             query: (slug) => `/slug/${slug}`,
             providesTags: ["Posts"],
-        }), 
+        }),
 
         getPostsByCategory: builder.query({
             query: (categoryId) => `/category/${categoryId}`,

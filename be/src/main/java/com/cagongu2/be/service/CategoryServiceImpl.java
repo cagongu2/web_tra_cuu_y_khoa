@@ -2,15 +2,22 @@ package com.cagongu2.be.service;
 
 import com.cagongu2.be.dto.CategoryDTO;
 import com.cagongu2.be.dto.CategoryFlatDTO;
+import com.cagongu2.be.dto.GetAllCategoriesAndPostDTO;
+import com.cagongu2.be.dto.PostDTO;
 import com.cagongu2.be.model.Category;
+import com.cagongu2.be.model.Post;
 import com.cagongu2.be.repository.CategoryRepository;
+import com.cagongu2.be.repository.PostRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -18,11 +25,12 @@ import java.util.Optional;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final PostRepository postRepository;
 
     @Override
     public Category createCategory(CategoryDTO category) {
         Optional<Category> parentCategory = Optional.empty();
-        if (category.getParent() != null){
+        if (category.getParent() != null) {
             parentCategory = categoryRepository.findById(category.getParent());
         }
 
@@ -93,6 +101,35 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<CategoryFlatDTO> getAllCategoriesFlat() {
         return categoryRepository.findAllFlat();
+    }
+
+    @Override
+    public List<GetAllCategoriesAndPostDTO> getAllCategoriesWithPosts() {
+        List<CategoryFlatDTO> categories = categoryRepository.findAllFlat();
+
+        if (categories.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<GetAllCategoriesAndPostDTO> result = new ArrayList<>();
+
+        for (CategoryFlatDTO category : categories) {
+            if (category.getId() != null) {
+                List<Post> listPost = postRepository.findByCategoryId(category.getId());
+                List<PostDTO> listPostDTO = new ArrayList<>();
+                for(Post post : listPost){
+                    listPostDTO.add(PostDTO.builder().id(post.getId()).name(post.getName()).slug(post.getSlug()).build());
+                }
+                var tmp = new GetAllCategoriesAndPostDTO(
+                        category.getId(),
+                        category.getName(),
+                        category.getParentId(),
+                        listPostDTO
+                );
+            }
+        }
+
+        return result;
     }
 
     @Override

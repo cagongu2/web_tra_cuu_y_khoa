@@ -5,6 +5,8 @@ import { SearchPage } from "../pages/SearchPage";
 import { SinglePost } from "../pages/SinglePost";
 import { SearchList } from "../pages/SearchList";
 import DashBoard from "../pages/dashboard/Dashboard";
+import Login from "../components/Login";
+import Register from "../components/Register";
 
 const router = createBrowserRouter([
   {
@@ -28,6 +30,14 @@ const router = createBrowserRouter([
         element: <SearchList />,
       },
     ],
+  },
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/register",
+    element: <Register />,
   },
   // admin router
   {
