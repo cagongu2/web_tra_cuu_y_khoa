@@ -4,6 +4,8 @@ import { GoHomeFill } from "react-icons/go";
 import { useNavigate } from "react-router-dom";
 import { useGetAllCategoriesQuery } from "../redux/features/categories/categoryAPI";
 import { FaAngleDown } from "react-icons/fa";
+import { getImgUrl } from "../util/getImgUrl";
+import { useGetImageByTypeQuery } from "../redux/features/image/imageAPI";
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,7 +14,7 @@ export const Header = () => {
   const { data: categories, error, isLoading } = useGetAllCategoriesQuery(0);
 
   const username = localStorage.getItem("username");
-  console.log(categories);
+  const avatar_url = localStorage.getItem("avatar_url");
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -44,9 +46,14 @@ export const Header = () => {
     localStorage.removeItem("username");
     localStorage.removeItem("userId");
     localStorage.removeItem("token");
+    localStorage.removeItem("avatar_url");
     setIsMenuOpen(false);
     navigate("/login");
   };
+
+  const {
+    data: logo,
+  } = useGetImageByTypeQuery("logo");
 
   const {
     register,
@@ -90,7 +97,12 @@ export const Header = () => {
                 </svg>
               </button>
             </div>
-            <h1 className="text-2xl font-bold text-blue-600">YouMed</h1>
+            <img
+              src={getImgUrl(logo?.url)}
+              alt=""
+              className="!m-0 w-[174px] h-[84px] object-cover"
+            />
+            {/* <h1 className="text-2xl font-bold text-blue-600">YouMed</h1> */}
           </div>
           <div className="flex">
             <form className="relative w-100 " onSubmit={handleSubmit(onSubmit)}>
@@ -143,7 +155,7 @@ export const Header = () => {
                         <img
                           className="w-full h-full object-cover"
                           style={{ margin: 0 }}
-                          src="https://th.bing.com/th/id/R.ba5d6fcf47aa73f4958df2642c3152a2?rik=TixRbRPC7q3Tiw&pid=ImgRaw&r=0"
+                          src={getImgUrl(avatar_url)}
                           alt="avatar"
                         />
                       </div>
