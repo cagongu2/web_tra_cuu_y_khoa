@@ -30,4 +30,7 @@ public class PostDocument {
 
     @Field(type = FieldType.Keyword)
     private String slug;
+
+    @Field(type = FieldType.Text)
+    private String thumbnail_url;
 }

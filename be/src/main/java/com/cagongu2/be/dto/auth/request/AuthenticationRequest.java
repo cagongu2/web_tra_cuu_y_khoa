@@ -1,6 +1,5 @@
-package com.cagongu2.be.dto;
+package com.cagongu2.be.dto.auth.request;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;

@@ -3,21 +3,18 @@ package com.cagongu2.be.service;
 import com.cagongu2.be.dto.CategoryDTO;
 import com.cagongu2.be.dto.CategoryFlatDTO;
 import com.cagongu2.be.dto.GetAllCategoriesAndPostDTO;
-import com.cagongu2.be.dto.PostDTO;
+import com.cagongu2.be.dto.post.PostDTO;
 import com.cagongu2.be.model.Category;
 import com.cagongu2.be.model.Post;
 import com.cagongu2.be.repository.CategoryRepository;
 import com.cagongu2.be.repository.PostRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.TypedQuery;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

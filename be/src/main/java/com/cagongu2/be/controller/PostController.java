@@ -1,6 +1,7 @@
 package com.cagongu2.be.controller;
 
-import com.cagongu2.be.dto.PostResponse;
+import com.cagongu2.be.dto.post.response.PostResponse;
+import com.cagongu2.be.dto.post.request.PostRequest;
 import com.cagongu2.be.model.Post;
 import com.cagongu2.be.model.elasticsearch.PostDocument;
 import com.cagongu2.be.service.PostService;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -19,22 +21,21 @@ import java.util.List;
 public class PostController {
     private final PostService postService;
 
-    @PostMapping
-    public ResponseEntity<Post> createPost(@RequestBody PostResponse postResponse) {
-        Post createdPost = postService.createPost(postResponse);
-        return ResponseEntity.ok(createdPost);
+    @PostMapping(consumes = {"multipart/form-data"})
+    public ResponseEntity<PostResponse> createPost(@ModelAttribute PostRequest request) throws IOException {
+        return ResponseEntity.ok(postService.createPost(request));
     }
 
     @GetMapping("/search-post")
-    public ResponseEntity<List<PostDocument>> searchPost(@RequestParam String query){
-        return  ResponseEntity.ok(postService.searchPosts(query));
+    public ResponseEntity<List<PostDocument>> searchPost(@RequestParam String query) {
+        return ResponseEntity.ok(postService.searchPosts(query));
     }
 
     @GetMapping
     public ResponseEntity<Page<PostResponse>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page,size);
+        Pageable pageable = PageRequest.of(page, size);
         return ResponseEntity.ok(postService.getAllPosts(pageable));
     }
 
@@ -48,36 +49,34 @@ public class PostController {
         return ResponseEntity.ok(postService.searchPostResponsesByTitle(keyword, pageable));
     }
 
-
     @GetMapping("/{id}")
-    public ResponseEntity<Post> getPostById(@PathVariable Long id) {
+    public ResponseEntity<PostResponse> getPostById(@PathVariable Long id) {
         return ResponseEntity.ok(postService.getPostById(id));
     }
 
     @GetMapping("/slug/{slug}")
-    public ResponseEntity<Post> getPostBySlug(@PathVariable String slug) {
+    public ResponseEntity<PostResponse> getPostBySlug(@PathVariable String slug) {
         return ResponseEntity.ok(postService.getPostBySlug(slug));
     }
 
     @GetMapping("/category/{categoryId}")
-    public ResponseEntity<List<Post>> getPostsByCategory(@PathVariable Long categoryId) {
+    public ResponseEntity<List<PostResponse>> getPostsByCategory(@PathVariable Long categoryId) {
         return ResponseEntity.ok(postService.getPostsByCategory(categoryId));
     }
 
     @GetMapping("/author/{authorId}")
-    public ResponseEntity<List<Post>> getPostsByAuthor(@PathVariable Long authorId) {
+    public ResponseEntity<List<PostResponse>> getPostsByAuthor(@PathVariable Long authorId) {
         return ResponseEntity.ok(postService.getPostsByAuthor(authorId));
     }
 
     @GetMapping("/status/{status}")
-    public ResponseEntity<List<Post>> getPostsByStatus(@PathVariable String status) {
+    public ResponseEntity<List<PostResponse>> getPostsByStatus(@PathVariable String status) {
         return ResponseEntity.ok(postService.getPostsByStatus(status));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody PostResponse postResponse) {
-        Post updatedPost = postService.updatePost(id, postResponse);
-        return ResponseEntity.ok(updatedPost);
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    public ResponseEntity<PostResponse> updatePost(@PathVariable Long id, @ModelAttribute PostRequest request) throws IOException {
+        return ResponseEntity.ok(postService.updatePost(id, request));
     }
 
     @DeleteMapping("/{id}")

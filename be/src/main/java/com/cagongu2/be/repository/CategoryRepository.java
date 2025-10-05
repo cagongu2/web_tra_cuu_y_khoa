@@ -1,12 +1,10 @@
 package com.cagongu2.be.repository;
 
 import com.cagongu2.be.dto.CategoryFlatDTO;
-import com.cagongu2.be.dto.GetAllCategoriesAndPostDTO;
 import com.cagongu2.be.model.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.w3c.dom.stylesheets.LinkStyle;
 
 import java.util.List;
 import java.util.Optional;
