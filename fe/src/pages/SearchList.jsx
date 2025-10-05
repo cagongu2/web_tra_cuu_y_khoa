@@ -2,6 +2,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useSearchPostQuery } from "../redux/features/post/postAPI";
+import { getImgUrl } from "../util/getImgUrl";
 
 export const SearchList = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ export const SearchList = () => {
   const searchQuery = searchParams.get("s") || "";
 
   const { data, isLoading, error } = useSearchPostQuery(searchQuery);
+  console.log(data)
 
   const { register, handleSubmit } = useForm();
 
@@ -75,7 +77,7 @@ export const SearchList = () => {
                 <img
                   width="150"
                   height="150"
-                  src={post.thumbnail || "https://cdn.pixabay.com/photo/2017/09/23/04/02/dice-2777809_1280.jpg"}
+                  src={getImgUrl(post.thumbnail_url) || "https://cdn.pixabay.com/photo/2017/09/23/04/02/dice-2777809_1280.jpg"}
                   className="overflow-hidden rounded-2xl w-28 h-28 aspect-square"
                   alt={post.name}
                 />

@@ -1,4 +1,4 @@
-package com.cagongu2.be.dto;
+package com.cagongu2.be.dto.post.response;
 
 import lombok.*;
 
@@ -21,6 +21,8 @@ public class PostResponse {
 
     private Long authorId;
     private String authorName;
+
+    private String thumbnail_url;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

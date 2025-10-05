@@ -2,6 +2,7 @@ package com.cagongu2.be.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -42,6 +43,11 @@ public class Post {
     @JoinColumn(name = "author_id")
     @JsonBackReference
     private User author;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "thumbnail_id")
+    @JsonManagedReference
+    private Image thumbnail;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

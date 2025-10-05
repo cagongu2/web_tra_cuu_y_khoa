@@ -6,6 +6,7 @@ import { IoMdClose } from "react-icons/io";
 import { useUpdatePostMutation } from "../../../redux/features/post/postAPI";
 import { useGetAllCategoriesFlatQuery } from "../../../redux/features/categories/categoryAPI";
 import { useUploadImageMutation } from "../../../redux/features/upload/uploadApi";
+import { getImgUrl } from "../../../util/getImgUrl";
 
 const EditPostForm = ({ post, onClose, onSave }) => {
   const {
@@ -20,7 +21,11 @@ const EditPostForm = ({ post, onClose, onSave }) => {
   const [updatePost, { isLoading: isUpdating }] = useUpdatePostMutation();
   const [uploadImage] = useUploadImageMutation();
   const [content, setContent] = useState(post?.content || "");
+  const [previewImage, setPreviewImage] = useState(null);
+  const [isServerImage, setIsServerImage] = useState(post.thumbnail_url ? true : false);
   const quillRef = useRef(null);
+
+  console.log(post);
 
   // Quill Editor modules configuration
   const modules = {
@@ -58,24 +63,42 @@ const EditPostForm = ({ post, onClose, onSave }) => {
 
   // Populate form fields when post data is available
   useEffect(() => {
+    if (isServerImage) {
+      setPreviewImage(getImgUrl(post.thumbnail_url));
+      setIsServerImage(true);
+    }
     if (post) {
       setValue("name", post.name);
       setValue("title", post.title);
       setValue("slug", post.slug);
       setValue("status", post.status);
       setValue("categoryId", post.categoryId || "");
+      // setValue("file", post.thumbnail_url);
       setContent(post.content);
     }
-  }, [post, setValue]);
+  }, [post, setValue, isServerImage]);
+
+   useEffect(() => {
+    return () => {
+      if (previewImage && previewImage.startsWith('blob:')) {
+        URL.revokeObjectURL(previewImage);
+      }
+    };
+  }, [previewImage]);
+
+
 
   // Handle form submission
   const onSubmit = async (data) => {
     try {
+      console.log(data);
       await updatePost({
         id: post.id,
         ...data,
         content: content, // include Quill content
+        file: data.file?.[0],
       }).unwrap();
+
       onSave({
         ...data,
         content: content,
@@ -267,6 +290,22 @@ const EditPostForm = ({ post, onClose, onSave }) => {
     [processImageFile]
   );
 
+  const handleFileChange = (e) => {
+   const file = e.target.files?.[0];
+
+    if (file) {
+      if (previewImage) {
+        URL.revokeObjectURL(previewImage);
+      }
+
+      const previewURL = URL.createObjectURL(file);
+      setPreviewImage(previewURL);
+      setIsServerImage(false);
+    } else {
+      setPreviewImage(null);
+    }
+  };
+
   // Quill modules including custom image handler and paste handler
   const updatedModules = {
     ...modules,
@@ -420,6 +459,36 @@ const EditPostForm = ({ post, onClose, onSave }) => {
               <p className="text-red-500 text-xs mt-1">
                 {errors.category.message}
               </p>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Ảnh thumbnail
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              {...register("file", { onChange: handleFileChange })}
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isUpdating}
+            />
+
+            {previewImage && (
+              <div className="mt-3">
+                <p className="text-sm text-gray-600 mb-1">
+                  {isServerImage ? "Ảnh hiện tại:" : "Ảnh mới chọn:"}
+                </p>
+                <img
+                  src={previewImage}
+                  alt="Thumbnail Preview"
+                  className="w-48 h-32 object-cover rounded-lg border"
+                />
+              </div>
+            )}
+
+            {errors.file && (
+              <p className="text-red-500 text-xs mt-1">{errors.file.message}</p>
             )}
           </div>
 

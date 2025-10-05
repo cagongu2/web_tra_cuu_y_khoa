@@ -1,4 +1,4 @@
-package com.cagongu2.be.dto;
+package com.cagongu2.be.dto.user.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

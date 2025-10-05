@@ -1,6 +1,6 @@
 package com.cagongu2.be.service;
 
-import com.cagongu2.be.dto.UserDTO;
+import com.cagongu2.be.dto.user.UserDTO;
 import com.cagongu2.be.model.User;
 
 import java.util.List;

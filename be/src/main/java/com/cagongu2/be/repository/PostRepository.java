@@ -1,7 +1,6 @@
 package com.cagongu2.be.repository;
 
-import com.cagongu2.be.dto.PostDTO;
-import com.cagongu2.be.dto.PostResponse;
+import com.cagongu2.be.dto.post.response.PostResponse;
 import com.cagongu2.be.model.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,25 +21,29 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findByStatus(String status);
 
-    @Query("SELECT new com.cagongu2.be.dto.PostResponse(" +
-            "p.id, p.name, p.title, p.slug, p.content, p.status, " +
-            "c.id, c.name, " +
-            "u.id, u.username, " +
-            "p.createdAt, p.updatedAt) " +
-            "FROM Post p " +
-            "LEFT JOIN p.category c " +
-            "LEFT JOIN p.author u")
-    Page<PostResponse> findAllPostResponses(Pageable pageable);
+//    @Query("SELECT new com.cagongu2.be.dto.post.response.PostResponse(" +
+//            "p.id, p.name, p.title, p.slug, p.content, p.status, " +
+//            "c.id, c.name, " +
+//            "u.id, u.username, " +
+//            "p.thumbnail.url, " +
+//            "p.createdAt, p.updatedAt) " +
+//            "FROM Post p " +
+//            "LEFT JOIN p.category c " +
+//            "LEFT JOIN p.author u")
+//    Page<PostResponse> findAllPostResponses(Pageable pageable);
+//
+//    @Query("SELECT new com.cagongu2.be.dto.post.response.PostResponse(" +
+//            "p.id, p.name, p.title, p.slug, p.content, p.status, " +
+//            "c.id, c.name, " +
+//            "u.id, u.username, " +
+//            "p.thumbnail.url, " +
+//            "p.createdAt, p.updatedAt) " +
+//            "FROM Post p " +
+//            "LEFT JOIN p.category c " +
+//            "LEFT JOIN p.author u " +
+//            "WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+//    Page<PostResponse> searchPostResponsesByTitle(@Param("keyword") String keyword, Pageable pageable);
 
-    @Query("SELECT new com.cagongu2.be.dto.PostResponse(" +
-            "p.id, p.name, p.title, p.slug, p.content, p.status, " +
-            "c.id, c.name, " +
-            "u.id, u.username, " +
-            "p.createdAt, p.updatedAt) " +
-            "FROM Post p " +
-            "LEFT JOIN p.category c " +
-            "LEFT JOIN p.author u " +
-            "WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
-    Page<PostResponse> searchPostResponsesByTitle(@Param("keyword") String keyword, Pageable pageable);
-
+    Page<Post> findAll(Pageable pageable);
+    Page<Post> findAllByTitleIsLikeIgnoreCase(String keyword, Pageable pageable);
 }
