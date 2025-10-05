@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,11 +48,17 @@ public class User {
     @JsonManagedReference
     private List<Post> posts;
 
+    @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_role",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Role> roles = new HashSet<>();
+    private List<Role> roles = new ArrayList<>();
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "avatar_id")
+    @JsonManagedReference
+    private Image avatar;
 }

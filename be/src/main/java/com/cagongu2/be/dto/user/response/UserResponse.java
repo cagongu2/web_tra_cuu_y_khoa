@@ -20,5 +20,7 @@ public class UserResponse {
     private Boolean isActive;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<String> postIds;
     private List<String> roleSlugs;
+    private String avatar_url;
 }

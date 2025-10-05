@@ -68,9 +68,7 @@ const postApi = createApi({
                 if (data.categoryId) formData.append("categoryId", data.categoryId);
                 if (data.authorId) formData.append("authorId", data.authorId);
                 if (data.content) formData.append("content", data.content);
-                if (data.file && data.file.length > 0) {
-                    formData.append("file", data.file[0]);
-                }
+                if (data.file instanceof File) formData.append("file", data.file);
 
                 return {
                     url: ``,
@@ -93,8 +91,7 @@ const postApi = createApi({
                 if (data.categoryId) formData.append("categoryId", data.categoryId);
                 if (data.authorId) formData.append("authorId", data.authorId);
                 if (data.content) formData.append("content", data.content);
-                if (data.file && data.file.length > 0) formData.append("file", data.file[0]);
-
+                if (data.file instanceof File) formData.append("file", data.file);
                 return {
                     url: `/${id}`,
                     method: "PUT",

@@ -3,7 +3,7 @@ package com.cagongu2.be.service;
 import com.cagongu2.be.dto.CategoryDTO;
 import com.cagongu2.be.dto.CategoryFlatDTO;
 import com.cagongu2.be.dto.GetAllCategoriesAndPostDTO;
-import com.cagongu2.be.dto.post.PostDTO;
+import com.cagongu2.be.dto.post.request.PostDTO;
 import com.cagongu2.be.model.Category;
 import com.cagongu2.be.model.Post;
 import com.cagongu2.be.repository.CategoryRepository;

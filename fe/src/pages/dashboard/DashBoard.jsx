@@ -4,6 +4,7 @@ import Sidebar from "./SideBar";
 import PostList from "./Post/PostList";
 import { FaBars } from "react-icons/fa";
 import CategoryList from "./category/CategoryList";
+import UserList from "./User/UserList";
 
 const DashBoard = () => {
   const [activeMenu, setActiveMenu] = useState("dashboard");
@@ -35,7 +36,7 @@ const DashBoard = () => {
       <div className="flex-1 p-4 md:p-6 overflow-auto">
         {activeMenu === "activePostList" && <PostList />}
         {activeMenu === "activeCategoryList" && <CategoryList />}
-
+        {activeMenu === "userList" && <UserList />}
         {activeMenu === "dashboard" && (
           <div className="bg-white rounded-lg shadow p-6">
             <h1 className="text-2xl font-bold text-gray-800 mb-4">
@@ -53,6 +54,12 @@ const DashBoard = () => {
         {activeMenu === "inactiveCategoryList" && (
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-bold mb-2">Danh sách danh mục</h2>
+            {/* Component render danh mục */}
+          </div>
+        )}
+        {activeMenu === "inactiveUserList" && (
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-bold mb-2">Danh sách người dùng</h2>
             {/* Component render danh mục */}
           </div>
         )}

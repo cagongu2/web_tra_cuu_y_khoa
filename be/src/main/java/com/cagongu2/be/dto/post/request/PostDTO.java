@@ -1,4 +1,4 @@
-package com.cagongu2.be.dto.post;
+package com.cagongu2.be.dto.post.request;
 
 import lombok.*;
 

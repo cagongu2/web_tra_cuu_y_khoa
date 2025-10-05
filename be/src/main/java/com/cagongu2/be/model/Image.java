@@ -23,4 +23,8 @@ public class Image {
     @OneToOne(mappedBy = "thumbnail")
     @JsonBackReference
     private Post post;
+
+    @OneToOne(mappedBy = "avatar")
+    @JsonBackReference
+    private User user;
 }

@@ -62,7 +62,7 @@ const AddPostForm = ({ onClose, onSave }) => {
       await createPost({
         ...data,
         content: content,
-        file: data.file?.[0],
+        file: data.file instanceof FileList ? data.file[0] : data.file,
       }).unwrap();
 
       onSave({
@@ -419,7 +419,7 @@ const AddPostForm = ({ onClose, onSave }) => {
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Ảnh thumbnail
+              Ảnh đại diện
             </label>
             <input
               type="file"
@@ -435,7 +435,7 @@ const AddPostForm = ({ onClose, onSave }) => {
                 <p className="text-sm text-gray-600 mb-1">Xem trước:</p>
                 <img
                   src={previewImage}
-                  alt="Thumbnail Preview"
+                  alt="Avatar Preview"
                   className="w-48 h-32 object-cover rounded-lg border"
                 />
               </div>

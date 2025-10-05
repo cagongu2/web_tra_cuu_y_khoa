@@ -22,10 +22,10 @@ const EditPostForm = ({ post, onClose, onSave }) => {
   const [uploadImage] = useUploadImageMutation();
   const [content, setContent] = useState(post?.content || "");
   const [previewImage, setPreviewImage] = useState(null);
-  const [isServerImage, setIsServerImage] = useState(post.thumbnail_url ? true : false);
+  const [isServerImage, setIsServerImage] = useState(
+    post.thumbnail_url ? true : false
+  );
   const quillRef = useRef(null);
-
-  console.log(post);
 
   // Quill Editor modules configuration
   const modules = {
@@ -73,20 +73,17 @@ const EditPostForm = ({ post, onClose, onSave }) => {
       setValue("slug", post.slug);
       setValue("status", post.status);
       setValue("categoryId", post.categoryId || "");
-      // setValue("file", post.thumbnail_url);
       setContent(post.content);
     }
   }, [post, setValue, isServerImage]);
 
-   useEffect(() => {
+  useEffect(() => {
     return () => {
-      if (previewImage && previewImage.startsWith('blob:')) {
+      if (previewImage && previewImage.startsWith("blob:")) {
         URL.revokeObjectURL(previewImage);
       }
     };
   }, [previewImage]);
-
-
 
   // Handle form submission
   const onSubmit = async (data) => {
@@ -96,7 +93,7 @@ const EditPostForm = ({ post, onClose, onSave }) => {
         id: post.id,
         ...data,
         content: content, // include Quill content
-        file: data.file?.[0],
+        file: data.file instanceof FileList ? data.file[0] : data.file,
       }).unwrap();
 
       onSave({
@@ -291,7 +288,7 @@ const EditPostForm = ({ post, onClose, onSave }) => {
   );
 
   const handleFileChange = (e) => {
-   const file = e.target.files?.[0];
+    const file = e.target.files?.[0];
 
     if (file) {
       if (previewImage) {
@@ -301,8 +298,10 @@ const EditPostForm = ({ post, onClose, onSave }) => {
       const previewURL = URL.createObjectURL(file);
       setPreviewImage(previewURL);
       setIsServerImage(false);
+      setValue("file", file);
     } else {
       setPreviewImage(null);
+      setValue("file", undefined);
     }
   };
 
@@ -469,7 +468,7 @@ const EditPostForm = ({ post, onClose, onSave }) => {
             <input
               type="file"
               accept="image/*"
-              {...register("file", { onChange: handleFileChange })}
+              onChange={handleFileChange}
               className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={isUpdating}
             />
