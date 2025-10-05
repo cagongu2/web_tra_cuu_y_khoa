@@ -5,6 +5,9 @@ import PostList from "./Post/PostList";
 import { FaBars } from "react-icons/fa";
 import CategoryList from "./category/CategoryList";
 import UserList from "./User/UserList";
+import { Logo } from "./CompanyInfo/Logo";
+import { Banner } from "./CompanyInfo/Banner";
+import { Favicon } from "./CompanyInfo/Favicon";
 
 const DashBoard = () => {
   const [activeMenu, setActiveMenu] = useState("dashboard");
@@ -33,10 +36,13 @@ const DashBoard = () => {
       />
 
       {/* Main content */}
-      <div className="flex-1 p-4 md:p-6 overflow-auto">
+      <div className="flex-1 px-4 md:p-6 overflow-auto">
         {activeMenu === "activePostList" && <PostList />}
         {activeMenu === "activeCategoryList" && <CategoryList />}
         {activeMenu === "userList" && <UserList />}
+        {activeMenu === "banner" && <Banner />}
+        {activeMenu === "logo" && <Logo />}
+        {activeMenu === "favicon" && <Favicon />}
         {activeMenu === "dashboard" && (
           <div className="bg-white rounded-lg shadow p-6">
             <h1 className="text-2xl font-bold text-gray-800 mb-4">

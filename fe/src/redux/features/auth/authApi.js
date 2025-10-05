@@ -29,6 +29,8 @@ const authApi = createApi({
                     localStorage.setItem("token", response.accessToken);
                     localStorage.setItem("userId", response.user.id);
                     localStorage.setItem("username", response.user.username);
+                    localStorage.setItem("avatar_url", response.user.avatar_url);
+
 
                 }
                 return response;

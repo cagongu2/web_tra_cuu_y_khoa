@@ -1,4 +1,4 @@
-import {  useState } from "react";
+import { useState } from "react";
 import { FaChevronDown, FaHome, FaTimes } from "react-icons/fa";
 import { GiNewspaper } from "react-icons/gi";
 import { Link } from "react-router-dom";
@@ -11,7 +11,6 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, activeMenu, setActiveMenu }) =>
 
   const toggleMenu = (menu) => {
     setOpenMenus((prev) => ({ ...prev, [menu]: !prev[menu] }));
-    setActiveMenu(menu);
   };
 
   const handleClick = (menu) => {
@@ -20,6 +19,50 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, activeMenu, setActiveMenu }) =>
       toggleSidebar();
     }
   };
+
+  const menuItems = [
+    {
+      id: "dashboard",
+      label: "Trang Chủ",
+      icon: <FaHome />,
+      path: "/"
+    },
+    {
+      id: "posts",
+      label: "Bài Viết",
+      icon: <GiNewspaper />,
+      submenus: [
+        { id: "activePostList", label: "Danh Sách Bài Viết" },
+      ]
+    },
+    {
+      id: "categories",
+      label: "Danh mục",
+      icon: <CiViewList />,
+      submenus: [
+        { id: "activeCategoryList", label: "Danh sách danh mục" },
+      ]
+    },
+    {
+      id: "users",
+      label: "Người dùng",
+      icon: <FaRegUser />,
+      submenus: [
+        { id: "userList", label: "Danh sách người dùng" },
+      ]
+    },
+    {
+      id: "companyInfo",
+      label: "Thông Tin Công Ty",
+      icon: <IoNewspaperOutline />,
+      submenus: [
+        { id: "banner", label: "Banner" },
+        { id: "logo", label: "Logo" },
+        { id: "favicon", label: "Favicon" },
+        { id: "footer", label: "Footer" }
+      ]
+    }
+  ];
 
   return (
     <>
@@ -33,236 +76,90 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, activeMenu, setActiveMenu }) =>
 
       {/* Sidebar */}
       <div
-        className={`fixed md:relative w-64 bg-white shadow-lg h-screen p-4 z-50 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed md:relative w-64 bg-white h-screen p-4 z-50 transform transition-transform duration-300 ease-in-out border-r border-gray-200 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
         {/* Logo và nút đóng (mobile) */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-indigo-600">
+            <span className="text-xl font-bold text-gray-800">
               <Link to="/">Youmed</Link>
             </span>
           </div>
-          <button className="md:hidden text-gray-500" onClick={toggleSidebar}>
-            <FaTimes size={20} />
+          <button className="md:hidden text-gray-500 hover:text-gray-700" onClick={toggleSidebar}>
+            <FaTimes size={18} />
           </button>
         </div>
 
         {/* Menu Items */}
-        <ul className="space-y-2 text-base text-gray-700 font-semibold">
-          {/* home */}
-          <li>
-            <Link
-              to="/"
-              className={`flex justify-between items-center w-full p-2 rounded-lg hover:bg-gray-100 ${
-                activeMenu === "dashboard" ? "bg-purple-100 text-blue-500" : ""
-              }`}
-              onClick={() => handleClick("dashboard")}
-            >
-              <div className="flex items-center">
-                <FaHome />
-                <span className="ml-2">Trang Chủ</span>
-              </div>
-            </Link>
-          </li>
-
-          {/* Posts */}
-          <li>
-            <button
-              onClick={() => toggleMenu("posts")}
-              className={`flex justify-between items-center w-full p-2 rounded-lg hover:bg-gray-100 ${
-                activeMenu === "posts" ? "bg-purple-100 text-blue-500" : ""
-              }`}
-            >
-              <div className="flex items-center">
-                <GiNewspaper />
-                <span className="ml-2">Bài Viết</span>
-              </div>
-              <FaChevronDown
-                className={`font-light transition ${
-                  openMenus["posts"] ? "rotate-180" : ""
-                }`}
-                size={12}
-              />
-            </button>
-            {openMenus["posts"] && (
-              <ul className="ml-4 mt-1 space-y-1 text-gray-600 text-sm">
-                <li
-                  className={`p-2 rounded-lg hover:bg-gray-100 ${
-                    activeMenu === "activePostList"
-                      ? "bg-purple-100 text-blue-500"
-                      : ""
+        <nav className="space-y-1">
+          {menuItems.map((item) => (
+            <div key={item.id} className="mb-1">
+              {item.path ? (
+                // Menu item có đường dẫn
+                <Link
+                  to={item.path}
+                  className={`flex items-center w-full p-3 rounded-lg transition-colors ${
+                    activeMenu === item.id 
+                      ? "bg-blue-50 text-blue-600 border border-blue-200" 
+                      : "text-gray-700 hover:bg-gray-100"
                   }`}
-                  onClick={() => handleClick("activePostList")}
+                  onClick={() => handleClick(item.id)}
                 >
-                  Danh Sách Bài Viết
-                </li>
-                {/* <li
-                  className={`p-2 rounded-lg hover:bg-gray-100 ${
-                    activeMenu === "inActivePostList"
-                      ? "bg-purple-100 text-blue-500"
-                      : ""
-                  }`}
-                  onClick={() => handleClick("inActivePostList")}
-                >
-                  Danh Sách Ẩn
-                </li> */}
-              </ul>
-            )}
-          </li>
-
-          {/* Categories */}
-          <li>
-            <button
-              onClick={() => toggleMenu("categories")}
-              className={`flex justify-between items-center w-full p-2 rounded-lg hover:bg-gray-100 ${
-                activeMenu === "categories" ? "bg-purple-100 text-blue-500" : ""
-              }`}
-            >
-              <div className="flex items-center">
-                <CiViewList />
-                <span className="ml-2">Danh mục</span>
-              </div>
-              <FaChevronDown
-                className={`font-light transition ${
-                  openMenus["categories"] ? "rotate-180" : ""
-                }`}
-                size={12}
-              />
-            </button>
-            {openMenus["categories"] && (
-              <ul className="ml-4 mt-1 space-y-1 text-gray-600 text-sm">
-                <li
-                  className={`p-2 rounded-lg hover:bg-gray-100 ${
-                    activeMenu === "activeCategoryList"
-                      ? "bg-purple-100 text-blue-500"
-                      : ""
-                  }`}
-                  onClick={() => handleClick("activeCategoryList")}
-                >
-                  Danh sách danh mục
-                </li>
-                {/* <li
-                  className={`p-2 rounded-lg hover:bg-gray-100 ${
-                    activeMenu === "inactiveCategoryList"
-                      ? "bg-purple-100 text-blue-500"
-                      : ""
-                  }`}
-                  onClick={() => handleClick("inactiveCategoryList")}
-                >
-                  Danh sách danh mục bị ẩn
-                </li> */}
-              </ul>
-            )}
-          </li>
-
-          {/* Users */}
-          <li>
-            <button
-              onClick={() => toggleMenu("users")}
-              className={`flex justify-between items-center w-full p-2 rounded-lg hover:bg-gray-100 ${
-                activeMenu === "users" ? "bg-purple-100 text-blue-500" : ""
-              }`}
-            >
-              <div className="flex items-center">
-                <FaRegUser />
-                <span className="ml-2">Người dùng</span>
-              </div>
-              <FaChevronDown
-                className={`font-light transition ${
-                  openMenus["users"] ? "rotate-180" : ""
-                }`}
-                size={12}
-              />
-            </button>
-            {openMenus["users"] && (
-              <ul className="ml-4 mt-1 space-y-1 text-gray-600 text-sm">
-                <li
-                  className={`p-2 rounded-lg hover:bg-gray-100 ${
-                    activeMenu === "userList"
-                      ? "bg-purple-100 text-blue-500"
-                      : ""
-                  }`}
-                  onClick={() => handleClick("userList")}
-                >
-                  Danh sách người dùng
-                </li>
-                {/* <li
-                  className={`p-2 rounded-lg hover:bg-gray-100 ${
-                    activeMenu === "addUser"
-                      ? "bg-purple-100 text-blue-500"
-                      : ""
-                  }`}
-                  onClick={() => handleClick("addUser")}
-                >
-                  Thêm người dùng
-                </li> */}
-              </ul>
-            )}
-          </li>
-
-          {/* CompanyInfo */}
-          <li>
-            <button
-              onClick={() => toggleMenu("companyInfo")}
-              className={`flex justify-between items-center w-full p-2 rounded-lg hover:bg-gray-100 ${
-                activeMenu === "companyInfo"
-                  ? "bg-purple-100 text-blue-500"
-                  : ""
-              }`}
-            >
-              <div className="flex items-center">
-                <IoNewspaperOutline />
-                <span className="ml-2">Thông Tin Công Ty</span>
-              </div>
-              <FaChevronDown
-                className={`font-light transition ${
-                  openMenus["companyInfo"] ? "rotate-180" : ""
-                }`}
-                size={12}
-              />
-            </button>
-            {openMenus["companyInfo"] && (
-              <ul className="ml-4 mt-1 space-y-1 text-gray-600 text-sm">
-                <li
-                  className={`p-2 rounded-lg hover:bg-gray-100 ${
-                    activeMenu === "banner" ? "bg-purple-100 text-blue-500" : ""
-                  }`}
-                  onClick={() => handleClick("banner")}
-                >
-                  Banner
-                </li>
-                <li
-                  className={`p-2 rounded-lg hover:bg-gray-100 ${
-                    activeMenu === "logo" ? "bg-purple-100 text-blue-500" : ""
-                  }`}
-                  onClick={() => handleClick("logo")}
-                >
-                  Logo
-                </li>
-                <li
-                  className={`p-2 rounded-lg hover:bg-gray-100 ${
-                    activeMenu === "favicon"
-                      ? "bg-purple-100 text-blue-500"
-                      : ""
-                  }`}
-                  onClick={() => handleClick("favicon")}
-                >
-                  Favicon
-                </li>
-                <li
-                  className={`p-2 rounded-lg hover:bg-gray-100 ${
-                    activeMenu === "footer" ? "bg-purple-100 text-blue-500" : ""
-                  }`}
-                  onClick={() => handleClick("footer")}
-                >
-                  Footer
-                </li>
-              </ul>
-            )}
-          </li>
-        </ul>
+                  <div className={`${activeMenu === item.id ? 'text-blue-600' : 'text-gray-500'}`}>
+                    {item.icon}
+                  </div>
+                  <span className="ml-3 font-medium">{item.label}</span>
+                </Link>
+              ) : (
+                // Menu item có submenu
+                <>
+                  <button
+                    onClick={() => toggleMenu(item.id)}
+                    className={`flex justify-between items-center w-full p-3 rounded-lg transition-colors ${
+                      activeMenu === item.id 
+                        ? "bg-blue-50 text-blue-600 border border-blue-200" 
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      <div className={`${activeMenu === item.id ? 'text-blue-600' : 'text-gray-500'}`}>
+                        {item.icon}
+                      </div>
+                      <span className="ml-3 font-medium">{item.label}</span>
+                    </div>
+                    <FaChevronDown
+                      className={`transition-transform duration-200 ${
+                        openMenus[item.id] ? "rotate-180" : ""
+                      } ${activeMenu === item.id ? 'text-blue-600' : 'text-gray-400'}`}
+                      size={12}
+                    />
+                  </button>
+                  
+                  {/* Submenu */}
+                  {openMenus[item.id] && (
+                    <div className="ml-4 mt-1 space-y-1">
+                      {item.submenus.map((submenu) => (
+                        <button
+                          key={submenu.id}
+                          className={`flex items-center w-full p-2 rounded-lg transition-colors text-left ${
+                            activeMenu === submenu.id
+                              ? "text-blue-600 bg-blue-50"
+                              : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                          }`}
+                          onClick={() => handleClick(submenu.id)}
+                        >
+                          <span className="text-sm ml-7">{submenu.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          ))}
+        </nav>
       </div>
     </>
   );

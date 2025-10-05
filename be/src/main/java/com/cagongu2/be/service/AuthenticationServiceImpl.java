@@ -7,6 +7,7 @@ import com.cagongu2.be.dto.auth.request.RefreshTokenRequest;
 import com.cagongu2.be.dto.auth.response.AuthenticationResponse;
 import com.cagongu2.be.dto.auth.response.IntrospectResponse;
 import com.cagongu2.be.dto.user.response.UserResponse;
+import com.cagongu2.be.mapper.UserMapper;
 import com.cagongu2.be.model.RefreshToken;
 import com.cagongu2.be.model.Role;
 import com.cagongu2.be.model.User;
@@ -37,6 +38,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     private final String SIGNER_KEY;
     private final Long VALID_DURATION;
@@ -47,6 +49,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public AuthenticationServiceImpl(UserRepository userRepository,
                                      RefreshTokenRepository refreshTokenRepository,
                                      PasswordEncoder passwordEncoder,
+                                     UserMapper userMapper,
                                      @Value("${jwt.signerKey}") String SIGNER_KEY,
                                      @Value("${jwt.valid-duration}") Long VALID_DURATION,
                                      @Value("${jwt.refreshable-duration}") Long REFRESHABLE_DURATION,
@@ -54,6 +57,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userMapper = userMapper;
         this.SIGNER_KEY = SIGNER_KEY;
         this.VALID_DURATION = VALID_DURATION;
         this.REFRESHABLE_DURATION = REFRESHABLE_DURATION;
@@ -77,15 +81,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 throw new Exception("User account is inactive");
             }
 
-            var userResponse = UserResponse.builder()
-                    .id(user.getId())
-                    .phone(user.getPhone())
-                    .email(user.getEmail())
-                    .username(user.getUsername())
-                    .createdAt(user.getCreatedAt())
-                    .updatedAt(user.getUpdatedAt())
-                    .roleSlugs(user.getRoles().stream().filter(Role::getIsActive).map(Role::getSlug).toList())
-                    .build();
+            var userResponse = userMapper.toUserResponse(user);
             var accessToken = generateToken(user, userResponse.getRoleSlugs());
             var refreshToken = generateRefreshToken(user);
             RefreshToken refreshTokenEntity = RefreshToken.builder()
