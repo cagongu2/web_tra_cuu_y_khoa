@@ -188,7 +188,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, activeMenu, setActiveMenu }) =>
                 >
                   Danh sách người dùng
                 </li>
-                <li
+                {/* <li
                   className={`p-2 rounded-lg hover:bg-gray-100 ${
                     activeMenu === "addUser"
                       ? "bg-purple-100 text-blue-500"
@@ -197,7 +197,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, activeMenu, setActiveMenu }) =>
                   onClick={() => handleClick("addUser")}
                 >
                   Thêm người dùng
-                </li>
+                </li> */}
               </ul>
             )}
           </li>

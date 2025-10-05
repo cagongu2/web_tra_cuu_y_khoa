@@ -1,24 +1,25 @@
 package com.cagongu2.be.service;
 
-import com.cagongu2.be.dto.user.UserDTO;
-import com.cagongu2.be.model.User;
+import com.cagongu2.be.dto.user.request.UserRequest;
+import com.cagongu2.be.dto.user.response.UserResponse;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface UserService {
-    User createUser(UserDTO userDTO);
+    UserResponse createUser(UserRequest request) throws IOException;
 
-    User updateUser(Long id, UserDTO userDTO);
+    UserResponse  updateUser(Long id, UserRequest request) throws IOException;
 
-    User getUserById(Long id);
+    UserResponse  getUserById(Long id);
 
-    User getUserByUsername(String username);
+    UserResponse  getUserByUsername(String username);
 
-    User getUserByEmail(String email);
+    UserResponse  getUserByEmail(String email);
 
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);
 
-    List<User> getAllUsers();
+    List<UserResponse > getAllUsers();
 }

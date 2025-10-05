@@ -1,12 +1,13 @@
 package com.cagongu2.be.controller;
 
-import com.cagongu2.be.dto.user.UserDTO;
-import com.cagongu2.be.model.User;
+import com.cagongu2.be.dto.user.request.UserRequest;
+import com.cagongu2.be.dto.user.response.UserResponse;
 import com.cagongu2.be.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -15,34 +16,29 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody UserDTO userDTO) {
-        User createdUser = userService.createUser(userDTO);
-        return ResponseEntity.ok(createdUser);
+    @PostMapping(consumes = {"multipart/form-data"})
+    public ResponseEntity<UserResponse> createUser(@ModelAttribute UserRequest request) throws IOException {
+        return ResponseEntity.ok(userService.createUser(request));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody UserDTO userDTO) {
-        User updatedUser = userService.updateUser(id, userDTO);
-        return ResponseEntity.ok(updatedUser);
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @ModelAttribute UserRequest request) throws IOException {
+        return ResponseEntity.ok(userService.updateUser(id, request));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        User user = userService.getUserById(id);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserById(id));
     }
 
     @GetMapping("/by-username/{username}")
-    public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
-        User user = userService.getUserByUsername(username);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<UserResponse> getUserByUsername(@PathVariable String username) {
+        return ResponseEntity.ok(userService.getUserByUsername(username));
     }
 
     @GetMapping("/by-email/{email}")
-    public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
-        User user = userService.getUserByEmail(email);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<UserResponse> getUserByEmail(@PathVariable String email) {
+        return ResponseEntity.ok(userService.getUserByEmail(email));
     }
 
     @GetMapping("/exists/username/{username}")
@@ -58,8 +54,7 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 }

@@ -1,6 +1,6 @@
 package com.cagongu2.be.dto;
 
-import com.cagongu2.be.dto.post.PostDTO;
+import com.cagongu2.be.dto.post.request.PostDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

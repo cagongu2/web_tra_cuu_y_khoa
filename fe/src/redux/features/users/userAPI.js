@@ -47,20 +47,39 @@ const userApi = createApi({
         }),
 
         createUser: builder.mutation({
-            query: (data) => ({
-                url: ``,
-                method: "POST",
-                body: data,
-            }),
+            query: (data) => {
+                const formData = new FormData();
+                if (data.username !== undefined) formData.append("username", data.username ?? "");
+                if (data.email !== undefined) formData.append("email", data.email ?? "");
+                if (data.password !== undefined) formData.append("password", data.password ?? "");
+                if (data.phone !== undefined) formData.append("phone", data.phone ?? "");
+                if (data.isActive !== undefined) formData.append("isActive", String(data.isActive));
+                if (data.file instanceof File) formData.append("file", data.file);
+                return {
+                    url: ``,
+                    method: "POST",
+                    body: formData,
+                };
+            },
             invalidatesTags: ["Users"],
         }),
 
         updateUser: builder.mutation({
-            query: ({ id, ...data }) => ({
-                url: `/${id}`,
-                method: "PUT",
-                body: data,
-            }),
+            query: ({ id, ...data }) => {
+                const formData = new FormData();
+                if (data.username !== undefined) formData.append("username", data.username ?? "");
+                if (data.email !== undefined) formData.append("email", data.email ?? "");
+                if (data.password !== undefined) formData.append("password", data.password ?? "");
+                if (data.phone !== undefined) formData.append("phone", data.phone ?? "");
+                if (data.isActive !== undefined) formData.append("isActive", String(data.isActive));
+                if (data.file instanceof File) formData.append("file", data.file);
+
+                return {
+                    url: `/${id}`,
+                    method: "PUT",
+                    body: formData,
+                };
+            },
             invalidatesTags: (result, error, { id }) => [
                 { type: "Users", id },
                 "Users",

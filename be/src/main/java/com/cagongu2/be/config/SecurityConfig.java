@@ -23,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/api/authenticate/**", "/api/posts/**" , "/api/categories/**", "/api/upload/**", "/images/**"
+            "/api/authenticate/**", "/api/posts/**" , "/api/categories/**", "/api/upload/**", "/images/**", "/api/users/**"
     };
     private final CustomJwtDecoder customJwtDecoder;
 
