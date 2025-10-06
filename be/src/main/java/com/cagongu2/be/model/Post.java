@@ -40,6 +40,11 @@ public class Post {
     private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
+    @JoinColumn(name = "footer_id")
+    private Footer footer;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id")
     @JsonBackReference
     private User author;

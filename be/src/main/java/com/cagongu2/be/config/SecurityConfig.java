@@ -23,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/api/authenticate/**", "/api/posts/**" , "/api/categories/**", "/api/upload/**", "/images/**", "/api/users/**", "/api/images/**"
+            "/api/authenticate/**", "/api/posts/**", "/api/categories/**", "/api/upload/**", "/images/**", "/api/users/**", "/api/images/**", "/api/footers/**"
     };
     private final CustomJwtDecoder customJwtDecoder;
 
@@ -49,7 +49,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsFilter corsFilter(){
+    public CorsFilter corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173"));
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));

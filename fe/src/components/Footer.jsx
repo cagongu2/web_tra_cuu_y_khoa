@@ -1,103 +1,99 @@
 import React from "react";
 import { FaFacebookSquare, FaTwitter, FaYoutube } from "react-icons/fa";
-
-const data = {
-  id: 1,
-  company_name: "YouMed",
-  company_full_name: "Công ty Cổ phần YouMed Việt Nam",
-  company_description: "Hệ sinh thái chăm sóc sức khỏe toàn diện tại Việt Nam.",
-  office_address: "Tòa nhà ABC, Quận 1, TP. Hồ Chí Minh",
-  hotline: "1900 1234",
-  email: "contact@youmed.vn",
-  copyright_text: "Copyright © 2018 - 2025 YouMed. All rights reserved.",
-  working_hours: "8:00 - 17:30 (T2 đến T7)",
-  business_license:
-    "Số ĐKKD 0312345678 do Sở KH&ĐT TP. Hồ Chí Minh cấp lần đầu ngày 01/01/2020",
-  about_links: "Abc",
-  service_links: "Abc",
-  support_links: "Abc",
-  facebook_url: "https://facebook.com/youmed",
-  youtube_url: "https://youtube.com/youmed",
-  twitter_url: "https://twitter.com/youmed",
-};
+import { useGetFootersByStatusQuery } from "../redux/features/footer/footerAPI";
 
 const Footer = () => {
-  return (
-    <>
-      <footer className="bg-white border-t border-gray-200 text-sm text-gray-700 mt-10 w-full">
-        <div className="max-w-[1130px] mx-auto py-4 px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Cột 1: Thông tin công ty */}
-          <div className="space-y-2 md:col-span-2">
-            <h3 className="font-semibold uppercase text-black">
-              {data.company_full_name}
-            </h3>
-            <p>
-              <strong>VPĐD:</strong> {data.office_address}
-            </p>
-            <p>
-              <strong>Hotline:</strong>{" "}
-              <span className="text-blue-600 font-semibold">
-                {data.hotline}
-              </span>{" "}
-              |{" " + data.working_hours}
-            </p>
+  const { data, isLoading, error } = useGetFootersByStatusQuery(true);
 
-            <p>
-              <strong>Email:</strong>{" "}
-              <span className="text-blue-600 font-semibold">{data.email}</span>
-            </p>
-          </div>
-          <div className="space-y-2">
-            <h4 className="font-semibold text-black">Về {data.company_name}</h4>
-            <ul className="space-y-1">
-              <li>
-                <a href={data.about_links} className="hover:text-blue-600">
-                  Về Chúng Tôi
+  if (isLoading) {
+    return <p className="text-center py-4">Đang tải footer...</p>;
+  }
+
+  if (error) {
+    return <p className="text-center text-red-500 py-4">Lỗi khi tải footer.</p>;
+  }
+
+  if (!data || data.length === 0) {
+    return <p className="text-center py-4">Không có dữ liệu footer.</p>;
+  }
+
+  const footer = data[0]; // vì API trả về mảng 1 phần tử
+
+  return (
+    <footer className="bg-white border-t border-gray-200 text-sm text-gray-700 mt-10 w-full">
+      <div className="max-w-[1130px] mx-auto py-4 px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
+        {/* Cột 1: Thông tin công ty */}
+        <div className="space-y-2 md:col-span-2">
+          <h3 className="font-semibold uppercase text-black">
+            {footer.companyFullName}
+          </h3>
+          <p>
+            <strong>VPĐD:</strong> {footer.officeAddress}
+          </p>
+          <p>
+            <strong>Hotline:</strong>{" "}
+            <span className="text-blue-600 font-semibold">{footer.hotline}</span>{" "}
+            | {footer.workingHours}
+          </p>
+          <p>
+            <strong>Email:</strong>{" "}
+            <span className="text-blue-600 font-semibold">{footer.email}</span>
+          </p>
+        </div>
+
+        {/* Cột 2: Danh sách bài viết từ postList */}
+        <div className="space-y-2">
+          <h4 className="font-semibold text-black">Bài viết nổi bật</h4>
+          <ul className="space-y-1">
+            {footer.postList?.map((post) => (
+              <li key={post.id}>
+                <a
+                  href={`/bai-viet/${post.slug}`}
+                  className="hover:text-blue-600"
+                >
+                  {post.name}
                 </a>
               </li>
-              <li>
-                <a href="#" className="hover:text-blue-600">
-                  Dịch Vụ {data.company_name} cung cấp
-                </a>
-              </li>
-              <li>
-                <a href={data.support_links} className="hover:text-blue-600">
-                  Hướng Dẫn Sử Dụng
-                </a>
-              </li>
-            </ul>
-          </div>
-          <div className="space-y-2">
-            <h4 className="font-semibold">Kết nối với chúng tôi</h4>
-            <div className="flex space-x-3 mt-2">
-              <a href={data.facebook_url}>
+            ))}
+          </ul>
+        </div>
+
+        {/* Cột 3: Mạng xã hội */}
+        <div className="space-y-2">
+          <h4 className="font-semibold text-black">Kết nối với chúng tôi</h4>
+          <div className="flex space-x-3 mt-2 text-xl text-gray-600">
+            {footer.facebookUrl && (
+              <a href={footer.facebookUrl} target="_blank" rel="noopener noreferrer">
                 <FaFacebookSquare />
               </a>
-              <a href={data.youtube_url}>
+            )}
+            {footer.youtubeUrl && (
+              <a href={footer.youtubeUrl} target="_blank" rel="noopener noreferrer">
                 <FaYoutube />
               </a>
-              <a href={data.twitter_url}>
+            )}
+            {footer.twitterUrl && (
+              <a href={footer.twitterUrl} target="_blank" rel="noopener noreferrer">
                 <FaTwitter />
               </a>
-            </div>
+            )}
           </div>
         </div>
+      </div>
 
-        {/* Dòng dưới cùng */}
-        <div className="border-t border-gray-200 w-full"></div>
-        <div className="max-w-[1130px] mx-auto pt-6 pb-4 px-4 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
-          <p className="text-center md:text-left">
-            Các thông tin trên {data.company_name} chỉ dành cho mục đích tham
-            khảo, tra cứu và không thay thế cho việc chẩn đoán hoặc điều trị y
-            khoa. Cần tuyệt đối tuân theo hướng dẫn của Bác sĩ và Nhân viên y
-            tế.
-          </p>
-          <p className="mt-2 md:mt-0">
-            Copyright © 2018 - 2025 {data.copyright_text}
-          </p>
-        </div>
-      </footer>
-    </>
+      {/* Dòng dưới cùng */}
+      <div className="border-t border-gray-200 w-full"></div>
+      <div className="max-w-[1130px] mx-auto pt-6 pb-4 px-4 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
+        <p className="text-center md:text-left">
+          Các thông tin trên {footer.companyName} chỉ dành cho mục đích tham
+          khảo, tra cứu và không thay thế cho việc chẩn đoán hoặc điều trị y
+          khoa. Cần tuyệt đối tuân theo hướng dẫn của Bác sĩ và Nhân viên y tế.
+        </p>
+        <p className="mt-2 md:mt-0 text-center md:text-right">
+          {footer.copyrightText}
+        </p>
+      </div>
+    </footer>
   );
 };
 
