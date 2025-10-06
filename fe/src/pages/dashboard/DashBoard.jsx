@@ -8,6 +8,7 @@ import UserList from "./User/UserList";
 import { Logo } from "./CompanyInfo/Logo";
 import { Banner } from "./CompanyInfo/Banner";
 import { Favicon } from "./CompanyInfo/Favicon";
+import { FooterList } from "./CompanyInfo/footer/FooterList";
 
 const DashBoard = () => {
   const [activeMenu, setActiveMenu] = useState("dashboard");
@@ -43,6 +44,7 @@ const DashBoard = () => {
         {activeMenu === "banner" && <Banner />}
         {activeMenu === "logo" && <Logo />}
         {activeMenu === "favicon" && <Favicon />}
+        {activeMenu === "footer" && <FooterList />}
         {activeMenu === "dashboard" && (
           <div className="bg-white rounded-lg shadow p-6">
             <h1 className="text-2xl font-bold text-gray-800 mb-4">

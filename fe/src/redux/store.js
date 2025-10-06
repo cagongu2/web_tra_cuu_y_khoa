@@ -6,6 +6,7 @@ import userApi from "./features/users/userAPI"
 import { uploadApi } from './features/upload/uploadApi';
 import authApi from './features/auth/authApi';
 import imagesApi from './features/image/imageAPI';
+import footerApi from './features/footer/footerAPI';
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     [postApi.reducerPath]: postApi.reducer,
     [userApi.reducerPath]: userApi.reducer,
     [imagesApi.reducerPath]: imagesApi.reducer,
+    [footerApi.reducerPath]: footerApi.reducer,
     [uploadApi.reducerPath]: uploadApi.reducer
   },
   middleware: (getDefaultMiddleware) =>
@@ -23,6 +25,7 @@ export const store = configureStore({
       postApi.middleware,
       userApi.middleware,
       imagesApi.middleware,
+      footerApi.middleware,
       uploadApi.middleware
     ),
 });

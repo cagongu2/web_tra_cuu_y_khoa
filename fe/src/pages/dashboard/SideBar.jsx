@@ -5,9 +5,17 @@ import { Link } from "react-router-dom";
 import { FaRegUser } from "react-icons/fa";
 import { IoNewspaperOutline } from "react-icons/io5";
 import { CiViewList } from "react-icons/ci";
+import { useGetImageByTypeQuery } from "../../redux/features/image/imageAPI";
+import { getImgUrl } from "../../util/getImgUrl";
 
-const Sidebar = ({ isSidebarOpen, toggleSidebar, activeMenu, setActiveMenu }) => {
+const Sidebar = ({
+  isSidebarOpen,
+  toggleSidebar,
+  activeMenu,
+  setActiveMenu,
+}) => {
   const [openMenus, setOpenMenus] = useState({});
+  const { data: logo } = useGetImageByTypeQuery("logo");
 
   const toggleMenu = (menu) => {
     setOpenMenus((prev) => ({ ...prev, [menu]: !prev[menu] }));
@@ -25,31 +33,25 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, activeMenu, setActiveMenu }) =>
       id: "dashboard",
       label: "Trang Chủ",
       icon: <FaHome />,
-      path: "/"
+      path: "/",
     },
     {
       id: "posts",
       label: "Bài Viết",
       icon: <GiNewspaper />,
-      submenus: [
-        { id: "activePostList", label: "Danh Sách Bài Viết" },
-      ]
+      submenus: [{ id: "activePostList", label: "Danh Sách Bài Viết" }],
     },
     {
       id: "categories",
       label: "Danh mục",
       icon: <CiViewList />,
-      submenus: [
-        { id: "activeCategoryList", label: "Danh sách danh mục" },
-      ]
+      submenus: [{ id: "activeCategoryList", label: "Danh sách danh mục" }],
     },
     {
       id: "users",
       label: "Người dùng",
       icon: <FaRegUser />,
-      submenus: [
-        { id: "userList", label: "Danh sách người dùng" },
-      ]
+      submenus: [{ id: "userList", label: "Danh sách người dùng" }],
     },
     {
       id: "companyInfo",
@@ -59,9 +61,9 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, activeMenu, setActiveMenu }) =>
         { id: "banner", label: "Banner" },
         { id: "logo", label: "Logo" },
         { id: "favicon", label: "Favicon" },
-        { id: "footer", label: "Footer" }
-      ]
-    }
+        { id: "footer", label: "Footer" },
+      ],
+    },
   ];
 
   return (
@@ -84,10 +86,19 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, activeMenu, setActiveMenu }) =>
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-2">
             <span className="text-xl font-bold text-gray-800">
-              <Link to="/">Youmed</Link>
+              <Link to="/">
+                <img
+                  src={getImgUrl(logo?.url)}
+                  alt=""
+                  className="!m-0 w-[174px] h-[84px] object-cover"
+                />
+              </Link>
             </span>
           </div>
-          <button className="md:hidden text-gray-500 hover:text-gray-700" onClick={toggleSidebar}>
+          <button
+            className="md:hidden text-gray-500 hover:text-gray-700"
+            onClick={toggleSidebar}
+          >
             <FaTimes size={18} />
           </button>
         </div>
@@ -101,13 +112,17 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, activeMenu, setActiveMenu }) =>
                 <Link
                   to={item.path}
                   className={`flex items-center w-full p-3 rounded-lg transition-colors ${
-                    activeMenu === item.id 
-                      ? "bg-blue-50 text-blue-600 border border-blue-200" 
+                    activeMenu === item.id
+                      ? "bg-blue-50 text-blue-600 border border-blue-200"
                       : "text-gray-700 hover:bg-gray-100"
                   }`}
                   onClick={() => handleClick(item.id)}
                 >
-                  <div className={`${activeMenu === item.id ? 'text-blue-600' : 'text-gray-500'}`}>
+                  <div
+                    className={`${
+                      activeMenu === item.id ? "text-blue-600" : "text-gray-500"
+                    }`}
+                  >
                     {item.icon}
                   </div>
                   <span className="ml-3 font-medium">{item.label}</span>
@@ -118,13 +133,19 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, activeMenu, setActiveMenu }) =>
                   <button
                     onClick={() => toggleMenu(item.id)}
                     className={`flex justify-between items-center w-full p-3 rounded-lg transition-colors ${
-                      activeMenu === item.id 
-                        ? "bg-blue-50 text-blue-600 border border-blue-200" 
+                      activeMenu === item.id
+                        ? "bg-blue-50 text-blue-600 border border-blue-200"
                         : "text-gray-700 hover:bg-gray-100"
                     }`}
                   >
                     <div className="flex items-center">
-                      <div className={`${activeMenu === item.id ? 'text-blue-600' : 'text-gray-500'}`}>
+                      <div
+                        className={`${
+                          activeMenu === item.id
+                            ? "text-blue-600"
+                            : "text-gray-500"
+                        }`}
+                      >
                         {item.icon}
                       </div>
                       <span className="ml-3 font-medium">{item.label}</span>
@@ -132,11 +153,15 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar, activeMenu, setActiveMenu }) =>
                     <FaChevronDown
                       className={`transition-transform duration-200 ${
                         openMenus[item.id] ? "rotate-180" : ""
-                      } ${activeMenu === item.id ? 'text-blue-600' : 'text-gray-400'}`}
+                      } ${
+                        activeMenu === item.id
+                          ? "text-blue-600"
+                          : "text-gray-400"
+                      }`}
                       size={12}
                     />
                   </button>
-                  
+
                   {/* Submenu */}
                   {openMenus[item.id] && (
                     <div className="ml-4 mt-1 space-y-1">

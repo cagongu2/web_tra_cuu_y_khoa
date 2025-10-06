@@ -45,6 +45,7 @@ public class Role {
     @Column(name = "is_active")
     private Boolean isActive = true;
 
+    @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "role_permission",
