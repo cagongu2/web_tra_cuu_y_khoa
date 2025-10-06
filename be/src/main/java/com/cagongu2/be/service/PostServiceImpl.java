@@ -97,7 +97,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Page<PostResponse> searchPostResponsesByTitle(String keyword, Pageable pageable) {
-        return postRepository.findAllByTitleIsLikeIgnoreCase(keyword, pageable).map(postMapper::toPostResponse);
+        return postRepository.findAllByTitleContainingIgnoreCase(keyword, pageable).map(postMapper::toPostResponse);
     }
 
 
