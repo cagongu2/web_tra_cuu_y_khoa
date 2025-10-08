@@ -7,6 +7,7 @@ import { IoNewspaperOutline } from "react-icons/io5";
 import { CiViewList } from "react-icons/ci";
 import { useGetImageByTypeQuery } from "../../redux/features/image/imageAPI";
 import { getImgUrl } from "../../util/getImgUrl";
+import useAuth from "../../hook/useAuth";
 
 const Sidebar = ({
   isSidebarOpen,
@@ -16,6 +17,7 @@ const Sidebar = ({
 }) => {
   const [openMenus, setOpenMenus] = useState({});
   const { data: logo } = useGetImageByTypeQuery("logo");
+  const { isAdmin, isLoading } = useAuth();
 
   const toggleMenu = (menu) => {
     setOpenMenus((prev) => ({ ...prev, [menu]: !prev[menu] }));
@@ -34,24 +36,28 @@ const Sidebar = ({
       label: "Trang Chủ",
       icon: <FaHome />,
       path: "/",
+      requiredRole: 'admin',
     },
     {
       id: "posts",
       label: "Bài Viết",
       icon: <GiNewspaper />,
       submenus: [{ id: "activePostList", label: "Danh Sách Bài Viết" }],
+      requiredRole: 'admin',
     },
     {
       id: "categories",
       label: "Danh mục",
       icon: <CiViewList />,
       submenus: [{ id: "activeCategoryList", label: "Danh sách danh mục" }],
+      requiredRole: 'admin',
     },
     {
       id: "users",
       label: "Người dùng",
       icon: <FaRegUser />,
       submenus: [{ id: "userList", label: "Danh sách người dùng" }],
+      requiredRole: 'admin',
     },
     {
       id: "companyInfo",
@@ -63,8 +69,25 @@ const Sidebar = ({
         { id: "favicon", label: "Favicon" },
         { id: "footer", label: "Footer" },
       ],
+      requiredRole: 'admin',
     },
   ];
+
+  const filteredMenuItems = menuItems.filter(item => {
+        if (item.requiredRole === 'admin') {
+            return isAdmin();
+        }
+        
+        return true; 
+    });
+
+ if (isLoading) {
+    return (
+      <div className="mt-4 md:mt-10 mx-2 md:mx-8 flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -105,7 +128,7 @@ const Sidebar = ({
 
         {/* Menu Items */}
         <nav className="space-y-1">
-          {menuItems.map((item) => (
+          {filteredMenuItems.map((item) => (
             <div key={item.id} className="mb-1">
               {item.path ? (
                 // Menu item có đường dẫn

@@ -23,18 +23,28 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/api/authenticate/**", "/api/posts/**", "/api/categories/**", "/api/upload/**", "/images/**", "/api/users/**", "/api/images/**", "/api/footers/**"
+            "/api/authenticate/**",
+            "/images/**"
     };
+
+    private static final String[] PUBLIC_READ_ENDPOINTS = {
+            "/api/footers/**",
+            "/api/posts/**",
+            "/api/categories/**",
+            "/api/users/**",
+            "/api/images/**",
+            "/api/upload/**"
+    };
+
     private final CustomJwtDecoder customJwtDecoder;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                .authorizeHttpRequests(request ->
-                        request.requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                                .anyRequest()
-                                .authenticated());
-//                                .permitAll());
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.GET, PUBLIC_READ_ENDPOINTS).permitAll()
+                        .anyRequest().hasRole("admin"));
 
         httpSecurity.oauth2ResourceServer(
                 oauth2 ->
@@ -45,6 +55,7 @@ public class SecurityConfig {
                         )
         );
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
+        httpSecurity.cors(httpSecurityCorsConfigurer -> {});
         return httpSecurity.build();
     }
 
@@ -62,6 +73,8 @@ public class SecurityConfig {
 
     private JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+
+        jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName("scope");
         jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
 
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
