@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { GoHomeFill } from "react-icons/go";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useGetAllCategoriesQuery } from "../redux/features/categories/categoryAPI";
 import { FaAngleDown } from "react-icons/fa";
 import { getImgUrl } from "../util/getImgUrl";
 import { useGetImageByTypeQuery } from "../redux/features/image/imageAPI";
+import useAuth from "../hook/useAuth";
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeSubCategory, setActiveSubCategory] = useState(null);
-  const { data: categories, error, isLoading } = useGetAllCategoriesQuery(0);
+  const { data: categories, error, isLoading : categoriesLoading } = useGetAllCategoriesQuery(0);
+  const { isAdmin, isLoading } = useAuth();
 
   const username = localStorage.getItem("username");
   const avatar_url = localStorage.getItem("avatar_url");
@@ -51,9 +53,7 @@ export const Header = () => {
     navigate("/login");
   };
 
-  const {
-    data: logo,
-  } = useGetImageByTypeQuery("logo");
+  const { data: logo } = useGetImageByTypeQuery("logo");
 
   const {
     register,
@@ -69,6 +69,22 @@ export const Header = () => {
       navigate(`/tra-cuu?s=${encodeURIComponent(searchQuery)}`);
     }
   };
+
+  if(categoriesLoading){
+     return (
+      <div className="mt-4 md:mt-10 mx-2 md:mx-8 flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="mt-4 md:mt-10 mx-2 md:mx-8 flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -182,6 +198,15 @@ export const Header = () => {
                         >
                           Đăng xuất
                         </button>
+                        {isAdmin() && (
+                          <Link to="/dashboard">
+                          <button
+                            className="w-full text-left px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-200 font-medium"
+                          >
+                            Bảng điều khiển
+                          </button>
+                          </Link>
+                        )}
                       </div>
                     )}
                   </div>

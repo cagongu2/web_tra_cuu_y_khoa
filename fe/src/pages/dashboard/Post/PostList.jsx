@@ -14,7 +14,12 @@ import EditPostForm from "./EditPostForm";
 import AddPostForm from "./AddPostForm";
 
 import { Link } from "react-router-dom";
-import { useDeletePostMutation, useGetAllPostsQuery, useSearchPostsByTitleIslikeIgnoreCaseQuery, useUpdatePostMutation } from "../../../redux/features/post/postAPI";
+import {
+  useDeletePostMutation,
+  useGetAllPostsQuery,
+  useSearchPostsByTitleIslikeIgnoreCaseQuery,
+  useUpdatePostMutation,
+} from "../../../redux/features/post/postAPI";
 
 const PostList = () => {
   const [page, setPage] = useState(0);
@@ -39,18 +44,15 @@ const PostList = () => {
       size,
     },
     {
-      skip: !isSearching || !searchKeyword.trim(),
+      skip: !searchKeyword.trim(),
     }
   );
-  console.log(searchData)
 
   // Use search data if searching, otherwise use normal data
   const currentData = isSearching ? searchData : data;
   const posts = useMemo(() => {
-  return searchKeyword
-    ? searchData?.content || []
-    : data?.content || [];
-}, [searchKeyword, searchData, data]);
+    return searchKeyword ? searchData?.content || [] : data?.content || [];
+  }, [searchKeyword, searchData, data]);
 
   const totalPages = currentData?.totalPages || 0;
   const currentPage = currentData?.number || 0;
@@ -407,14 +409,14 @@ const PostList = () => {
                   className="w-full pl-8 pr-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
-              <button 
+              <button
                 type="submit"
                 className="w-full md:w-auto bg-blue-600 py-1 px-4 rounded text-white text-sm whitespace-nowrap"
               >
                 Tìm Kiếm
               </button>
               {isSearching && (
-                <button 
+                <button
                   type="button"
                   onClick={handleClearSearch}
                   className="w-full md:w-auto bg-gray-500 py-1 px-4 rounded text-white text-sm whitespace-nowrap"
@@ -431,7 +433,8 @@ const PostList = () => {
       {isSearching && (
         <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded">
           <p className="text-sm text-blue-800">
-            Đang hiển thị kết quả tìm kiếm cho: <strong>"{searchKeyword}"</strong>
+            Đang hiển thị kết quả tìm kiếm cho:{" "}
+            <strong>"{searchKeyword}"</strong>
             {posts.length > 0 && (
               <span> - Tìm thấy {posts.length} kết quả</span>
             )}
@@ -490,7 +493,9 @@ const PostList = () => {
                   <td className="p-3 text-center font-mono">
                     {index + 1 + page * size}
                   </td>
-                  <td className="p-3">{post.categoryName || "Chưa phân loại"}</td>
+                  <td className="p-3">
+                    {post.categoryName || "Chưa phân loại"}
+                  </td>
                   <td className="p-3 font-medium text-blue-700">
                     <Link
                       to={`/tin-tuc/${post.slug}`}
@@ -538,7 +543,9 @@ const PostList = () => {
             ) : (
               <tr>
                 <td colSpan="6" className="p-4 text-center text-gray-500">
-                  {isSearching ? "Không tìm thấy bài viết nào phù hợp" : "Không có bài viết nào"}
+                  {isSearching
+                    ? "Không tìm thấy bài viết nào phù hợp"
+                    : "Không có bài viết nào"}
                 </td>
               </tr>
             )}
@@ -619,7 +626,9 @@ const PostList = () => {
           ))
         ) : (
           <div className="bg-white rounded-lg shadow p-4 text-center text-gray-500">
-            {isSearching ? "Không tìm thấy bài viết nào phù hợp" : "Không có bài viết nào"}
+            {isSearching
+              ? "Không tìm thấy bài viết nào phù hợp"
+              : "Không có bài viết nào"}
           </div>
         )}
       </div>
