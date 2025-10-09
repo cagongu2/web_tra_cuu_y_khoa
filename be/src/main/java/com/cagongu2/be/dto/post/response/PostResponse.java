@@ -1,4 +1,4 @@
-package com.cagongu2.be.dto;
+package com.cagongu2.be.dto.post.response;
 
 import lombok.*;
 
@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostDTO {
+public class PostResponse {
     private Long id;
     private String name;
     private String title;
@@ -21,6 +21,8 @@ public class PostDTO {
 
     private Long authorId;
     private String authorName;
+
+    private String thumbnail_url;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

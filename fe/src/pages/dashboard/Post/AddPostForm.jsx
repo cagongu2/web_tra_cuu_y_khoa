@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
 import { useForm } from "react-hook-form";
@@ -20,6 +20,7 @@ const AddPostForm = ({ onClose, onSave }) => {
   const [createPost, { isLoading }] = useCreatePostMutation();
   const [uploadImage] = useUploadImageMutation();
   const [content, setContent] = useState("");
+  const [previewImage, setPreviewImage] = useState(null);
   const quillRef = useRef(null);
 
   // Quill Editor modules configuration
@@ -61,6 +62,7 @@ const AddPostForm = ({ onClose, onSave }) => {
       await createPost({
         ...data,
         content: content,
+        file: data.file instanceof FileList ? data.file[0] : data.file,
       }).unwrap();
 
       onSave({
@@ -72,10 +74,12 @@ const AddPostForm = ({ onClose, onSave }) => {
     }
   };
 
-  const generateSlug = (title) => {
-    if (!title) return "";
-    return title
+  const generateSlug = (name) => {
+    if (!name) return "";
+    return name
       .toLowerCase()
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "d")
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9 -]/g, "")
@@ -250,6 +254,21 @@ const AddPostForm = ({ onClose, onSave }) => {
     [processImageFile]
   );
 
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+
+    if (file) {
+      if (previewImage) {
+        URL.revokeObjectURL(previewImage);
+      }
+
+      const previewURL = URL.createObjectURL(file);
+      setPreviewImage(previewURL);
+    } else {
+      setPreviewImage(null);
+    }
+  };
+
   // Quill modules including custom image handler and paste handler
   const updatedModules = {
     ...modules,
@@ -272,6 +291,14 @@ const AddPostForm = ({ onClose, onSave }) => {
       matchVisual: false,
     },
   };
+
+  useEffect(() => {
+    return () => {
+      if (previewImage) {
+        URL.revokeObjectURL(previewImage);
+      }
+    };
+  }, [previewImage]);
 
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -387,6 +414,34 @@ const AddPostForm = ({ onClose, onSave }) => {
               <p className="text-red-500 text-xs mt-1">
                 {errors.category.message}
               </p>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Ảnh đại diện
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              {...register("file", {
+                onChange: (e) => handleFileChange(e),
+              })}
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isLoading}
+            />
+            {previewImage && (
+              <div className="mt-3">
+                <p className="text-sm text-gray-600 mb-1">Xem trước:</p>
+                <img
+                  src={previewImage}
+                  alt="Avatar Preview"
+                  className="w-48 h-32 object-cover rounded-lg border"
+                />
+              </div>
+            )}
+            {errors.file && (
+              <p className="text-red-500 text-xs mt-1">{errors.file.message}</p>
             )}
           </div>
 

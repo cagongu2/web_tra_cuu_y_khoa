@@ -1,10 +1,12 @@
 package com.cagongu2.be.repository;
 
-import com.cagongu2.be.dto.PostDTO;
+import com.cagongu2.be.dto.post.response.PostResponse;
 import com.cagongu2.be.model.Post;
-import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,14 +21,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findByStatus(String status);
 
-    @Query("SELECT new com.cagongu2.be.dto.PostDTO(" +
-            "p.id, p.name, p.title, p.slug, p.content, p.status, " +
-            "c.id, c.name, " +
-            "u.id, u.username, " +
-            "p.createdAt, p.updatedAt) " +
-            "FROM Post p " +
-            "LEFT JOIN p.category c " +
-            "LEFT JOIN p.author u")
-    List<PostDTO> findAllPostDTOs();
-
+    Page<Post> findAll(Pageable pageable);
+    Page<Post> findAllByTitleContainingIgnoreCase(String keyword, Pageable pageable);
 }

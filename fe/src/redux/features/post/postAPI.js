@@ -19,8 +19,17 @@ const postApi = createApi({
     tagTypes: ["Posts"],
     endpoints: (builder) => ({
         getAllPosts: builder.query({
-            query: () => ``,
-            providesTags: ["Posts"],
+            query: ({ page = 0, size = 10 }) =>
+                `?page=${page}&size=${size}`,
+        }),
+
+        searchPostsByTitleIslikeIgnoreCase: builder.query({
+            query: ({ keyword, page = 0, size = 10 }) =>
+                `/search?keyword=${keyword}&page=${page}&size=${size}`,
+        }),
+
+        searchPost: builder.query({
+            query: (query) => `/search-post?query=${query}`,
         }),
 
         getPostById: builder.query({
@@ -31,7 +40,7 @@ const postApi = createApi({
         getPostBySlug: builder.query({
             query: (slug) => `/slug/${slug}`,
             providesTags: ["Posts"],
-        }), 
+        }),
 
         getPostsByCategory: builder.query({
             query: (categoryId) => `/category/${categoryId}`,
@@ -49,25 +58,52 @@ const postApi = createApi({
         }),
 
         createPost: builder.mutation({
-            query: (data) => ({
-                url: ``,
-                method: "POST",
-                body: data,
-            }),
+            query: (data) => {
+                const formData = new FormData();
+
+                if (data.name) formData.append("name", data.name);
+                if (data.title) formData.append("title", data.title);
+                if (data.slug) formData.append("slug", data.slug);
+                if (data.status) formData.append("status", data.status);
+                if (data.categoryId) formData.append("categoryId", data.categoryId);
+                if (data.authorId) formData.append("authorId", data.authorId);
+                if (data.content) formData.append("content", data.content);
+                if (data.file instanceof File) formData.append("file", data.file);
+
+                return {
+                    url: ``,
+                    method: "POST",
+                    body: formData,
+                };
+            },
             invalidatesTags: ["Posts"],
         }),
 
+
         updatePost: builder.mutation({
-            query: ({ id, ...data }) => ({
-                url: `/${id}`,
-                method: "PUT",
-                body: data,
-            }),
+            query: ({ id, ...data }) => {
+                const formData = new FormData();
+
+                if (data.name) formData.append("name", data.name);
+                if (data.title) formData.append("title", data.title);
+                if (data.slug) formData.append("slug", data.slug);
+                if (data.status) formData.append("status", data.status);
+                if (data.categoryId) formData.append("categoryId", data.categoryId);
+                if (data.authorId) formData.append("authorId", data.authorId);
+                if (data.content) formData.append("content", data.content);
+                if (data.file instanceof File) formData.append("file", data.file);
+                return {
+                    url: `/${id}`,
+                    method: "PUT",
+                    body: formData,
+                };
+            },
             invalidatesTags: (result, error, { id }) => [
                 { type: "Posts", id },
                 "Posts",
             ],
         }),
+
 
         deletePost: builder.mutation({
             query: (id) => ({
@@ -84,6 +120,8 @@ const postApi = createApi({
 
 export const {
     useGetAllPostsQuery,
+    useSearchPostsByTitleIslikeIgnoreCaseQuery,
+    useSearchPostQuery,
     useGetPostByIdQuery,
     useGetPostBySlugQuery,
     useGetPostsByCategoryQuery,
