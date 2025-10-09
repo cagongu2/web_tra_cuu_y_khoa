@@ -18,6 +18,7 @@ app_container = AppContainer()
 app_container = AppContainer()
 app_container.config.verbose.from_env("verbose")
 app_container.config.genmini.api.from_value(ast.literal_eval(os.getenv("api_key")))
+app_container.config.database.path.from_env("faiss_path")
 
 setup_server()
 

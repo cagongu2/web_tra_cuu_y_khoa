@@ -10,7 +10,11 @@
         "model": "gemini-2.0-flash"
         
     },
+    "database": {
+        "type": "faiss",
+        "path": ""
 
+    },
     "server": {
         "host": "0.0.0.0",
         "port": "8000"

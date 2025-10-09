@@ -3,7 +3,7 @@ import os
 from typing import Dict, List, Union
 from dotenv import load_dotenv
 from tenacity import retry, stop_after_attempt, wait_fixed
-from .agent.agent import root_agent
+from modules.agent.agent import root_agent
 import httpx
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService

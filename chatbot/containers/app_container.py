@@ -1,5 +1,7 @@
 from dependency_injector import containers, providers
 from fastapi import FastAPI
+
+# from modules.database import Database
 from modules.chatbot import Chatbot
 
 
@@ -15,13 +17,13 @@ class AppContainer(containers.DeclarativeContainer):
             "apis.v1.app",
             "apis.v1.routes.route",
             "apis.v1.routes.health",
+            # "modules.agent.tools",
         ]
     )
     config = providers.Configuration(json_files=["config/config.json"])
     server_config = providers.Resource(config.server)
     gemini_config = providers.Resource(config.gemini)
     logging_config = providers.Resource(config.logging)
-
     app = providers.Singleton(FastAPI)
-
     chatbot = providers.Singleton(Chatbot, config=config)
+    # database = providers.Singleton(Database, config=config)

@@ -3,10 +3,7 @@ from typing import Dict
 from fastapi import FastAPI
 import uvicorn
 from containers.app_container import AppContainer
-from apis.v1.routes import (
-    route,
-    health
-)
+from apis.v1.routes import route, health
 from dependency_injector.wiring import inject, Provide
 from middleware.auth import AuthMiddleware
 from modules.chatbot import Chatbot
@@ -14,24 +11,20 @@ from modules.chatbot import Chatbot
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.authentication import AuthCredentials, BaseUser, AuthenticationBackend
 
-from modules.tts import TTS
+
 class BasicAuthBackend(AuthenticationBackend):
     async def authenticate(self, conn):
         return AuthCredentials(["authenticated"]), BaseUser("user")
+
+
 @inject
 def create_app(
-        app: FastAPI = Provide[AppContainer.app],
-        config: Dict = Provide[AppContainer.config],
-        tts:TTS = Provide[AppContainer.tts_novel],
-       
+    app: FastAPI = Provide[AppContainer.app],
+    config: Dict = Provide[AppContainer.config],
 ):
     # ✅ Add CORS Middleware to FastAPI app (NOT in the router!)
-    app.add_middleware(
-       AuthMiddleware,
-       CACHE_EXPIRY=3600 
-    )
-    
-    
+    app.add_middleware(AuthMiddleware, CACHE_EXPIRY=3600)
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -42,25 +35,20 @@ def create_app(
 
     app.include_router(route.router)
     app.include_router(health.router)
-    @app.on_event("shutdown")
-    async def on_shutdown():
-        tts.shutdown()
-        
+
     return app
 
 
 @inject
 def initialize(
-        chatbot: Chatbot = Provide[AppContainer.chatbot],
+    chatbot: Chatbot = Provide[AppContainer.chatbot],
 ):
     logger = logging.getLogger(FastAPI.__name__)
     logger.info("Initialize successfully")
 
 
 @inject
-def start_app(
-        server_config: dict = Provide[AppContainer.server_config]
-):
+def start_app(server_config: dict = Provide[AppContainer.server_config]):
     app = create_app()
     uvicorn.run(
         app,
@@ -71,5 +59,5 @@ def start_app(
         workers=1,
         factory=False,
         loop="asyncio",
-        timeout_keep_alive=120
+        timeout_keep_alive=120,
     )

@@ -1,34 +1,23 @@
 import json
-import os
+
 from dotenv import load_dotenv
 from google.adk.agents import Agent
-from google.adk.tools import google_search, url_context  # Import the tool
 
-from google.adk.tools.agent_tool import AgentTool
+
+from modules.agent.extracted_info import extracted_info_agent
 
 load_dotenv()
 with open("config/config.json", "r") as f:
     config = json.load(f)
 
-
-Agent_Search = Agent(
-    model=config["genmini"]["model"],
-    name="SearchAgent",
-    instruction="""
-    You're a spealist in Google Search
-    """,
-    tools=[
-        google_search,
-    ],
-)
-
-rroot_agent = Agent(
+root_agent = Agent(
     name="TraCuuYKhoaAgent",
     model=config["genmini"]["model"],
     description=(
         "Trợ lý y khoa thông minh và thân thiện, hỗ trợ người dùng tra cứu, tìm kiếm "
         "thông tin y tế và sức khỏe chính xác, dễ hiểu."
     ),
+    sub_agents=[extracted_info_agent],
     instruction="""
     Bạn là **Y Khoa Trí Tuệ** – một trợ lý y tế thông minh, tận tâm và đáng tin cậy.
 
@@ -41,8 +30,8 @@ rroot_agent = Agent(
     Ngôn ngữ:
     - Chỉ sử dụng tiếng Việt.
     - Văn phong tự nhiên, dễ đọc, tránh từ ngữ gây hoang mang hoặc khó hiểu.
-    """,
-    global_instruction="""
+    
+    <INSTRUCTION>
     ## Nhiệm vụ chính
     - Hỗ trợ người dùng tra cứu thông tin y khoa, triệu chứng, bệnh lý, thuốc men, xét nghiệm, phương pháp điều trị.
     - Tìm kiếm và tóm tắt thông tin từ nguồn đáng tin cậy (Tổ chức Y tế Thế giới, Bộ Y tế Việt Nam, CDC, PubMed...).
@@ -60,6 +49,9 @@ rroot_agent = Agent(
       **"Mình chưa tìm thấy thông tin phù hợp, bạn có thể mô tả chi tiết hơn không?"**
     - Luôn khuyến cáo:  
       **"Thông tin này chỉ mang tính tham khảo, bạn nên trao đổi với bác sĩ hoặc chuyên gia y tế để được tư vấn chính xác."**
+    ## Các công cụ bạn có thể sử dụng
+    - Bạn có thể gọi Extracted_Info_Agent: là một Agent để tìm kiếm và trích xuất thông tin y khoa từ các trang thông tin y tế đáng tin cậy.
+    
+    <INSTRUCTION>
     """,
-    tools=[google_search, url_context, AgentTool(agent=Agent_Search)],
 )
