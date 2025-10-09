@@ -1,14 +1,22 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { GoHomeFill } from "react-icons/go";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useGetAllCategoriesQuery } from "../redux/features/categories/categoryAPI";
+import { FaAngleDown } from "react-icons/fa";
+import { getImgUrl } from "../util/getImgUrl";
+import { useGetImageByTypeQuery } from "../redux/features/image/imageAPI";
+import useAuth from "../hook/useAuth";
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeSubCategory, setActiveSubCategory] = useState(null);
-  const { data: categories, error, isLoading } = useGetAllCategoriesQuery(0);
+  const { data: categories, error, isLoading : categoriesLoading } = useGetAllCategoriesQuery(0);
+  const { isAdmin, isLoading } = useAuth();
+
+  const username = localStorage.getItem("username");
+  const avatar_url = localStorage.getItem("avatar_url");
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -29,7 +37,23 @@ export const Header = () => {
     );
   };
 
+  const [isSubItemOpen, setIsSubItemOpen] = useState(false);
   const navigate = useNavigate();
+
+  const handleToggleMenu = () => {
+    setIsSubItemOpen(!isSubItemOpen);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("username");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("token");
+    localStorage.removeItem("avatar_url");
+    setIsMenuOpen(false);
+    navigate("/login");
+  };
+
+  const { data: logo } = useGetImageByTypeQuery("logo");
 
   const {
     register,
@@ -45,6 +69,22 @@ export const Header = () => {
       navigate(`/tra-cuu?s=${encodeURIComponent(searchQuery)}`);
     }
   };
+
+  if(categoriesLoading){
+     return (
+      <div className="mt-4 md:mt-10 mx-2 md:mx-8 flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="mt-4 md:mt-10 mx-2 md:mx-8 flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -73,41 +113,114 @@ export const Header = () => {
                 </svg>
               </button>
             </div>
-            <h1 className="text-2xl font-bold text-blue-600">YouMed</h1>
-          </div>
-          <form className="relative w-100 " onSubmit={handleSubmit(onSubmit)}>
-            <input
-              type="text"
-              {...register("search-title", { required: true })}
-              placeholder="Tìm kiếm bài viết, thông tin bệnh, thuốc ..."
-              name="search-title"
-              id="search-title"
-              className="w-full py-3 px-6 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            <img
+              src={getImgUrl(logo?.url)}
+              alt=""
+              className="!m-0 w-[174px] h-[84px] object-cover"
             />
-            <button className="absolute right-3 top-4 text-gray-400">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </button>
-          </form>
+            {/* <h1 className="text-2xl font-bold text-blue-600">YouMed</h1> */}
+          </div>
+          <div className="flex">
+            <form className="relative w-100 " onSubmit={handleSubmit(onSubmit)}>
+              <input
+                type="text"
+                {...register("search-title", { required: true })}
+                placeholder="Tìm kiếm bài viết, thông tin bệnh, thuốc ..."
+                name="search-title"
+                id="search-title"
+                className="w-full py-3 px-6 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <button className="absolute right-3 top-4 text-gray-400">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </button>
+            </form>
+
+            {/* info */}
+            <div className="flex items-center pl-5">
+              <div>
+                {!username ? (
+                  // Nếu chưa login
+                  <button
+                    onClick={() => navigate("/login")}
+                    className="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors duration-200 font-medium"
+                  >
+                    Đăng nhập
+                  </button>
+                ) : (
+                  // Nếu đã login
+                  <div className="relative">
+                    <button
+                      onClick={handleToggleMenu}
+                      className="flex items-center gap-2 p-1 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+                    >
+                      {/* user avatar */}
+                      <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200">
+                        <img
+                          className="w-full h-full object-cover"
+                          style={{ margin: 0 }}
+                          src={getImgUrl(avatar_url)}
+                          alt="avatar"
+                        />
+                      </div>
+
+                      {/* user name */}
+                      <span className="font-medium text-gray-700 max-w-32 truncate">
+                        {username}
+                      </span>
+
+                      {/* down icon */}
+                      <FaAngleDown
+                        className={`text-gray-500 transition-transform duration-200 ${
+                          isSubItemOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+
+                    {/* Dropdown menu */}
+                    {isSubItemOpen && (
+                      <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-200 font-medium"
+                        >
+                          Đăng xuất
+                        </button>
+                        {isAdmin() && (
+                          <Link to="/dashboard">
+                          <button
+                            className="w-full text-left px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-200 font-medium"
+                          >
+                            Bảng điều khiển
+                          </button>
+                          </Link>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="hidden lg:block border-1 border-gray-100"></div>
         <div className="hidden lg:block max-w-[1130px] my-0 mx-auto">
           {/* Menu chính */}
           <nav className="">
-            <ul className=" flex space-x-5 text-sm font-semibold items-center py-2 px-4">
+            <ul className="flex space-x-5 text-sm font-semibold items-center py-2 px-4 gap-4">
               <li className="relative">
                 <a href="#" className="text-black hover:text-blue-600">
                   <GoHomeFill />
@@ -283,6 +396,34 @@ export const Header = () => {
                         )}
                       </div>
 
+                      {/* Hiển thị danh mục cấp 2 trường hợp không có cấp 1 */}
+                      {activeCategory === category.id &&
+                        !category.children.some(
+                          (child) => child.level === 1
+                        ) && (
+                          <ul className="ml-4 mt-1 space-y-1">
+                            {category.postList?.slice(0, 7).map((item) => (
+                              <li key={item.id}>
+                                <a
+                                  className="block py-2 px-3 text-gray-700 hover:bg-blue-50 rounded"
+                                  href={`/tra-cuu/${item.slug}`}
+                                >
+                                  {item.name}
+                                </a>
+                              </li>
+                            ))}
+                            {category.postList?.length > 7 && (
+                              <li>
+                                <a
+                                  href={`/tra-cuu/${category.slug}`}
+                                  className="block py-1 text-blue-600 font-semibold"
+                                >
+                                  Tra cứu thêm
+                                </a>
+                              </li>
+                            )}
+                          </ul>
+                        )}
                       {/* Hiển thị danh mục cấp 1 */}
                       {activeCategory === category.id && category.children && (
                         <ul className="ml-4 mt-1 space-y-1">

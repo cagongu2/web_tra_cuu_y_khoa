@@ -5,6 +5,9 @@ import { SearchPage } from "../pages/SearchPage";
 import { SinglePost } from "../pages/SinglePost";
 import { SearchList } from "../pages/SearchList";
 import DashBoard from "../pages/dashboard/Dashboard";
+import Login from "../components/Login";
+import Register from "../components/Register";
+import AdminRouteGuard from "../components/AdminRouteGuard";
 
 const router = createBrowserRouter([
   {
@@ -29,10 +32,23 @@ const router = createBrowserRouter([
       },
     ],
   },
-  // admin router
   {
-    path: "/dashboard",
-    element: <DashBoard />,
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/register",
+    element: <Register />,
+  },
+  {
+    element: <AdminRouteGuard allowedRoles={["admin"]} />,
+    children: [
+      // admin router
+      {
+        path: "/dashboard",
+        element: <DashBoard />,
+      },
+    ],
   },
 ]);
 export default router;

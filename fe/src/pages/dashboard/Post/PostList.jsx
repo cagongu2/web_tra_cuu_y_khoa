@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   FaHome,
@@ -12,18 +12,52 @@ import { MdEdit } from "react-icons/md";
 import { IoMdClose } from "react-icons/io";
 import EditPostForm from "./EditPostForm";
 import AddPostForm from "./AddPostForm";
+
+import { Link } from "react-router-dom";
 import {
   useDeletePostMutation,
   useGetAllPostsQuery,
+  useSearchPostsByTitleIslikeIgnoreCaseQuery,
   useUpdatePostMutation,
 } from "../../../redux/features/post/postAPI";
-import { Link } from "react-router-dom";
 
 const PostList = () => {
-  const { register, handleSubmit } = useForm();
+  const [page, setPage] = useState(0);
+  const size = 10;
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
 
-  // RTK query hooks
-  const { data: posts = [], error, isLoading, refetch } = useGetAllPostsQuery();
+  // --- RTK query hooks ---
+  const { data, isLoading, error, refetch } = useGetAllPostsQuery({
+    page,
+    size,
+  });
+
+  const {
+    data: searchData,
+    isLoading: isSearchLoading,
+    error: searchError,
+  } = useSearchPostsByTitleIslikeIgnoreCaseQuery(
+    {
+      keyword: searchKeyword,
+      page,
+      size,
+    },
+    {
+      skip: !searchKeyword.trim(),
+    }
+  );
+
+  // Use search data if searching, otherwise use normal data
+  const currentData = isSearching ? searchData : data;
+  const posts = useMemo(() => {
+    return searchKeyword ? searchData?.content || [] : data?.content || [];
+  }, [searchKeyword, searchData, data]);
+
+  const totalPages = currentData?.totalPages || 0;
+  const currentPage = currentData?.number || 0;
+
+  const { register, handleSubmit, watch } = useForm();
   const [deletePost] = useDeletePostMutation();
   const [updatePost] = useUpdatePostMutation();
 
@@ -35,18 +69,49 @@ const PostList = () => {
   const [selectAll, setSelectAll] = useState(false);
   const [notification, setNotification] = useState({ type: "", message: "" });
 
+  const searchInputValue = watch("search-title");
+
   useEffect(() => {
-    if (error) {
+    if (error || searchError) {
       setNotification({
         type: "error",
         message: "Lỗi khi tải dữ liệu bài viết",
       });
     }
-  }, [error]);
+  }, [error, searchError]);
+
+  useEffect(() => {
+    // Reset selection when data changes
+    setSelectedPosts([]);
+    setSelectAll(false);
+  }, [posts]);
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      setPage(newPage);
+    }
+  };
 
   const onSubmit = (data) => {
-    console.log("Tìm kiếm:", data);
-    // Implement search functionality here
+    const keyword = data["search-title"]?.trim();
+    if (keyword) {
+      setSearchKeyword(keyword);
+      setIsSearching(true);
+      setPage(0); // Reset to first page when searching
+      showNotification("info", `Đang tìm kiếm: "${keyword}"`);
+    } else {
+      // If search is empty, switch back to normal list
+      handleClearSearch();
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchKeyword("");
+    setIsSearching(false);
+    setPage(0);
+    if (searchInputValue) {
+      showNotification("info", "Đã xóa tìm kiếm");
+    }
   };
 
   const showNotification = (type, message) => {
@@ -74,6 +139,7 @@ const PostList = () => {
         }).unwrap();
 
         onToggle();
+        refetch();
         showNotification("success", `Cập nhật thành công`);
       } catch (error) {
         console.error("Lỗi khi cập nhật:", error);
@@ -126,6 +192,7 @@ const PostList = () => {
       setIsEditFormOpen(false);
       setEditingPost(null);
       showNotification("success", "Cập nhật bài viết thành công");
+      refetch(); // Refresh data after update
     } catch (error) {
       console.error("Lỗi khi cập nhật bài viết:", error);
       showNotification("error", "Lỗi khi cập nhật bài viết");
@@ -138,6 +205,7 @@ const PostList = () => {
       // This would be handled by the AddPostForm component
       setIsAddFormOpen(false);
       showNotification("success", "Thêm bài viết thành công");
+      refetch(); // Refresh data after add
     } catch (error) {
       console.error("Lỗi khi thêm bài viết:", error);
       showNotification("error", "Lỗi khi thêm bài viết");
@@ -174,6 +242,7 @@ const PostList = () => {
         await deletePost(postId).unwrap();
 
         showNotification("success", "Đã xóa bài viết thành công");
+        refetch(); // Refresh data after delete
       } catch (error) {
         console.error("Lỗi khi xóa bài viết:", error);
         showNotification("error", "Lỗi khi xóa bài viết");
@@ -205,6 +274,7 @@ const PostList = () => {
           "success",
           `Đã xóa ${selectedPosts.length} bài viết thành công`
         );
+        refetch(); // Refresh data after delete
       } catch (error) {
         console.error("Lỗi khi xóa bài viết:", error);
         showNotification("error", "Lỗi khi xóa bài viết");
@@ -215,10 +285,16 @@ const PostList = () => {
   // refresh data
   const handleRefresh = () => {
     refetch();
-    showNotification("info", "Đang làm mới dữ liệu...");
+    if (isSearching) {
+      showNotification("info", "Đang làm mới kết quả tìm kiếm...");
+    } else {
+      showNotification("info", "Đang làm mới dữ liệu...");
+    }
   };
 
-  if (isLoading) {
+  const isLoadingState = isLoading || (isSearching && isSearchLoading);
+
+  if (isLoadingState) {
     return (
       <div className="mt-4 md:mt-10 mx-2 md:mx-8 flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
@@ -250,7 +326,14 @@ const PostList = () => {
         <div className="text-gray-600">
           <FaHome />
         </div>
-        <div className="text-sm md:text-base">Danh sách bài viết</div>
+        <div className="text-sm md:text-base">
+          Danh sách bài viết
+          {isSearching && (
+            <span className="ml-2 text-blue-600">
+              - Tìm kiếm: "{searchKeyword}"
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Action buttons */}
@@ -276,6 +359,15 @@ const PostList = () => {
           <FaSync size={10} />
           <span>Làm mới</span>
         </button>
+        {isSearching && (
+          <button
+            className="bg-gray-600 py-1 px-2 rounded text-xs md:text-sm flex items-center gap-1"
+            onClick={handleClearSearch}
+          >
+            <IoMdClose size={10} />
+            <span>Xóa tìm kiếm</span>
+          </button>
+        )}
         <button
           className="md:hidden bg-gray-600 py-1 px-2 rounded text-xs flex items-center gap-1"
           onClick={() => setShowFilters(!showFilters)}
@@ -317,13 +409,38 @@ const PostList = () => {
                   className="w-full pl-8 pr-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                 />
               </div>
-              <button className="w-full md:w-auto bg-blue-600 py-1 px-4 rounded text-white text-sm whitespace-nowrap">
+              <button
+                type="submit"
+                className="w-full md:w-auto bg-blue-600 py-1 px-4 rounded text-white text-sm whitespace-nowrap"
+              >
                 Tìm Kiếm
               </button>
+              {isSearching && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="w-full md:w-auto bg-gray-500 py-1 px-4 rounded text-white text-sm whitespace-nowrap"
+                >
+                  Hủy
+                </button>
+              )}
             </div>
           </form>
         </div>
       </div>
+
+      {/* Search results info */}
+      {isSearching && (
+        <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded">
+          <p className="text-sm text-blue-800">
+            Đang hiển thị kết quả tìm kiếm cho:{" "}
+            <strong>"{searchKeyword}"</strong>
+            {posts.length > 0 && (
+              <span> - Tìm thấy {posts.length} kết quả</span>
+            )}
+          </p>
+        </div>
+      )}
 
       {/* Table - Desktop view */}
       <div className="hidden md:block mt-2 bg-white rounded-lg shadow-md overflow-x-auto">
@@ -359,25 +476,118 @@ const PostList = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {posts.map((post, index) => (
-              <tr
-                key={post.id}
-                className="hover:bg-blue-50 transition-colors duration-150"
-              >
-                <td className="p-3 text-center">
+            {posts.length > 0 ? (
+              posts.map((post, index) => (
+                <tr
+                  key={post.id}
+                  className="hover:bg-blue-50 transition-colors duration-150"
+                >
+                  <td className="p-3 text-center">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 accent-blue-500 cursor-pointer"
+                      checked={selectedPosts.includes(post.id)}
+                      onChange={() => handleSelectPost(post.id)}
+                    />
+                  </td>
+                  <td className="p-3 text-center font-mono">
+                    {index + 1 + page * size}
+                  </td>
+                  <td className="p-3">
+                    {post.categoryName || "Chưa phân loại"}
+                  </td>
+                  <td className="p-3 font-medium text-blue-700">
+                    <Link
+                      to={`/tin-tuc/${post.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:underline"
+                    >
+                      {post.title}
+                    </Link>
+                  </td>
+                  {/* <td className="p-3 text-center">
+                  <ToggleSwitch 
+                    isOn={post.featured} 
+                    onToggle={() => {}} 
+                    postId={post.id}
+                    type="featured"
+                  />
+                </td> */}
+                  <td className="p-3 text-center">
+                    <ToggleSwitch
+                      isOn={post.status}
+                      onToggle={() => {}}
+                      postId={post.id}
+                      type="status"
+                    />
+                  </td>
+                  <td className="p-3 text-center">
+                    <div className="flex justify-center space-x-2">
+                      <button
+                        className="p-2 bg-blue-100 text-blue-600 hover:bg-blue-200 rounded transition-colors duration-150"
+                        onClick={() => handleEditClick(post)}
+                      >
+                        <MdEdit className="h-4 w-4" />
+                      </button>
+                      <button
+                        className="p-2 bg-red-100 text-red-600 hover:bg-red-200 rounded transition-colors duration-150"
+                        onClick={() => handleDeletePost(post.id)}
+                      >
+                        <IoMdClose className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" className="p-4 text-center text-gray-500">
+                  {isSearching
+                    ? "Không tìm thấy bài viết nào phù hợp"
+                    : "Không có bài viết nào"}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile view - Cards */}
+      <div className="mt-2 md:hidden space-y-3">
+        {posts.length > 0 ? (
+          posts.map((post, index) => (
+            <div key={post.id} className="bg-white rounded-lg shadow p-4">
+              <div className="flex justify-between items-start">
+                <div className="flex items-center">
                   <input
                     type="checkbox"
-                    className="w-4 h-4 accent-blue-500 cursor-pointer"
+                    className="w-4 h-4 accent-blue-500 cursor-pointer mr-2"
                     checked={selectedPosts.includes(post.id)}
                     onChange={() => handleSelectPost(post.id)}
                   />
-                </td>
-                <td className="p-3 text-center font-mono">
-                  {/* {post.order || post.id} */}
-                  {index + 1}
-                </td>
-                <td className="p-3">{post.categoryName || "Chưa phân loại"}</td>
-                <td className="p-3 font-medium text-blue-700">
+                  <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
+                    #{index + 1 + page * size}
+                  </span>
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    className="p-1 bg-blue-100 text-blue-600 rounded"
+                    onClick={() => handleEditClick(post)}
+                  >
+                    <MdEdit className="h-4 w-4" />
+                  </button>
+                  <button
+                    className="p-1 bg-red-100 text-red-600 rounded"
+                    onClick={() => handleDeletePost(post.id)}
+                  >
+                    <IoMdClose className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-3">
+                <h3 className="font-medium text-blue-700 text-sm">
                   <Link
                     to={`/tin-tuc/${post.slug}`}
                     target="_blank"
@@ -386,97 +596,14 @@ const PostList = () => {
                   >
                     {post.title}
                   </Link>
-                </td>
-                {/* <td className="p-3 text-center">
-                  <ToggleSwitch 
-                    isOn={post.featured} 
-                    onToggle={() => {}} 
-                    postId={post.id}
-                    type="featured"
-                  />
-                </td> */}
-                <td className="p-3 text-center">
-                  <ToggleSwitch
-                    isOn={post.status}
-                    onToggle={() => {}}
-                    postId={post.id}
-                    type="status"
-                  />
-                </td>
-                <td className="p-3 text-center">
-                  <div className="flex justify-center space-x-2">
-                    <button
-                      className="p-2 bg-blue-100 text-blue-600 hover:bg-blue-200 rounded transition-colors duration-150"
-                      onClick={() => handleEditClick(post)}
-                    >
-                      <MdEdit className="h-4 w-4" />
-                    </button>
-                    <button
-                      className="p-2 bg-red-100 text-red-600 hover:bg-red-200 rounded transition-colors duration-150"
-                      onClick={() => handleDeletePost(post.id)}
-                    >
-                      <IoMdClose className="h-4 w-4" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Mobile view - Cards */}
-      <div className="mt-2 md:hidden space-y-3">
-        {posts.map((post, index) => (
-          <div key={post.id} className="bg-white rounded-lg shadow p-4">
-            <div className="flex justify-between items-start">
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 accent-blue-500 cursor-pointer mr-2"
-                  checked={selectedPosts.includes(post.id)}
-                  onChange={() => handleSelectPost(post.id)}
-                />
-                <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
-                  #
-                  {/* {post.order || post.id} */}
-                  {index + 1}
-                </span>
+                </h3>
+                <p className="text-gray-600 text-xs mt-1">
+                  {post.category?.name || "Chưa phân loại"}
+                </p>
               </div>
-              <div className="flex space-x-2">
-                <button
-                  className="p-1 bg-blue-100 text-blue-600 rounded"
-                  onClick={() => handleEditClick(post)}
-                >
-                  <MdEdit className="h-4 w-4" />
-                </button>
-                <button
-                  className="p-1 bg-red-100 text-red-600 rounded"
-                  onClick={() => handleDeletePost(post.id)}
-                >
-                  <IoMdClose className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
 
-            <div className="mt-3">
-              <h3 className="font-medium text-blue-700 text-sm">
-                <Link
-                  to={`/tin-tuc/${post.slug}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline"
-                >
-                  {post.title}
-                </Link>
-              </h3>
-              <p className="text-gray-600 text-xs mt-1">
-                {post.category?.name || "Chưa phân loại"}
-              </p>
-            </div>
-
-            <div className="mt-3 flex justify-between items-center">
-              {/* <div>
+              <div className="mt-3 flex justify-between items-center">
+                {/* <div>
                 <span className="text-xs text-gray-500 mr-2">Nổi bật:</span>
                 <ToggleSwitch
                   isOn={post.featured}
@@ -485,40 +612,63 @@ const PostList = () => {
                   type="featured"
                 />
               </div> */}
-              <div>
-                <span className="text-xs text-gray-500 mr-2">Hiển thị:</span>
-                <ToggleSwitch
-                  isOn={post.status}
-                  onToggle={() => {}}
-                  postId={post.id}
-                  type="status"
-                />
+                <div>
+                  <span className="text-xs text-gray-500 mr-2">Hiển thị:</span>
+                  <ToggleSwitch
+                    isOn={post.status}
+                    onToggle={() => {}}
+                    postId={post.id}
+                    type="status"
+                  />
+                </div>
               </div>
             </div>
+          ))
+        ) : (
+          <div className="bg-white rounded-lg shadow p-4 text-center text-gray-500">
+            {isSearching
+              ? "Không tìm thấy bài viết nào phù hợp"
+              : "Không có bài viết nào"}
           </div>
-        ))}
+        )}
       </div>
 
       {/* Pagination */}
-      <div className="mt-4 flex justify-center">
-        <div className="flex items-center space-x-1">
-          <button className="px-3 py-1 rounded border text-sm bg-white hover:bg-gray-100">
-            Trước
-          </button>
-          <button className="px-3 py-1 rounded border text-sm bg-blue-500 text-white">
-            1
-          </button>
-          <button className="px-3 py-1 rounded border text-sm bg-white hover:bg-gray-100">
-            2
-          </button>
-          <button className="px-3 py-1 rounded border text-sm bg-white hover:bg-gray-100">
-            3
-          </button>
-          <button className="px-3 py-1 rounded border text-sm bg-white hover:bg-gray-100">
-            Sau
-          </button>
+      {totalPages > 1 && (
+        <div className="mt-4 flex justify-center">
+          <div className="flex items-center space-x-1">
+            <button
+              disabled={currentPage === 0}
+              onClick={() => handlePageChange(currentPage - 1)}
+              className="px-3 py-1 rounded border text-sm bg-white hover:bg-gray-100 disabled:opacity-50"
+            >
+              Trước
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i}
+                onClick={() => handlePageChange(i)}
+                className={`px-3 py-1 rounded border text-sm ${
+                  i === currentPage
+                    ? "bg-blue-500 text-white"
+                    : "bg-white hover:bg-gray-100"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              disabled={currentPage + 1 === totalPages}
+              onClick={() => handlePageChange(currentPage + 1)}
+              className="px-3 py-1 rounded border text-sm bg-white hover:bg-gray-100 disabled:opacity-50"
+            >
+              Sau
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Show editing form when isEditFormOpen = true */}
       {isEditFormOpen && (
