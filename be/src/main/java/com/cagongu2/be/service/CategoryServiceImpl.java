@@ -40,9 +40,9 @@ public class CategoryServiceImpl implements CategoryService {
                 .build();
 
         if (newCategory.getParent() == null) {
-            newCategory.setLevel(1);
-        } else {
             newCategory.setLevel(0);
+        } else {
+            newCategory.setLevel(1);
         }
 
         return categoryRepository.save(newCategory);

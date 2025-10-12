@@ -1,0 +1,27 @@
+{
+    "device": "cpu",
+    "sentence": {
+        "model": "intfloat/multilingual-e5-base",
+        "save_path": "./checkpoint"
+    },
+    "verbose": false,
+    "genmini":{
+        "api":[],
+        "model": "gemini-2.0-flash"
+        
+    },
+    "database": {
+        "type": "faiss",
+        "path": ""
+
+    },
+    "server": {
+        "host": "0.0.0.0",
+        "port": "8000"
+    },
+    "logging": {
+        "folder": "logs",
+        "name"  : "app.log"
+    }
+    
+}

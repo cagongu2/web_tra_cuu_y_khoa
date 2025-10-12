@@ -1,0 +1,7 @@
+checkpoint
+comic.csv
+embedding.pkl
+.env
+__pycache__
+*.ipynb
+logs/app.log.log
