@@ -29,7 +29,7 @@ const router = createBrowserRouter([
       {
         path: "/tra-cuu",
         element: <SearchList />,
-      },
+      }
     ],
   },
   {
