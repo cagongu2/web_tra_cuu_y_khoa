@@ -7,7 +7,8 @@
     "verbose": false,
     "genmini":{
         "api":[],
-        "model": "gemini-2.0-flash"
+        "model": "gemini-2.0-flash",
+        "model_embed" : "models/gemini-embedding-001"
         
     },
     "database": {
