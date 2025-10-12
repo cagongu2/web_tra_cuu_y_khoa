@@ -12,7 +12,11 @@ export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeSubCategory, setActiveSubCategory] = useState(null);
-  const { data: categories, error, isLoading : categoriesLoading } = useGetAllCategoriesQuery(0);
+  const {
+    data: categories,
+    error,
+    isLoading: categoriesLoading,
+  } = useGetAllCategoriesQuery(0);
   const { isAdmin, isLoading } = useAuth();
 
   const username = localStorage.getItem("username");
@@ -70,8 +74,8 @@ export const Header = () => {
     }
   };
 
-  if(categoriesLoading){
-     return (
+  if (categoriesLoading) {
+    return (
       <div className="mt-4 md:mt-10 mx-2 md:mx-8 flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
       </div>
@@ -116,7 +120,7 @@ export const Header = () => {
             <img
               src={getImgUrl(logo?.url)}
               alt=""
-              className="!m-0 w-[174px] h-[84px] object-cover"
+              className="!m-0 w-auto h-[100px] object-contain object-center mx-auto"
             />
             {/* <h1 className="text-2xl font-bold text-blue-600">YouMed</h1> */}
           </div>
@@ -200,11 +204,9 @@ export const Header = () => {
                         </button>
                         {isAdmin() && (
                           <Link to="/dashboard">
-                          <button
-                            className="w-full text-left px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-200 font-medium"
-                          >
-                            Bảng điều khiển
-                          </button>
+                            <button className="w-full text-left px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-200 font-medium">
+                              Bảng điều khiển
+                            </button>
                           </Link>
                         )}
                       </div>
