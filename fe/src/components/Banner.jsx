@@ -10,7 +10,7 @@ export const Banner = () => {
       <img 
         src={getImgUrl(banner?.url)} 
         alt={banner?.alt || "Website banner"} 
-        className="w-[1366px] h-[187px] object-cover"
+        className="w-[1584px] h-[396px] object-cover"
         loading="lazy"
       />
     </div>
