@@ -1,22 +1,25 @@
 # import psycopg2
+import logging
 import os
-from typing import Dict, List, Union
+from typing import Dict
 from dotenv import load_dotenv
 from tenacity import retry, stop_after_attempt, wait_fixed
-from modules.agent.agent import root_agent
-import httpx
+
+from services.agent_service import AgentService
+
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.adk.memory import InMemoryMemoryService
 from google.genai.types import Content, Part
 
 load_dotenv()
+logger = logging.getLogger(__name__)
 
 
 class Chatbot:
     _cache_memory: Dict[int, InMemoryMemoryService] = {}
 
-    def __init__(self, config: dict):
+    def __init__(self, config: dict, agent_service: AgentService):
 
         self.config = config
         self.device = config["device"]
@@ -24,6 +27,7 @@ class Chatbot:
         self.config_geminai = config["genmini"]
         self.current_account_index = 0
         self.session_service = InMemorySessionService()
+        self.agent_service = agent_service
         self._initialize_chat()
 
     def _initialize_chat(self):
@@ -49,6 +53,7 @@ class Chatbot:
                 self._cache_memory[user_id] = memory_service
             memory_service = self._cache_memory[user_id]
 
+            root_agent = self.agent_service.get_root_agent()
             runner = Runner(
                 app_name="MoiBot",
                 agent=root_agent,
@@ -56,6 +61,7 @@ class Chatbot:
                 memory_service=memory_service,
             )
             content = Content(role="user", parts=[Part(text=messages)])
+            logger.info(f"User {user_id} gửi: {content}")
             async for event in runner.run_async(
                 user_id=user_id, session_id="sess1", new_message=content
             ):
