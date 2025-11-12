@@ -7,6 +7,7 @@ import { uploadApi } from './features/upload/uploadApi';
 import authApi from './features/auth/authApi';
 import imagesApi from './features/image/imageAPI';
 import footerApi from './features/footer/footerAPI';
+// import chatApi from './features/chatbot/chatApi';
 
 export const store = configureStore({
   reducer: {
@@ -16,7 +17,8 @@ export const store = configureStore({
     [userApi.reducerPath]: userApi.reducer,
     [imagesApi.reducerPath]: imagesApi.reducer,
     [footerApi.reducerPath]: footerApi.reducer,
-    [uploadApi.reducerPath]: uploadApi.reducer
+    [uploadApi.reducerPath]: uploadApi.reducer,
+    // [chatApi.reducerPath]: chatApi.reducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -26,6 +28,7 @@ export const store = configureStore({
       userApi.middleware,
       imagesApi.middleware,
       footerApi.middleware,
-      uploadApi.middleware
+      uploadApi.middleware,
+      // chatApi.middleware
     ),
 });
