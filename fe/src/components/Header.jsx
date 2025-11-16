@@ -202,6 +202,7 @@ export const Header = () => {
                         >
                           Đăng xuất
                         </button>
+
                         {isAdmin() && (
                           <Link to="/dashboard">
                             <button className="w-full text-left px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-200 font-medium">
@@ -209,6 +210,12 @@ export const Header = () => {
                             </button>
                           </Link>
                         )}
+
+                        <Link to="/hoi-dap">
+                          <button className="w-full text-left px-4 py-3 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors duration-200 font-medium">
+                            Hỏi đáp với AI{" "}
+                          </button>
+                        </Link>
                       </div>
                     )}
                   </div>
