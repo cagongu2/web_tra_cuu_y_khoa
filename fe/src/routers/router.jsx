@@ -8,6 +8,7 @@ import DashBoard from "../pages/dashboard/Dashboard";
 import Login from "../components/Login";
 import Register from "../components/Register";
 import AdminRouteGuard from "../components/AdminRouteGuard";
+import { ChatSimulator } from "../components/ChatSimulator";
 
 const router = createBrowserRouter([
   {
@@ -29,8 +30,12 @@ const router = createBrowserRouter([
       {
         path: "/tra-cuu",
         element: <SearchList />,
-      }
+      },
     ],
+  },
+  {
+    path: "/hoi-dap",
+    element: <ChatSimulator />,
   },
   {
     path: "/login",

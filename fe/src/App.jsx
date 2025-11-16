@@ -13,7 +13,6 @@ function App() {
           <Header />
           <main className="flex-1 w-full">
             <Outlet />
-            <ChatSimulator/>
           </main>
           <Footer/>
       </div>
