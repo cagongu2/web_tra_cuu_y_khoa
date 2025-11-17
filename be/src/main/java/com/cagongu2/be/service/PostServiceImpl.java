@@ -12,6 +12,7 @@ import com.cagongu2.be.repository.CategoryRepository;
 import com.cagongu2.be.repository.PostRepository;
 import com.cagongu2.be.repository.UserRepository;
 import com.cagongu2.be.repository.elasticsearch.PostSearchRepository;
+import com.cagongu2.be.util.HtmlSanitizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +34,7 @@ public class PostServiceImpl implements PostService {
     private final UserRepository userRepository;
     private final FileUploadService fileUploadService;
     private final PostMapper postMapper;
+    private final HtmlSanitizer htmlSanitizer;
 
     @Override
     @Transactional
@@ -54,11 +56,14 @@ public class PostServiceImpl implements PostService {
                     .build();
         }
 
+        // Sanitize HTML content
+        String sanitizedContent = htmlSanitizer.sanitize(request.getContent());
+
         Post post = new Post();
         post.setName(request.getName());
         post.setTitle(request.getTitle());
         post.setSlug(request.getSlug());
-        post.setContent(request.getContent());
+        post.setContent(sanitizedContent);
         post.setStatus(request.getStatus());
         post.setCategory(category);
         post.setAuthor(author);
@@ -141,7 +146,8 @@ public class PostServiceImpl implements PostService {
         }
 
         if (StringUtils.hasText(request.getContent())) {
-            post.setContent(request.getContent());
+            String sanitizedContent = htmlSanitizer.sanitize(request.getContent());
+            post.setContent(sanitizedContent);
         }
 
         if (StringUtils.hasText(request.getStatus())) {
