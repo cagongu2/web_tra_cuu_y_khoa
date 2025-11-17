@@ -3,5 +3,5 @@ comic.csv
 embedding.pkl
 .env
 __pycache__
-*.ipynb
+# *.ipynb
 logs/app.log.log
