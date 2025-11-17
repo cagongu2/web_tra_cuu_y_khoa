@@ -6,6 +6,7 @@ import com.cagongu2.be.model.Category;
 import com.cagongu2.be.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,17 +23,26 @@ import java.util.List;
 public class CategoryController {
     private final CategoryService categoryService;
 
+    /**
+     * Get all categories by level - Public
+     */
     @GetMapping
     public ResponseEntity<List<Category>> getAllCategories(
             @RequestParam @Min(0) @Max(1) int level) {
         return ResponseEntity.ok(categoryService.getAllCategoriesByLevel(level));
     }
 
+    /**
+     * Get flat categories - Public
+     */
     @GetMapping("/flat")
     public ResponseEntity<List<CategoryFlatDTO>> getFlatCategories() {
         return ResponseEntity.ok(categoryService.getAllCategoriesFlat());
     }
 
+    /**
+     * Get category by ID - Public
+     */
     @GetMapping("/{id}")
     public ResponseEntity<Category> getCategoryById(
             @PathVariable @Min(1) Long id) {
@@ -41,6 +51,9 @@ public class CategoryController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Get category by slug - Public
+     */
     @GetMapping("/slug/{slug}")
     public ResponseEntity<Category> getCategoryBySlug(
             @PathVariable @jakarta.validation.constraints.Pattern(
@@ -51,13 +64,20 @@ public class CategoryController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Get children categories - Public
+     */
     @GetMapping("/children/{parentId}")
     public ResponseEntity<List<Category>> getChildren(
             @PathVariable @Min(1) Long parentId) {
         return ResponseEntity.ok(categoryService.getChildren(parentId));
     }
 
+    /**
+     * Create category - Admin only
+     */
     @PostMapping
+    @PreAuthorize("hasRole('admin')")
     public ResponseEntity<Category> createCategory(
             @Valid @RequestBody CategoryDTO category) {
         Category created = categoryService.createCategory(category);
@@ -66,7 +86,11 @@ public class CategoryController {
         ).body(created);
     }
 
+    /**
+     * Update category - Admin only
+     */
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('admin')")
     public ResponseEntity<Category> updateCategory(
             @PathVariable @Min(1) Long id,
             @Valid @RequestBody CategoryDTO category) {
@@ -78,7 +102,11 @@ public class CategoryController {
         }
     }
 
+    /**
+     * Delete category - Admin only
+     */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('admin')")
     public ResponseEntity<Void> deleteCategory(
             @PathVariable @Min(1) Long id) {
         categoryService.deleteCategory(id);
