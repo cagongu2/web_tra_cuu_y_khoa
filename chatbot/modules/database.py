@@ -7,7 +7,6 @@ from langchain_community.vectorstores import FAISS
 class Database:
     def __init__(self, config: dict):
         self.config = config
-
         self.collection = None
         self.index = None
         self.db_path = config.get("database", {}).get("path", None)
