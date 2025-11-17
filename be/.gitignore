@@ -14,6 +14,8 @@ target/
 .sts4-cache
 
 ### IntelliJ IDEA ###
+.env
+redis.conf
 .idea
 *.iws
 *.iml
@@ -33,7 +35,7 @@ build/
 .vscode/
 
 src/main/java/com/cagongu2/be/config/BootstrapData.java
-src/main/resources/application.yml
+src/main/resources/keystore.p12
 src/main/resources/application.yml
 
 

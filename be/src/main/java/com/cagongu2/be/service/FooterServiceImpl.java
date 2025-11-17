@@ -8,6 +8,9 @@ import com.cagongu2.be.model.Post;
 import com.cagongu2.be.repository.FooterRepository;
 import com.cagongu2.be.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,30 +22,39 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FooterServiceImpl implements FooterService {
+
     private final FooterMapper footerMapper;
     private final FooterRepository footerRepository;
     private final PostRepository postRepository;
 
     @Override
     @Transactional
+    @CacheEvict(value = "footers", allEntries = true)
     public FooterResponse createFooter(FooterRequest request) {
+        log.info("Creating new footer");
+
         Footer footer = footerMapper.toEntity(request);
 
         var listPostId = request.getPostIds();
-
         if (listPostId != null && !listPostId.isEmpty()) {
             List<Post> posts = validateAndGetPosts(listPostId);
             addPostsToFooter(footer, posts);
         }
 
         Footer savedFooter = footerRepository.save(footer);
+        log.info("Footer created with ID: {}", savedFooter.getId());
+
         return footerMapper.toResponse(savedFooter);
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = "footers", allEntries = true)
     public FooterResponse updateFooter(Long id, FooterRequest request) {
+        log.info("Updating footer ID: {}", id);
+
         Footer existingFooter = footerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Footer not found with id: " + id));
 
@@ -50,6 +62,8 @@ public class FooterServiceImpl implements FooterService {
         updatePostList(existingFooter, request.getPostIds());
 
         Footer updatedFooter = footerRepository.save(existingFooter);
+        log.info("Footer updated: {}", updatedFooter.getId());
+
         return footerMapper.toResponse(updatedFooter);
     }
 
@@ -113,27 +127,49 @@ public class FooterServiceImpl implements FooterService {
         });
     }
 
+    /**
+     * Get all footers - Cacheable
+     */
     @Override
+    @Cacheable(value = "footers", key = "'all'")
     public List<FooterResponse> getAllFooter() {
-        return footerRepository.findAll().stream().map(footerMapper::toResponse).toList();
+        log.info("Fetching all footers (cache miss)");
+        return footerRepository.findAll().stream()
+                .map(footerMapper::toResponse)
+                .toList();
     }
 
+    /**
+     * Get footer by ID - Cacheable
+     */
     @Override
+    @Cacheable(value = "footers", key = "#id")
     public FooterResponse getFooterById(Long id) {
+        log.info("Fetching footer by ID: {} (cache miss)", id);
         return footerMapper.toResponse(footerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Footer not found with id: " + id)));
     }
 
+    /**
+     * Get footer by status - Cacheable
+     */
     @Override
+    @Cacheable(value = "footers", key = "'status:' + #isActive")
     public List<FooterResponse> getFooterByStatus(Boolean isActive) {
+        log.info("Fetching footers by status: {} (cache miss)", isActive);
         return footerRepository.findByIsActive(isActive).stream()
                 .map(footerMapper::toResponse)
                 .toList();
     }
 
+    /**
+     * Delete footer - Evict cache
+     */
     @Override
     @Transactional
+    @CacheEvict(value = "footers", allEntries = true)
     public void deleteFooter(Long id) {
+        log.info("Deleting footer ID: {}", id);
         Footer footer = footerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Footer not found with id: " + id));
         footerRepository.delete(footer);
