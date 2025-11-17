@@ -6,26 +6,31 @@ import com.cagongu2.be.service.FooterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/footers")
 @RequiredArgsConstructor
+@Validated
 public class FooterController {
     private final FooterService footerService;
 
     @PostMapping
-    public ResponseEntity<FooterResponse> createFooter(@RequestBody FooterRequest request) {
+    public ResponseEntity<FooterResponse> createFooter(
+            @Valid @RequestBody FooterRequest request) {
         FooterResponse response = footerService.createFooter(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<FooterResponse> updateFooter(
-            @PathVariable Long id,
-            @RequestBody FooterRequest request) {
+            @PathVariable @Min(1) Long id,
+            @Valid @RequestBody FooterRequest request) {
         FooterResponse response = footerService.updateFooter(id, request);
         return ResponseEntity.ok(response);
     }
@@ -37,7 +42,8 @@ public class FooterController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<FooterResponse> getFooterById(@PathVariable Long id) {
+    public ResponseEntity<FooterResponse> getFooterById(
+            @PathVariable @Min(1) Long id) {
         FooterResponse response = footerService.getFooterById(id);
         return ResponseEntity.ok(response);
     }
@@ -59,8 +65,9 @@ public class FooterController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteFooter(@PathVariable Long id) {
-         footerService.deleteFooter(id);
+    public ResponseEntity<Void> deleteFooter(
+            @PathVariable @Min(1) Long id) {
+        footerService.deleteFooter(id);
         return ResponseEntity.noContent().build();
     }
 }
