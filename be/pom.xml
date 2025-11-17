@@ -124,6 +124,13 @@
 			<version>20220608.1</version>
 		</dependency>
 
+		<!-- Rate Limiting with Bucket4j -->
+		<dependency>
+			<groupId>com.github.vladimir-bukhtoyarov</groupId>
+			<artifactId>bucket4j-core</artifactId>
+			<version>8.0.1</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,37 +23,60 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
+    /**
+     * Create user - Admin only
+     */
     @PostMapping(consumes = {"multipart/form-data"})
+    @PreAuthorize("hasRole('admin')")
     public ResponseEntity<UserResponse> createUser(
             @Valid @ModelAttribute UserRequest request) throws IOException {
         return ResponseEntity.ok(userService.createUser(request));
     }
 
+    /**
+     * Update user - Self or Admin
+     */
     @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    @PreAuthorize("@userSecurity.isSelfOrAdmin(#id)")
     public ResponseEntity<UserResponse> updateUser(
             @PathVariable @Min(1) Long id,
             @Valid @ModelAttribute UserRequest request) throws IOException {
         return ResponseEntity.ok(userService.updateUser(id, request));
     }
 
+    /**
+     * Get user by ID - Self or Admin
+     */
     @GetMapping("/{id}")
+    @PreAuthorize("@userSecurity.isSelfOrAdmin(#id)")
     public ResponseEntity<UserResponse> getUserById(
             @PathVariable @Min(1) Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
+    /**
+     * Get user by username - Admin only
+     */
     @GetMapping("/by-username/{username}")
+    @PreAuthorize("hasRole('admin')")
     public ResponseEntity<UserResponse> getUserByUsername(
             @PathVariable @Pattern(regexp = "^[a-zA-Z0-9_]+$") String username) {
         return ResponseEntity.ok(userService.getUserByUsername(username));
     }
 
+    /**
+     * Get user by email - Admin only
+     */
     @GetMapping("/by-email/{email}")
+    @PreAuthorize("hasRole('admin')")
     public ResponseEntity<UserResponse> getUserByEmail(
             @PathVariable @Email String email) {
         return ResponseEntity.ok(userService.getUserByEmail(email));
     }
 
+    /**
+     * Check if username exists - Public for registration validation
+     */
     @GetMapping("/exists/username/{username}")
     public ResponseEntity<Boolean> existsByUsername(
             @PathVariable @Pattern(regexp = "^[a-zA-Z0-9_]+$") String username) {
@@ -60,6 +84,9 @@ public class UserController {
         return ResponseEntity.ok(exists);
     }
 
+    /**
+     * Check if email exists - Public for registration validation
+     */
     @GetMapping("/exists/email/{email}")
     public ResponseEntity<Boolean> existsByEmail(
             @PathVariable @Email String email) {
@@ -67,7 +94,11 @@ public class UserController {
         return ResponseEntity.ok(exists);
     }
 
+    /**
+     * Get all users - Admin only
+     */
     @GetMapping
+    @PreAuthorize("hasRole('admin')")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
