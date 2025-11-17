@@ -14,6 +14,10 @@ import com.cagongu2.be.repository.UserRepository;
 import com.cagongu2.be.repository.elasticsearch.PostSearchRepository;
 import com.cagongu2.be.util.HtmlSanitizer;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,7 +31,9 @@ import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PostServiceImpl implements PostService {
+
     private final PostRepository postRepository;
     private final PostSearchRepository postSearchRepository;
     private final CategoryRepository categoryRepository;
@@ -36,28 +42,35 @@ public class PostServiceImpl implements PostService {
     private final PostMapper postMapper;
     private final HtmlSanitizer htmlSanitizer;
 
+    /**
+     * Create post - Evict related caches
+     */
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "posts", allEntries = true),
+            @CacheEvict(value = "searchResults", allEntries = true)
+    })
     public PostResponse createPost(PostRequest request) throws IOException {
+        log.info("Creating new post: {}", request.getName());
+
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid category ID"));
 
         User author = userRepository.findById(request.getAuthorId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid author ID"));
 
-        Image image = null;
+        // Sanitize HTML content
+        String sanitizedContent = htmlSanitizer.sanitize(request.getContent());
 
+        Image image = null;
         if (request.getFile() != null && !request.getFile().isEmpty()) {
             String thumbnail_url = fileUploadService.uploadFile(request.getFile(), "thumbnail");
-
             image = Image.builder()
                     .url(thumbnail_url)
                     .type("thumbnail")
                     .build();
         }
-
-        // Sanitize HTML content
-        String sanitizedContent = htmlSanitizer.sanitize(request.getContent());
 
         Post post = new Post();
         post.setName(request.getName());
@@ -71,71 +84,136 @@ public class PostServiceImpl implements PostService {
         post.setCreatedAt(LocalDateTime.now());
         post.setUpdatedAt(LocalDateTime.now());
 
-        var saved = postRepository.save(post);
+        Post saved = postRepository.save(post);
+        log.info("Post created with ID: {}", saved.getId());
+
+        // Index to Elasticsearch
+        PostDocument document = PostDocument.builder()
+                .id(saved.getId())
+                .name(request.getName())
+                .title(request.getTitle())
+                .content(sanitizedContent)
+                .slug(request.getSlug())
+                .thumbnail_url(image != null ? image.getUrl() : null)
+                .build();
+
+        postSearchRepository.save(document);
 
         PostResponse response = postMapper.toPostResponse(saved);
         if (image != null) {
             response.setThumbnail_url(image.getUrl());
         }
 
-        PostDocument document = PostDocument.builder()
-                .id(saved.getId())
-                .name(request.getName())
-                .title(request.getTitle())
-                .content(request.getContent())
-                .slug(request.getSlug())
-                .thumbnail_url(response.getThumbnail_url())
-                .build();
-
         return response;
     }
 
+    /**
+     * Search posts - Cacheable with short TTL
+     */
     @Override
+    @Cacheable(value = "searchResults", key = "#text")
     public List<PostDocument> searchPosts(String text) {
+        log.info("Searching posts with query: {} (cache miss)", text);
         return postSearchRepository.searchPosts(text);
     }
 
+    /**
+     * Get all posts with pagination - Cacheable
+     */
     @Override
+    @Cacheable(value = "posts", key = "'page:' + #pageable.pageNumber + ':size:' + #pageable.pageSize")
     public Page<PostResponse> getAllPosts(Pageable pageable) {
+        log.info("Fetching all posts page: {} (cache miss)", pageable.getPageNumber());
         return postRepository.findAll(pageable).map(postMapper::toPostResponse);
     }
 
+    /**
+     * Search posts by title - Cacheable
+     */
     @Override
+    @Cacheable(value = "searchResults",
+            key = "'title:' + #keyword + ':' + #pageable.pageNumber")
     public Page<PostResponse> searchPostResponsesByTitle(String keyword, Pageable pageable) {
-        return postRepository.findAllByTitleContainingIgnoreCase(keyword, pageable).map(postMapper::toPostResponse);
+        log.info("Searching posts by title: {} (cache miss)", keyword);
+        return postRepository.findAllByTitleContainingIgnoreCase(keyword, pageable)
+                .map(postMapper::toPostResponse);
     }
 
-
+    /**
+     * Get post by ID - Cacheable
+     */
     @Override
+    @Cacheable(value = "posts", key = "#id", unless = "#result == null")
     public PostResponse getPostById(Long id) {
-        return postMapper.toPostResponse( postRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Post not found with ID: " + id)));
+        log.info("Fetching post by ID: {} (cache miss)", id);
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Post not found with ID: " + id));
+        return postMapper.toPostResponse(post);
     }
 
+    /**
+     * Get post by slug - Cacheable
+     */
     @Override
+    @Cacheable(value = "postBySlug", key = "#slug", unless = "#result == null")
     public PostResponse getPostBySlug(String slug) {
-        return postMapper.toPostResponse(postRepository.findBySlug(slug).orElseThrow(() -> new RuntimeException("Not found post has slug: " + slug)));
+        log.info("Fetching post by slug: {} (cache miss)", slug);
+        Post post = postRepository.findBySlug(slug)
+                .orElseThrow(() -> new RuntimeException("Not found post has slug: " + slug));
+        return postMapper.toPostResponse(post);
     }
 
+    /**
+     * Get posts by category - Cacheable
+     */
     @Override
+    @Cacheable(value = "posts", key = "'category:' + #categoryId")
     public List<PostResponse> getPostsByCategory(Long categoryId) {
-        return postRepository.findByCategoryId(categoryId).stream().map(postMapper::toPostResponse).toList();
+        log.info("Fetching posts by category: {} (cache miss)", categoryId);
+        return postRepository.findByCategoryId(categoryId).stream()
+                .map(postMapper::toPostResponse)
+                .toList();
     }
 
+    /**
+     * Get posts by author - Cacheable
+     */
     @Override
+    @Cacheable(value = "posts", key = "'author:' + #authorId")
     public List<PostResponse> getPostsByAuthor(Long authorId) {
-        return postRepository.findByAuthorId(authorId).stream().map(postMapper::toPostResponse).toList();
+        log.info("Fetching posts by author: {} (cache miss)", authorId);
+        return postRepository.findByAuthorId(authorId).stream()
+                .map(postMapper::toPostResponse)
+                .toList();
     }
 
+    /**
+     * Get posts by status - Not cached (admin only, changes frequently)
+     */
     @Override
     public List<PostResponse> getPostsByStatus(String status) {
-        return postRepository.findByStatus(status).stream().map(postMapper::toPostResponse).toList();
+        log.info("Fetching posts by status: {}", status);
+        return postRepository.findByStatus(status).stream()
+                .map(postMapper::toPostResponse)
+                .toList();
     }
 
+    /**
+     * Update post - Evict related caches
+     */
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "posts", key = "#id"),
+            @CacheEvict(value = "posts", allEntries = true),
+            @CacheEvict(value = "postBySlug", allEntries = true),
+            @CacheEvict(value = "searchResults", allEntries = true)
+    })
     public PostResponse updatePost(Long id, PostRequest request) throws IOException {
-        Post post = postRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Not found post has ID: " + id));
+        log.info("Updating post ID: {}", id);
+
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Not found post has ID: " + id));
 
         if (StringUtils.hasText(request.getTitle())) {
             post.setTitle(request.getTitle());
@@ -181,32 +259,49 @@ public class PostServiceImpl implements PostService {
 
         post.setUpdatedAt(LocalDateTime.now());
 
-        var updated = postRepository.save(post);
+        Post updated = postRepository.save(post);
+        log.info("Post updated: {}", updated.getId());
 
+        // Update Elasticsearch
         PostResponse response = postMapper.toPostResponse(updated);
-        if (updated.getThumbnail() != null) {
-            response.setThumbnail_url(updated.getThumbnail().getUrl());
-        }
-
         PostDocument document = PostDocument.builder()
                 .id(updated.getId())
-                .title(request.getTitle())
-                .name(request.getName())
-                .content(request.getContent())
-                .slug(request.getSlug())
+                .title(updated.getTitle())
+                .name(updated.getName())
+                .content(updated.getContent())
+                .slug(updated.getSlug())
                 .thumbnail_url(response.getThumbnail_url())
                 .build();
 
         postSearchRepository.save(document);
 
+        if (updated.getThumbnail() != null) {
+            response.setThumbnail_url(updated.getThumbnail().getUrl());
+        }
+
         return response;
     }
 
+    /**
+     * Delete post - Evict all related caches
+     */
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "posts", key = "#id"),
+            @CacheEvict(value = "posts", allEntries = true),
+            @CacheEvict(value = "postBySlug", allEntries = true),
+            @CacheEvict(value = "searchResults", allEntries = true)
+    })
     public void deletePost(Long id) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Not found post has ID: " + id));
+        log.info("Deleting post ID: {}", id);
+
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Not found post has ID: " + id));
+
         postRepository.delete(post);
         postSearchRepository.deleteById(post.getId());
+
+        log.info("Post deleted: {}", id);
     }
 }
