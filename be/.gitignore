@@ -35,6 +35,6 @@ build/
 src/main/java/com/cagongu2/be/config/BootstrapData.java
 src/main/resources/keystore.p12
 src/main/resources/application.yml
-.env
+src/variables/.env
 redis.conf
-
+src/grafana/dashboard/medical-platform-dashboard.json

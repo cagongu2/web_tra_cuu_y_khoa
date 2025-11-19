@@ -1,0 +1,161 @@
+groups:
+  - name: medical_platform_alerts
+    interval: 30s
+    rules:
+      # High error rate alert
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m]))
+            /
+            sum(rate(http_server_requests_seconds_count[5m]))
+          ) * 100 > 5
+        for: 5m
+        labels:
+          severity: critical
+          service: medical-platform
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 5%)"
+
+      # Slow response time alert
+      - alert: SlowResponseTime
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(http_server_requests_seconds_bucket[5m])) by (le, uri)
+          ) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: medical-platform
+        annotations:
+          summary: "Slow response time on {{ $labels.uri }}"
+          description: "95th percentile response time is {{ $value }}s (threshold: 2s)"
+
+      # Application down alert
+      - alert: ApplicationDown
+        expr: up{job="medical-platform"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: medical-platform
+        annotations:
+          summary: "Medical Platform is down"
+          description: "The application has been down for more than 2 minutes"
+
+      # High memory usage alert
+      - alert: HighMemoryUsage
+        expr: |
+          (
+            sum(jvm_memory_used_bytes{area="heap"})
+            /
+            sum(jvm_memory_max_bytes{area="heap"})
+          ) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          service: medical-platform
+        annotations:
+          summary: "High JVM memory usage"
+          description: "JVM heap memory usage is {{ $value | humanizePercentage }} (threshold: 85%)"
+
+      # Database connection pool exhaustion
+      - alert: DatabaseConnectionPoolExhausted
+        expr: hikari_connections_active >= hikari_connections_max * 0.9
+        for: 5m
+        labels:
+          severity: critical
+          service: medical-platform
+        annotations:
+          summary: "Database connection pool nearly exhausted"
+          description: "Active connections: {{ $value }}, Max: {{ hikari_connections_max }}"
+
+      # Redis down alert
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: redis
+        annotations:
+          summary: "Redis is down"
+          description: "Redis has been down for more than 2 minutes"
+
+      # Low cache hit rate
+      - alert: LowCacheHitRate
+        expr: |
+          (
+            sum(rate(cache_hits_total[5m]))
+            /
+            (sum(rate(cache_hits_total[5m])) + sum(rate(cache_misses_total[5m])))
+          ) * 100 < 50
+        for: 15m
+        labels:
+          severity: warning
+          service: medical-platform
+        annotations:
+          summary: "Low cache hit rate"
+          description: "Cache hit rate is {{ $value | humanizePercentage }} (threshold: 50%)"
+
+      # High disk usage
+      - alert: HighDiskUsage
+        expr: |
+          (
+            node_filesystem_size_bytes{mountpoint="/"}
+            -
+            node_filesystem_avail_bytes{mountpoint="/"}
+          ) / node_filesystem_size_bytes{mountpoint="/"} * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High disk usage"
+          description: "Disk usage is {{ $value | humanizePercentage }} (threshold: 85%)"
+
+      # High CPU usage
+      - alert: HighCPUUsage
+        expr: |
+          100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value | humanizePercentage }} (threshold: 80%)"
+
+      # MySQL down alert
+      - alert: MySQLDown
+        expr: mysql_up == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: mysql
+        annotations:
+          summary: "MySQL is down"
+          description: "MySQL has been down for more than 2 minutes"
+
+      # Too many failed login attempts
+      - alert: HighFailedLoginRate
+        expr: |
+          rate(auth_login_failure_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: medical-platform
+        annotations:
+          summary: "High rate of failed login attempts"
+          description: "{{ $value }} failed login attempts per second (possible brute force attack)"
+
+      # File upload errors
+      - alert: HighFileUploadErrors
+        expr: |
+          rate(files_upload_errors_total[5m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: medical-platform
+        annotations:
+          summary: "High rate of file upload errors"
+          description: "{{ $value }} file upload errors per second"

@@ -41,6 +41,7 @@ public class PostServiceImpl implements PostService {
     private final FileUploadService fileUploadService;
     private final PostMapper postMapper;
     private final HtmlSanitizer htmlSanitizer;
+    private final MetricsService metricsService;
 
     /**
      * Create post - Evict related caches
@@ -85,6 +86,10 @@ public class PostServiceImpl implements PostService {
         post.setUpdatedAt(LocalDateTime.now());
 
         Post saved = postRepository.save(post);
+
+        // Track metric
+        metricsService.trackPostCreation();
+
         log.info("Post created with ID: {}", saved.getId());
 
         // Index to Elasticsearch
@@ -113,8 +118,16 @@ public class PostServiceImpl implements PostService {
     @Override
     @Cacheable(value = "searchResults", key = "#text")
     public List<PostDocument> searchPosts(String text) {
-        log.info("Searching posts with query: {} (cache miss)", text);
-        return postSearchRepository.searchPosts(text);
+        long startTime = System.currentTimeMillis();
+
+        log.info("Searching posts with query: {}", text);
+        List<PostDocument> results = postSearchRepository.searchPosts(text);
+
+        // Track search time
+        long duration = System.currentTimeMillis() - startTime;
+        metricsService.recordPostSearchTime(duration);
+
+        return results;
     }
 
     /**
@@ -260,6 +273,10 @@ public class PostServiceImpl implements PostService {
         post.setUpdatedAt(LocalDateTime.now());
 
         Post updated = postRepository.save(post);
+
+        // Track metric
+        metricsService.trackPostUpdate();
+
         log.info("Post updated: {}", updated.getId());
 
         // Update Elasticsearch
@@ -301,6 +318,9 @@ public class PostServiceImpl implements PostService {
 
         postRepository.delete(post);
         postSearchRepository.deleteById(post.getId());
+
+        // Track metric
+        metricsService.trackPostDeletion();
 
         log.info("Post deleted: {}", id);
     }

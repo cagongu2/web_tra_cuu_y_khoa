@@ -45,6 +45,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final Long REFRESHABLE_DURATION;
     private final String JWT_ISSUER;
 
+    private final MetricsService metricsService;
+
     @Autowired
     public AuthenticationServiceImpl(UserRepository userRepository,
                                      RefreshTokenRepository refreshTokenRepository,
@@ -53,7 +55,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                                      @Value("${jwt.signerKey}") String SIGNER_KEY,
                                      @Value("${jwt.valid-duration}") Long VALID_DURATION,
                                      @Value("${jwt.refreshable-duration}") Long REFRESHABLE_DURATION,
-                                     @Value("${jwt.issuer}") String JWT_ISSUER) {
+                                     @Value("${jwt.issuer}") String JWT_ISSUER,
+                                     MetricsService metricsService
+                                     ) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
@@ -62,6 +66,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         this.VALID_DURATION = VALID_DURATION;
         this.REFRESHABLE_DURATION = REFRESHABLE_DURATION;
         this.JWT_ISSUER = JWT_ISSUER;
+        this.metricsService = metricsService;
     }
 
     @Override
@@ -74,12 +79,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
             if (!authenticated) {
+                // Track failed login
+                metricsService.trackLoginAttempt(false);
                 throw new Exception("Invalid email or password");
             }
 
             if (!user.getIsActive()) {
                 throw new Exception("User account is inactive");
             }
+
+            // Track successful login
+            metricsService.trackLoginAttempt(true);
 
             var userResponse = userMapper.toUserResponse(user);
             var accessToken = generateToken(user, userResponse.getRoleSlugs());

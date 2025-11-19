@@ -23,6 +23,8 @@ public class FileUploadServiceImpl implements FileUploadService {
     @Value("${upload.base-path}")
     private String basePath;
 
+    private final MetricsService metricsService;
+
     // Security constraints
     private static final List<String> ALLOWED_EXTENSIONS =
             Arrays.asList("jpg", "jpeg", "png", "gif", "webp");
@@ -108,16 +110,23 @@ public class FileUploadServiceImpl implements FileUploadService {
         try {
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
             log.info("File uploaded successfully: {}", filePath);
+
+            // Track successful upload
+            metricsService.trackFileUpload(true);
+
+            // 11. Return relative path
+            String relativePath = "images/" + safeType + "/" + fileName;
+            log.info("File upload completed. Relative path: {}", relativePath);
+
+            return relativePath;
         } catch (IOException e) {
             log.error("Failed to upload file: {}", fileName, e);
+
+            // Track failed upload
+            metricsService.trackFileUpload(false);
+
             throw new IOException("Failed to upload file: " + e.getMessage(), e);
         }
-
-        // 11. Return relative path
-        String relativePath = "images/" + safeType + "/" + fileName;
-        log.info("File upload completed. Relative path: {}", relativePath);
-
-        return relativePath;
     }
 
     /**
