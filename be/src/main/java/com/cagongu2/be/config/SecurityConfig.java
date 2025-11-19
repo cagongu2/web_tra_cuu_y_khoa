@@ -44,6 +44,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.GET, PUBLIC_READ_ENDPOINTS).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/users/**").permitAll()
                         .anyRequest().hasRole("admin"));
 
         httpSecurity.oauth2ResourceServer(

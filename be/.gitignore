@@ -34,5 +34,6 @@ build/
 
 src/main/java/com/cagongu2/be/config/BootstrapData.java
 src/main/resources/application.properties
+src/main/resources/application.yml
 
 

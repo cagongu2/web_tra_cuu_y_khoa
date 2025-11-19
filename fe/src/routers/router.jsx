@@ -9,6 +9,7 @@ import Login from "../components/Login";
 import Register from "../components/Register";
 import AdminRouteGuard from "../components/AdminRouteGuard";
 import { ChatSimulator } from "../components/ChatSimulator";
+import { Home } from "../pages/Home";
 
 const router = createBrowserRouter([
   {
@@ -17,7 +18,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <div>Home</div>,
+        element: <Home/>,
       },
       {
         path: "/tra-cuu/:slug",
