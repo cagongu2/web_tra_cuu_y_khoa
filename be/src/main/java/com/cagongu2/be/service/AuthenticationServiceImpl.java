@@ -57,7 +57,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                                      @Value("${jwt.refreshable-duration}") Long REFRESHABLE_DURATION,
                                      @Value("${jwt.issuer}") String JWT_ISSUER,
                                      MetricsService metricsService
-                                     ) {
+    ) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;

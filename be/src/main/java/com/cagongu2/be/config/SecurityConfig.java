@@ -85,7 +85,16 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/categories/**").hasRole("admin")
                         .requestMatchers(HttpMethod.PUT, "/api/categories/**").hasRole("admin")
                         .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasRole("admin")
-                        .requestMatchers("/actuator/**").hasRole("ADMIN")
+                        .requestMatchers("/actuator/**").hasRole("admin")
+
+                        // Audit endpoints - require ADMIN role
+                        .requestMatchers("/api/admin/audit/**").hasRole("admin")
+
+                        // Monitoring endpoints - require ADMIN role
+                        .requestMatchers("/api/admin/monitoring").hasRole("admin")
+
+                        // Cache endpoints - require ADMIN role
+                        .requestMatchers("/api/admin/cache/**").hasRole("admin")
 
                         // Post management - require authentication
                         .requestMatchers(HttpMethod.POST, "/api/posts/**").authenticated()

@@ -1,9 +1,11 @@
 package com.cagongu2.be.interceptor;
 
-import com.cagongu2.be.model.AuditLog;
-import com.cagongu2.be.repository.AuditLogRepository;
+import com.cagongu2.be.context.RequestContextInfo;
+import com.cagongu2.be.context.RequestContextService;
+import com.cagongu2.be.service.AsyncAuditService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -11,47 +13,38 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import java.time.LocalDateTime;
-
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class AuditInterceptor implements HandlerInterceptor {
 
-    private final AuditLogRepository auditLogRepository;
+    private final AsyncAuditService asyncAuditService;
+    private final RequestContextService requestContextService;
 
     @Override
-    public boolean preHandle(HttpServletRequest request,
-                             HttpServletResponse response,
-                             Object handler) {
+    public boolean preHandle(@NonNull HttpServletRequest request,
+                             @NonNull HttpServletResponse response,
+                             @NonNull Object handler) {
 
         // Only log authenticated requests to sensitive endpoints
         if (shouldAudit(request)) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             if (authentication != null && authentication.isAuthenticated()) {
-                String userId = authentication.getName();
-                String username = authentication.getPrincipal().toString();
                 String method = request.getMethod();
                 String uri = request.getRequestURI();
-                String ipAddress = getClientIP(request);
-                String userAgent = request.getHeader("User-Agent");
 
                 // Async logging to not block request
                 try {
-                    AuditLog auditLog = AuditLog.builder()
-                            .entityType("API_ACCESS")
-                            .entityId(0L)
-                            .action(method)
-                            .userId(Long.parseLong(userId))
-                            .username(username)
-                            .timestamp(LocalDateTime.now())
-                            .ipAddress(ipAddress)
-                            .userAgent(userAgent)
-                            .changesSummary(method + " " + uri)
-                            .build();
-
-                    auditLogRepository.save(auditLog);
+                    RequestContextInfo ctx = requestContextService.getInfo();
+                    asyncAuditService.logApiAccess(
+                            method,
+                            uri,
+                            ctx.getUserId(),
+                            ctx.getUsername(),
+                            ctx.getIp(),
+                            ctx.getUserAgent()
+                    );
                 } catch (Exception e) {
                     log.error("Failed to log audit", e);
                 }
@@ -77,16 +70,5 @@ public class AuditInterceptor implements HandlerInterceptor {
         return uri.contains("/api/users") ||
                 uri.contains("/api/footers") ||
                 uri.contains("/api/upload");
-    }
-
-    /**
-     * Get client IP address
-     */
-    private String getClientIP(HttpServletRequest request) {
-        String xfHeader = request.getHeader("X-Forwarded-For");
-        if (xfHeader == null) {
-            return request.getRemoteAddr();
-        }
-        return xfHeader.split(",")[0];
     }
 }

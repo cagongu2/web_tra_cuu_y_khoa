@@ -1,5 +1,7 @@
 package com.cagongu2.be.service;
 
+import com.cagongu2.be.context.RequestContextInfo;
+import com.cagongu2.be.context.RequestContextService;
 import com.cagongu2.be.dto.CategoryDTO;
 import com.cagongu2.be.dto.CategoryFlatDTO;
 import com.cagongu2.be.dto.GetAllCategoriesAndPostDTO;
@@ -28,6 +30,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final PostRepository postRepository;
+    private final AsyncAuditService asyncAuditService;
+    private final RequestContextService requestContextService;
 
     /**
      * Create category - Evict all category caches
@@ -62,6 +66,20 @@ public class CategoryServiceImpl implements CategoryService {
         Category saved = categoryRepository.save(newCategory);
         log.info("Category created with ID: {}", saved.getId());
 
+        // AuditLog
+        RequestContextInfo ctx = requestContextService.getInfo();
+        asyncAuditService.logAudit(
+                "CATEGORY",
+                saved.getId(),
+                "CREATE",
+                ctx.getUserId(),
+                ctx.getUsername(),
+                null,
+                requestContextService.toJson(saved),
+                ctx.getIp(),
+                ctx.getUserAgent()
+        );
+
         return saved;
     }
 
@@ -80,6 +98,8 @@ public class CategoryServiceImpl implements CategoryService {
         log.info("Updating category ID: {}", id);
 
         return categoryRepository.findById(id).map(existing -> {
+            String oldValue = requestContextService.toJson(existing);
+
             if (StringUtils.hasText(newCategory.getName()))
                 existing.setName(newCategory.getName());
 
@@ -107,6 +127,20 @@ public class CategoryServiceImpl implements CategoryService {
             Category updated = categoryRepository.save(existing);
             log.info("Category updated: {}", updated.getId());
 
+            // AuditLog
+            RequestContextInfo ctx = requestContextService.getInfo();
+            asyncAuditService.logAudit(
+                    "CATEGORY",
+                    updated.getId(),
+                    "UPDATE",
+                    ctx.getUserId(),
+                    ctx.getUsername(),
+                    oldValue,
+                    requestContextService.toJson(updated),
+                    ctx.getIp(),
+                    ctx.getUserAgent()
+            );
+
             return updated;
         }).orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
     }
@@ -114,6 +148,7 @@ public class CategoryServiceImpl implements CategoryService {
     /**
      * Delete category - Evict all category caches
      */
+    @Transactional
     @Override
     @Caching(evict = {
             @CacheEvict(value = "categories", key = "#id"),
@@ -123,7 +158,27 @@ public class CategoryServiceImpl implements CategoryService {
     })
     public void deleteCategory(Long id) {
         log.info("Deleting category ID: {}", id);
+
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Not found category has ID: " + id));
+
+        String deletedData = requestContextService.toJson(category);
+
         categoryRepository.deleteById(id);
+
+        // AuditLog
+        RequestContextInfo ctx = requestContextService.getInfo();
+        asyncAuditService.logAudit(
+                "CATEGORY",
+                id,
+                "DELETE",
+                ctx.getUserId(),
+                ctx.getUsername(),
+                deletedData,
+                null,
+                ctx.getIp(),
+                ctx.getUserAgent()
+        );
     }
 
     /**

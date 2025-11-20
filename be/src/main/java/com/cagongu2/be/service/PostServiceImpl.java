@@ -1,5 +1,7 @@
 package com.cagongu2.be.service;
 
+import com.cagongu2.be.context.RequestContextInfo;
+import com.cagongu2.be.context.RequestContextService;
 import com.cagongu2.be.dto.post.response.PostResponse;
 import com.cagongu2.be.dto.post.request.PostRequest;
 import com.cagongu2.be.mapper.PostMapper;
@@ -42,6 +44,8 @@ public class PostServiceImpl implements PostService {
     private final PostMapper postMapper;
     private final HtmlSanitizer htmlSanitizer;
     private final MetricsService metricsService;
+    private final AsyncAuditService asyncAuditService;
+    private final RequestContextService requestContextService;
 
     /**
      * Create post - Evict related caches
@@ -89,6 +93,21 @@ public class PostServiceImpl implements PostService {
 
         // Track metric
         metricsService.trackPostCreation();
+
+        // AuditLog
+        RequestContextInfo ctx = requestContextService.getInfo();
+        asyncAuditService.logAudit(
+                "POST",
+                saved.getId(),
+                "CREATE",
+                ctx.getUserId(),
+                ctx.getUsername(),
+                null,
+                requestContextService.toJson(saved),
+                ctx.getIp(),
+                ctx.getUserAgent()
+        );
+
 
         log.info("Post created with ID: {}", saved.getId());
 
@@ -228,6 +247,8 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Not found post has ID: " + id));
 
+        String oldValue = requestContextService.toJson(post);
+
         if (StringUtils.hasText(request.getTitle())) {
             post.setTitle(request.getTitle());
         }
@@ -274,6 +295,20 @@ public class PostServiceImpl implements PostService {
 
         Post updated = postRepository.save(post);
 
+        // AuditLog
+        RequestContextInfo ctx = requestContextService.getInfo();
+        asyncAuditService.logAudit(
+                "POST",
+                updated.getId(),
+                "UPDATE",
+                ctx.getUserId(),
+                ctx.getUsername(),
+                oldValue,
+                requestContextService.toJson(updated),
+                ctx.getIp(),
+                ctx.getUserAgent()
+        );
+
         // Track metric
         metricsService.trackPostUpdate();
 
@@ -316,12 +351,30 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Not found post has ID: " + id));
 
+        String deletedData = requestContextService.toJson(post);
+
         postRepository.delete(post);
         postSearchRepository.deleteById(post.getId());
+
+        // AuditLog
+        RequestContextInfo ctx = requestContextService.getInfo();
+        asyncAuditService.logAudit(
+                "POST",
+                id,
+                "DELETE",
+                ctx.getUserId(),
+                ctx.getUsername(),
+                deletedData,
+                null,
+                ctx.getIp(),
+                ctx.getUserAgent()
+        );
 
         // Track metric
         metricsService.trackPostDeletion();
 
         log.info("Post deleted: {}", id);
     }
+
+
 }

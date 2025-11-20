@@ -1,5 +1,7 @@
 package com.cagongu2.be.service;
 
+import com.cagongu2.be.context.RequestContextInfo;
+import com.cagongu2.be.context.RequestContextService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +26,8 @@ public class FileUploadServiceImpl implements FileUploadService {
     private String basePath;
 
     private final MetricsService metricsService;
+    private final AsyncAuditService asyncAuditService;
+    private final RequestContextService requestContextService;
 
     // Security constraints
     private static final List<String> ALLOWED_EXTENSIONS =
@@ -114,6 +118,20 @@ public class FileUploadServiceImpl implements FileUploadService {
             // Track successful upload
             metricsService.trackFileUpload(true);
 
+            // AuditLog
+            RequestContextInfo ctx = requestContextService.getInfo();
+            asyncAuditService.logAudit(
+                    "FILE_UPLOAD",
+                    0L,
+                    "UPLOAD_SUCCESS",
+                    ctx.getUserId(),
+                    ctx.getUsername(),
+                    null, // oldValue
+                    String.format("{\"filename\":\"%s\",\"size\":%d,\"type\":\"%s\"}", fileName, file.getSize(), type),
+                    ctx.getIp(),
+                    ctx.getUserAgent()
+            );
+
             // 11. Return relative path
             String relativePath = "images/" + safeType + "/" + fileName;
             log.info("File upload completed. Relative path: {}", relativePath);
@@ -124,6 +142,22 @@ public class FileUploadServiceImpl implements FileUploadService {
 
             // Track failed upload
             metricsService.trackFileUpload(false);
+
+            // AuditLog
+            RequestContextInfo ctx = requestContextService.getInfo();
+            asyncAuditService.logAudit(
+                    "FILE_UPLOAD",
+                    0L,
+                    "UPLOAD_FAILED",
+                    ctx.getUserId(),
+                    ctx.getUsername(),
+                    null,
+                    String.format("{\"filename\":\"%s\",\"error\":\"%s\"}", file.getOriginalFilename(), e.getMessage()),
+                    ctx.getIp(),
+                    ctx.getUserAgent()
+            );
+
+
 
             throw new IOException("Failed to upload file: " + e.getMessage(), e);
         }
@@ -169,37 +203,31 @@ public class FileUploadServiceImpl implements FileUploadService {
 
         // Check magic bytes based on expected extension
         boolean isValid;
-        String detectedType;
-
-        switch (expectedExtension.toLowerCase()) {
-            case "jpg":
-            case "jpeg":
+        String detectedType = switch (expectedExtension.toLowerCase()) {
+            case "jpg", "jpeg" -> {
                 // JPEG magic bytes: FF D8 FF
                 isValid = (fileHeader[0] == (byte) 0xFF &&
                         fileHeader[1] == (byte) 0xD8 &&
                         fileHeader[2] == (byte) 0xFF);
-                detectedType = "JPEG";
-                break;
-
-            case "png":
+                yield "JPEG";
+            }
+            case "png" -> {
                 // PNG magic bytes: 89 50 4E 47 0D 0A 1A 0A
                 isValid = (fileHeader[0] == (byte) 0x89 &&
                         fileHeader[1] == (byte) 0x50 &&
                         fileHeader[2] == (byte) 0x4E &&
                         fileHeader[3] == (byte) 0x47);
-                detectedType = "PNG";
-                break;
-
-            case "gif":
+                yield "PNG";
+            }
+            case "gif" -> {
                 // GIF magic bytes: 47 49 46 38 (GIF8)
                 isValid = (fileHeader[0] == (byte) 0x47 &&
                         fileHeader[1] == (byte) 0x49 &&
                         fileHeader[2] == (byte) 0x46 &&
                         fileHeader[3] == (byte) 0x38);
-                detectedType = "GIF";
-                break;
-
-            case "webp":
+                yield "GIF";
+            }
+            case "webp" -> {
                 // WebP magic bytes: 52 49 46 46 ... 57 45 42 50 (RIFF...WEBP)
                 isValid = (fileHeader[0] == (byte) 0x52 &&
                         fileHeader[1] == (byte) 0x49 &&
@@ -209,13 +237,13 @@ public class FileUploadServiceImpl implements FileUploadService {
                         fileHeader[9] == (byte) 0x45 &&
                         fileHeader[10] == (byte) 0x42 &&
                         fileHeader[11] == (byte) 0x50);
-                detectedType = "WebP";
-                break;
-
-            default:
+                yield "WebP";
+            }
+            default -> {
                 log.warn("Unknown extension for validation: {}", expectedExtension);
                 throw new IllegalArgumentException("Unsupported file type: " + expectedExtension);
-        }
+            }
+        };
 
         if (!isValid) {
             log.warn("File content does not match extension. Expected: {}, Detected: {}",
