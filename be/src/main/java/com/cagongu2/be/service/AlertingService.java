@@ -22,12 +22,6 @@ public class AlertingService {
 
     private final AsyncEmailService emailService;
 
-    @Value("${slack.webhook.url}")
-    private String slackUrl;
-
-    @Value("${slack.enabled}")
-    private String slackEnable;
-
     @Value("${dev.email}")
     private String devMail;
 

@@ -37,4 +37,7 @@ src/main/resources/keystore.p12
 src/main/resources/application.yml
 .env
 redis.conf
-src/grafana/dashboard/medical-platform-dashboard.json
+monitoring/grafana/dashboard/medical-platform-dashboard.json
+src/main/resources/truststore.jks
+src/main/resources/client-keystore.p12
+mysqld_exporter.cnf

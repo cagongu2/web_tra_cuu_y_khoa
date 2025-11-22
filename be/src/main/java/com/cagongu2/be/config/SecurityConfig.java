@@ -36,7 +36,9 @@ public class SecurityConfig {
             "/api/authenticate/login",
             "/api/authenticate/register",
             "/actuator/health",
-            "/actuator/info"
+            "/actuator/info",
+            "/v3/api-docs/**",
+            "/swagger-ui/**"
     };
 
     /**
@@ -85,6 +87,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/categories/**").hasRole("admin")
                         .requestMatchers(HttpMethod.PUT, "/api/categories/**").hasRole("admin")
                         .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasRole("admin")
+
                         .requestMatchers("/actuator/**").hasRole("admin")
 
                         // Audit endpoints - require ADMIN role

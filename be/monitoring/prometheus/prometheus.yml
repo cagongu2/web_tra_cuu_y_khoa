@@ -4,47 +4,54 @@ global:
   evaluation_interval: 15s
   external_labels:
     cluster: 'medical-platform'
-    environment: 'production'
+    environment: 'development'
 
 # Alertmanager configuration
 alerting:
   alertmanagers:
     - static_configs:
         - targets:
-          - localhost:9093
+            - alertmanager:9093
 
 # Alert rules
 rule_files:
-  - "alert_rules.yml"
+  - "/etc/prometheus/alert_rules.yml"
 
 # Scrape configurations
 scrape_configs:
-  # Medical Platform Application
+  # Spring Boot Application
   - job_name: 'medical-platform'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['localhost:8080']
+      - targets: ['host.docker.internal:8080']
         labels:
           application: 'medical-platform'
-          environment: 'production'
+          environment: 'development'
 
-  # Redis Exporter
+  # Redis (từ exporter)
   - job_name: 'redis'
     static_configs:
-      - targets: ['localhost:9121']
+      - targets: ['redis-exporter:9121']
         labels:
           service: 'redis'
 
-  # MySQL Exporter
+  # MySQL (từ exporter)
   - job_name: 'mysql'
     static_configs:
-      - targets: ['localhost:9104']
+      - targets: ['mysql-exporter:9104']
         labels:
           service: 'mysql'
 
-  # Node Exporter (System metrics)
+  # Elasticsearch (từ exporter)
+  - job_name: 'elasticsearch'
+    static_configs:
+      - targets: ['elasticsearch-exporter:9114']
+        labels:
+          service: 'elasticsearch'
+
+  # Node/System metrics
   - job_name: 'node'
     static_configs:
-      - targets: ['localhost:9100']
+      - targets: ['node-exporter:9100']
         labels:
           service: 'system'

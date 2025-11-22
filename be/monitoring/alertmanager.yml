@@ -1,9 +1,9 @@
 global:
   resolve_timeout: 5m
-  smtp_smarthost: 'smtp.gmail.com:587'
-  smtp_from: 'alerts@yourdomain.com'
-  smtp_auth_username: 'alerts@yourdomain.com'
-  smtp_auth_password: 'your-smtp-password'
+  smtp_smarthost: ${MAIL_HOST}:${MAIL_PORT}
+  smtp_from: ${MAIL_USERNAME}
+  smtp_auth_username: ${MAIL_USERNAME:vanthachdoan1206@gmail.com}
+  smtp_auth_password: ${MAIL_PASSWORD:xlixupjsbnnzynra}
 
 route:
   group_by: ['alertname', 'cluster', 'service']
@@ -23,24 +23,24 @@ route:
 receivers:
   - name: 'default'
     email_configs:
-      - to: 'team@yourdomain.com'
+      - to: ${DEVMAIL:hophucthai9@gmail.com}
         send_resolved: true
 
   - name: 'critical-alerts'
     email_configs:
-      - to: 'oncall@yourdomain.com'
+      - to: ${DEVMAIL:hophucthai9@gmail.com}
         send_resolved: true
         headers:
           Subject: '[CRITICAL] {{ .GroupLabels.alertname }}'
-    # slack_configs:
-#  - api_url: 'YOUR_SLACK_WEBHOOK_URL'
-#    channel: '#alerts-critical'
-#    title: 'CRITICAL Alert'
-#    text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/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'
+        channel: '#alerts'
+        title: 'CRITICAL Alert'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
 
   - name: 'warning-alerts'
     email_configs:
-      - to: 'dev-team@yourdomain.com'
+      - to: ${DEVMAIL:hophucthai9@gmail.com}
         send_resolved: true
 
 inhibit_rules:

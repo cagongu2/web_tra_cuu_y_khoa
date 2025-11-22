@@ -68,7 +68,7 @@ groups:
           service: medical-platform
         annotations:
           summary: "Database connection pool nearly exhausted"
-          description: "Active connections: {{ $value }}, Max: {{ hikari_connections_max }}"
+          description: "Active connections are above 90% of max. Current active: {{ $value }}"
 
       # Redis down alert
       - alert: RedisDown

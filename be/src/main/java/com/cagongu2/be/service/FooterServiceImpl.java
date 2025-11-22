@@ -134,7 +134,7 @@ public class FooterServiceImpl implements FooterService {
     @Cacheable(value = "footers", key = "'all'")
     public List<FooterResponse> getAllFooter() {
         log.info("Fetching all footers (cache miss)");
-        return footerRepository.findAll().stream()
+        return footerRepository.findAllWithPosts().stream()
                 .map(footerMapper::toResponse)
                 .toList();
     }
@@ -146,7 +146,7 @@ public class FooterServiceImpl implements FooterService {
     @Cacheable(value = "footers", key = "#id")
     public FooterResponse getFooterById(Long id) {
         log.info("Fetching footer by ID: {} (cache miss)", id);
-        return footerMapper.toResponse(footerRepository.findById(id)
+        return footerMapper.toResponse(footerRepository.findByIdWithPosts(id)
                 .orElseThrow(() -> new RuntimeException("Footer not found with id: " + id)));
     }
 
@@ -157,7 +157,7 @@ public class FooterServiceImpl implements FooterService {
     @Cacheable(value = "footers", key = "'status:' + #isActive")
     public List<FooterResponse> getFooterByStatus(Boolean isActive) {
         log.info("Fetching footers by status: {} (cache miss)", isActive);
-        return footerRepository.findByIsActive(isActive).stream()
+        return footerRepository.findByIsActiveWithPosts(isActive).stream()
                 .map(footerMapper::toResponse)
                 .toList();
     }

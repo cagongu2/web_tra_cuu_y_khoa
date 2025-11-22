@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -32,19 +31,19 @@ import java.util.Map;
 @Slf4j
 public class RedisConfig {
 
-    @Value("${spring.redis.host:localhost}")
+    @Value("${spring.redis.host}")
     private String redisHost;
 
-    @Value("${spring.redis.port:6379}")
+    @Value("${spring.redis.port}")
     private int redisPort;
 
-    @Value("${spring.redis.password:}")
+    @Value("${spring.redis.password}")
     private String redisPassword;
 
-    @Value("${spring.redis.database:0}")
+    @Value("${spring.redis.database}")
     private int redisDatabase;
 
-    @Value("${spring.redis.timeout:2000}")
+    @Value("${spring.redis.timeout}")
     private long redisTimeout;
 
     /**
@@ -87,6 +86,7 @@ public class RedisConfig {
 
         // Create ObjectMapper for JSON serialization
         ObjectMapper objectMapper = new ObjectMapper();
+        // Support LocalDateTime
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.activateDefaultTyping(
                 LaissezFaireSubTypeValidator.instance,
