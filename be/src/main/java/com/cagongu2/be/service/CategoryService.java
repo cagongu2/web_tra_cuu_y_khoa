@@ -1,8 +1,9 @@
 package com.cagongu2.be.service;
 
-import com.cagongu2.be.dto.CategoryDTO;
-import com.cagongu2.be.dto.CategoryFlatDTO;
-import com.cagongu2.be.dto.GetAllCategoriesAndPostDTO;
+import com.cagongu2.be.dto.category.request.CategoryDTO;
+import com.cagongu2.be.dto.category.request.CategoryFlatDTO;
+import com.cagongu2.be.dto.category.request.GetAllCategoriesAndPostDTO;
+import com.cagongu2.be.dto.category.response.CategoryResponse;
 import com.cagongu2.be.model.Category;
 
 import java.util.List;
@@ -15,15 +16,15 @@ public interface CategoryService {
 
     void deleteCategory(Long id);
 
-    Optional<Category> getCategoryById(Long id);
+    Optional<CategoryResponse> getCategoryById(Long id);
 
     Optional<Category> getCategoryBySlug(String slug);
 
-    List<Category> getAllCategoriesByLevel(int level);
+    List<CategoryResponse> getAllCategoriesByLevel(int level);
 
     List<CategoryFlatDTO> getAllCategoriesFlat();
 
     List<GetAllCategoriesAndPostDTO> getAllCategoriesWithPosts();
 
-    List<Category> getChildren(Long parentId);
+    List<CategoryResponse> getChildren(Long parentId);
 }

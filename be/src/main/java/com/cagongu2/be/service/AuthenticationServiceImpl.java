@@ -28,10 +28,8 @@ import org.springframework.util.CollectionUtils;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
-import java.util.StringJoiner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -113,7 +111,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
     }
 
-    private String generateToken(User user, List<String> roleSlugs) {
+    private String generateToken(User user, Set<String> roleSlugs) {
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
@@ -167,7 +165,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
     }
 
-    private String buildScope(List<String> roleSlugs) {
+    private String buildScope(Set<String> roleSlugs) {
         StringJoiner stringJoiner = new StringJoiner(" ");
 
         if (!CollectionUtils.isEmpty(roleSlugs))
@@ -219,7 +217,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .username(user.getUsername())
                     .createdAt(user.getCreatedAt())
                     .updatedAt(user.getUpdatedAt())
-                    .roleSlugs(user.getRoles().stream().filter(Role::getIsActive).map(Role::getSlug).toList())
+                    .roleSlugs(user.getRoles().stream().filter(Role::getIsActive).map(Role::getSlug).collect(Collectors.toSet()))
                     .build();
             String newAccessToken = generateToken(user, userResponse.getRoleSlugs());
             String newRefreshToken = generateRefreshToken(user);

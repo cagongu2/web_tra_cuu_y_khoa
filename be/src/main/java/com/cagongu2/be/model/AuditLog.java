@@ -46,7 +46,7 @@ public class AuditLog {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "username", length = 50)
+    @Column(name = "username", columnDefinition = "TEXT")
     private String username;
 
     @NotNull

@@ -1,10 +1,17 @@
 package com.cagongu2.be.config;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.cagongu2.be.config.redis.CleanJsonRedisSerializer;
+import com.cagongu2.be.config.redis.ListJsonRedisSerializer;
+import com.cagongu2.be.dto.category.request.CategoryFlatDTO;
+import com.cagongu2.be.dto.category.request.GetAllCategoriesAndPostDTO;
+import com.cagongu2.be.dto.category.response.CategoryResponse;
+import com.cagongu2.be.dto.footer.response.FooterResponse;
+import com.cagongu2.be.dto.post.request.PostDTO;
+import com.cagongu2.be.dto.post.response.PostResponse;
+import com.cagongu2.be.dto.user.response.UserResponse;
+import com.cagongu2.be.model.Image;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -18,12 +25,12 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Configuration
@@ -64,7 +71,7 @@ public class RedisConfig {
         // Connection pool configuration
         LettucePoolingClientConfiguration poolConfig = LettucePoolingClientConfiguration.builder()
                 .commandTimeout(Duration.ofMillis(redisTimeout))
-//                .poolConfig(new GenericObjectPoolConfig())
+                .poolConfig(new GenericObjectPoolConfig())
                 .build();
 
         LettuceConnectionFactory factory = new LettuceConnectionFactory(redisConfig, poolConfig);
@@ -75,42 +82,189 @@ public class RedisConfig {
     }
 
     /**
-     * Redis Template with JSON serialization
+     * Template for String values only
+     * Usage: Simple counters, flags, text data
      */
-    @Bean
-    public RedisTemplate<String, Object> redisTemplate(
+    @Bean("customStringRedisTemplate")
+    public RedisTemplate<String, String> customStringRedisTemplate(
             RedisConnectionFactory connectionFactory) {
 
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        RedisTemplate<String, String> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        // Create ObjectMapper for JSON serialization
-        ObjectMapper objectMapper = new ObjectMapper();
-        // Support LocalDateTime
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.activateDefaultTyping(
-                LaissezFaireSubTypeValidator.instance,
-                ObjectMapper.DefaultTyping.NON_FINAL,
-                JsonTypeInfo.As.PROPERTY
-        );
-
-        // JSON serializer
-        GenericJackson2JsonRedisSerializer jsonSerializer =
-                new GenericJackson2JsonRedisSerializer(objectMapper);
-
-        // String serializer for keys
         StringRedisSerializer stringSerializer = new StringRedisSerializer();
-
-        // Set serializers
         template.setKeySerializer(stringSerializer);
-        template.setValueSerializer(jsonSerializer);
+        template.setValueSerializer(stringSerializer);
         template.setHashKeySerializer(stringSerializer);
-        template.setHashValueSerializer(jsonSerializer);
+        template.setHashValueSerializer(stringSerializer);
 
         template.afterPropertiesSet();
 
-        log.info("RedisTemplate configured with JSON serialization");
+        log.info("customStringRedisTemplate configured");
+        return template;
+    }
 
+    /**
+     * Template for Long values (counters, IDs)
+     */
+    @Bean
+    public RedisTemplate<String, Long> longRedisTemplate(
+            RedisConnectionFactory connectionFactory) {
+
+        RedisTemplate<String, Long> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+
+        StringRedisSerializer stringSerializer = new StringRedisSerializer();
+        CleanJsonRedisSerializer<Long> longSerializer = new CleanJsonRedisSerializer<>(Long.class);
+
+        template.setKeySerializer(stringSerializer);
+        template.setValueSerializer(longSerializer);
+        template.setHashKeySerializer(stringSerializer);
+        template.setHashValueSerializer(longSerializer);
+
+        template.afterPropertiesSet();
+
+        log.info("LongRedisTemplate configured");
+        return template;
+    }
+
+    /**
+     * Template for CategoryResponse (clean JSON, no @class)
+     */
+    @Bean
+    public RedisTemplate<String, CategoryResponse> categoryResponseRedisTemplate(
+            RedisConnectionFactory connectionFactory) {
+        return createTypedTemplate(connectionFactory, CategoryResponse.class, "CategoryResponse");
+    }
+
+    /**
+     * Template for List<CategoryResponse>
+     */
+    @Bean
+    public RedisTemplate<String, List<CategoryResponse>> categoryListRedisTemplate(
+            RedisConnectionFactory connectionFactory) {
+        return createListTemplate(connectionFactory, CategoryResponse.class, "List<CategoryResponse>");
+    }
+
+    /**
+     * Template for GetAllCategoriesAndPostDTO
+     */
+    @Bean
+    public RedisTemplate<String, GetAllCategoriesAndPostDTO> categoryWithPostsRedisTemplate(
+            RedisConnectionFactory connectionFactory) {
+        return createTypedTemplate(connectionFactory, GetAllCategoriesAndPostDTO.class, "GetAllCategoriesAndPostDTO");
+    }
+
+    /**
+     * Template for CategoryFlatDTO
+     */
+    @Bean
+    public RedisTemplate<String, CategoryFlatDTO> categoryFlatRedisTemplate(
+            RedisConnectionFactory connectionFactory) {
+        return createTypedTemplate(connectionFactory, CategoryFlatDTO.class, "CategoryFlatDTO");
+    }
+
+    /**
+     * Template for FooterResponse
+     */
+    @Bean
+    public RedisTemplate<String, FooterResponse> footerRedisTemplate(
+            RedisConnectionFactory connectionFactory) {
+        return createTypedTemplate(connectionFactory, FooterResponse.class, "FooterResponse");
+    }
+
+    /**
+     * Template for PostDTO
+     */
+    @Bean
+    public RedisTemplate<String, PostDTO> postDtoRedisTemplate(
+            RedisConnectionFactory connectionFactory) {
+        return createTypedTemplate(connectionFactory, PostDTO.class, "PostDTO");
+    }
+
+    /**
+     * Template for List<PostDTO>
+     */
+    @Bean
+    public RedisTemplate<String, List<PostDTO>> postListRedisTemplate(
+            RedisConnectionFactory connectionFactory) {
+        return createListTemplate(connectionFactory, PostDTO.class, "List<PostDTO>");
+    }
+
+    /**
+     * Template for PostResponse
+     */
+    @Bean
+    public RedisTemplate<String, PostResponse> postResponseRedisTemplate(
+            RedisConnectionFactory connectionFactory) {
+        return createTypedTemplate(connectionFactory, PostResponse.class, "PostResponse");
+    }
+
+    /**
+     * Template for UserResponse
+     */
+    @Bean
+    public RedisTemplate<String, UserResponse> userResponseRedisTemplate(
+            RedisConnectionFactory connectionFactory) {
+        return createTypedTemplate(connectionFactory, UserResponse.class, "UserResponse");
+    }
+
+    /**
+     * Template for Image entity
+     */
+    @Bean
+    public RedisTemplate<String, Image> imageRedisTemplate(
+            RedisConnectionFactory connectionFactory) {
+        return createTypedTemplate(connectionFactory, Image.class, "Image");
+    }
+
+    /**
+     * Create typed RedisTemplate for single objects
+     */
+    private <T> RedisTemplate<String, T> createTypedTemplate(
+            RedisConnectionFactory connectionFactory,
+            Class<T> type,
+            String typeName) {
+
+        RedisTemplate<String, T> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+
+        StringRedisSerializer stringSerializer = new StringRedisSerializer();
+        CleanJsonRedisSerializer<T> valueSerializer = new CleanJsonRedisSerializer<>(type);
+
+        template.setKeySerializer(stringSerializer);
+        template.setValueSerializer(valueSerializer);
+        template.setHashKeySerializer(stringSerializer);
+        template.setHashValueSerializer(valueSerializer);
+
+        template.afterPropertiesSet();
+
+        log.info("RedisTemplate configured for type: {}", typeName);
+        return template;
+    }
+
+    /**
+     * Create typed RedisTemplate for List<T>
+     */
+    private <T> RedisTemplate<String, List<T>> createListTemplate(
+            RedisConnectionFactory connectionFactory,
+            Class<T> elementType,
+            String typeName) {
+
+        RedisTemplate<String, List<T>> template = new RedisTemplate<>();
+        template.setConnectionFactory(connectionFactory);
+
+        StringRedisSerializer stringSerializer = new StringRedisSerializer();
+        ListJsonRedisSerializer<T> listSerializer = new ListJsonRedisSerializer<>(elementType);
+
+        template.setKeySerializer(stringSerializer);
+        template.setValueSerializer(listSerializer);
+        template.setHashKeySerializer(stringSerializer);
+        template.setHashValueSerializer(listSerializer);
+
+        template.afterPropertiesSet();
+
+        log.info("RedisTemplate configured for type: {}", typeName);
         return template;
     }
 
@@ -120,28 +274,18 @@ public class RedisConfig {
     @Bean
     @Primary
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        // Create ObjectMapper
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.activateDefaultTyping(
-                LaissezFaireSubTypeValidator.instance,
-                ObjectMapper.DefaultTyping.NON_FINAL,
-                JsonTypeInfo.As.PROPERTY
-        );
+        // Use CleanJsonRedisSerializer for cache values
+        CleanJsonRedisSerializer<Object> cleanSerializer =
+                new CleanJsonRedisSerializer<>(Object.class);
 
-        // JSON serializer
-        GenericJackson2JsonRedisSerializer jsonSerializer =
-                new GenericJackson2JsonRedisSerializer(objectMapper);
-
-        // Default cache configuration
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(10)) // Default TTL: 10 minutes
+                .entryTtl(Duration.ofMinutes(10))
                 .serializeKeysWith(
                         RedisSerializationContext.SerializationPair.fromSerializer(
                                 new StringRedisSerializer()))
                 .serializeValuesWith(
                         RedisSerializationContext.SerializationPair.fromSerializer(
-                                jsonSerializer))
+                                cleanSerializer))
                 .disableCachingNullValues();
 
         // Custom TTL for different cache types

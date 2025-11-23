@@ -1,7 +1,8 @@
 package com.cagongu2.be.controller;
 
-import com.cagongu2.be.dto.CategoryDTO;
-import com.cagongu2.be.dto.CategoryFlatDTO;
+import com.cagongu2.be.dto.category.request.CategoryDTO;
+import com.cagongu2.be.dto.category.request.CategoryFlatDTO;
+import com.cagongu2.be.dto.category.response.CategoryResponse;
 import com.cagongu2.be.model.Category;
 import com.cagongu2.be.service.CategoryService;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ public class CategoryController {
      * Get all categories by level - Public
      */
     @GetMapping
-    public ResponseEntity<List<Category>> getAllCategories(
+    public ResponseEntity<List<CategoryResponse>> getAllCategories(
             @RequestParam @Min(0) @Max(1) int level) {
         return ResponseEntity.ok(categoryService.getAllCategoriesByLevel(level));
     }
@@ -44,7 +45,7 @@ public class CategoryController {
      * Get category by ID - Public
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Category> getCategoryById(
+    public ResponseEntity<CategoryResponse> getCategoryById(
             @PathVariable @Min(1) Long id) {
         return categoryService.getCategoryById(id)
                 .map(ResponseEntity::ok)
@@ -68,7 +69,7 @@ public class CategoryController {
      * Get children categories - Public
      */
     @GetMapping("/children/{parentId}")
-    public ResponseEntity<List<Category>> getChildren(
+    public ResponseEntity<List<CategoryResponse>> getChildren(
             @PathVariable @Min(1) Long parentId) {
         return ResponseEntity.ok(categoryService.getChildren(parentId));
     }

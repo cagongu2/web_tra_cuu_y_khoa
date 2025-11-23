@@ -140,7 +140,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse getUserById(Long id) {
-        return userMapper.toUserResponse(userRepository.findById(id).orElseThrow(() -> new RuntimeException("User has id: " + id + " not found")));
+        return userMapper.toUserResponse(userRepository.findWithDetailsById(id).orElseThrow(() -> new RuntimeException("User has id: " + id + " not found")));
     }
 
     @Override

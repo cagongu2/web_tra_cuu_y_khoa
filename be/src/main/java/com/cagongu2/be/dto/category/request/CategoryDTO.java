@@ -1,4 +1,4 @@
-package com.cagongu2.be.dto;
+package com.cagongu2.be.dto.category.request;
 
 import jakarta.validation.constraints.*;
 import lombok.*;

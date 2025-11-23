@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -20,7 +21,7 @@ public class UserResponse {
     private Boolean isActive;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private List<String> postIds;
-    private List<String> roleSlugs;
+    private Set<String> postIds;
+    private Set<String> roleSlugs;
     private String avatar_url;
 }

@@ -35,6 +35,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("SELECT p FROM Post p WHERE p.category.id = :categoryId AND p.deletedAt IS NULL")
     List<Post> findByCategoryId(@Param("categoryId") Long categoryId);
 
+    @Query("SELECT p FROM Post p WHERE p.category.id IN :categoryIds AND p.deletedAt IS NULL")
+    List<Post> findByCategoryIds(@Param("categoryIds") List<Long> categoryIds);
+
     /**
      * Find by author with optimized loading
      */

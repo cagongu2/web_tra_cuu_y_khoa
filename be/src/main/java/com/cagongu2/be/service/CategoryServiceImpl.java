@@ -2,9 +2,10 @@ package com.cagongu2.be.service;
 
 import com.cagongu2.be.context.RequestContextInfo;
 import com.cagongu2.be.context.RequestContextService;
-import com.cagongu2.be.dto.CategoryDTO;
-import com.cagongu2.be.dto.CategoryFlatDTO;
-import com.cagongu2.be.dto.GetAllCategoriesAndPostDTO;
+import com.cagongu2.be.dto.category.request.CategoryDTO;
+import com.cagongu2.be.dto.category.request.CategoryFlatDTO;
+import com.cagongu2.be.dto.category.request.GetAllCategoriesAndPostDTO;
+import com.cagongu2.be.dto.category.response.CategoryResponse;
 import com.cagongu2.be.dto.post.request.PostDTO;
 import com.cagongu2.be.model.Category;
 import com.cagongu2.be.model.Post;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,7 +48,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         Optional<Category> parentCategory = Optional.empty();
         if (category.getParent() != null) {
-            parentCategory = categoryRepository.findById(category.getParent());
+            parentCategory = categoryRepository.findByIdWithChildren(category.getParent());
         }
 
         Category newCategory = Category.builder()
@@ -66,6 +68,15 @@ public class CategoryServiceImpl implements CategoryService {
         Category saved = categoryRepository.save(newCategory);
         log.info("Category created with ID: {}", saved.getId());
 
+        CategoryDTO auditDTO = CategoryDTO.builder()
+                .name(saved.getName())
+                .slug(saved.getSlug())
+                .description(saved.getDescription())
+                .isActive(saved.getIsActive())
+                .level(saved.getLevel())
+                .parent(saved.getParent() != null ? saved.getParent().getId() : null)
+                .build();
+
         // AuditLog
         RequestContextInfo ctx = requestContextService.getInfo();
         asyncAuditService.logAudit(
@@ -75,7 +86,7 @@ public class CategoryServiceImpl implements CategoryService {
                 ctx.getUserId(),
                 ctx.getUsername(),
                 null,
-                requestContextService.toJson(saved),
+                requestContextService.toJson(auditDTO),
                 ctx.getIp(),
                 ctx.getUserAgent()
         );
@@ -97,8 +108,18 @@ public class CategoryServiceImpl implements CategoryService {
     public Category updateCategory(Long id, CategoryDTO newCategory) {
         log.info("Updating category ID: {}", id);
 
-        return categoryRepository.findById(id).map(existing -> {
-            String oldValue = requestContextService.toJson(existing);
+        return categoryRepository.findByIdWithChildren(id).map(existing -> {
+
+            CategoryDTO oldAuditDTO = CategoryDTO.builder()
+                    .name(existing.getName())
+                    .slug(existing.getSlug())
+                    .description(existing.getDescription())
+                    .isActive(existing.getIsActive())
+                    .level(existing.getLevel())
+                    .parent(existing.getParent() != null ? existing.getParent().getId() : null)
+                    .build();
+
+            String oldValue = requestContextService.toJson(oldAuditDTO);
 
             if (StringUtils.hasText(newCategory.getName()))
                 existing.setName(newCategory.getName());
@@ -115,7 +136,7 @@ public class CategoryServiceImpl implements CategoryService {
             }
 
             if (newCategory.getParent() != null) {
-                Category parentCategory = categoryRepository.findById(newCategory.getParent())
+                Category parentCategory = categoryRepository.findByIdWithChildren(newCategory.getParent())
                         .orElseThrow(() -> new RuntimeException("Parent category not found"));
                 existing.setLevel(1);
                 existing.setParent(parentCategory);
@@ -127,6 +148,15 @@ public class CategoryServiceImpl implements CategoryService {
             Category updated = categoryRepository.save(existing);
             log.info("Category updated: {}", updated.getId());
 
+            CategoryDTO auditDTO = CategoryDTO.builder()
+                    .name(updated.getName())
+                    .slug(updated.getSlug())
+                    .description(updated.getDescription())
+                    .isActive(updated.getIsActive())
+                    .level(updated.getLevel())
+                    .parent(updated.getParent() != null ? updated.getParent().getId() : null)
+                    .build();
+
             // AuditLog
             RequestContextInfo ctx = requestContextService.getInfo();
             asyncAuditService.logAudit(
@@ -136,7 +166,7 @@ public class CategoryServiceImpl implements CategoryService {
                     ctx.getUserId(),
                     ctx.getUsername(),
                     oldValue,
-                    requestContextService.toJson(updated),
+                    requestContextService.toJson(auditDTO),
                     ctx.getIp(),
                     ctx.getUserAgent()
             );
@@ -159,12 +189,19 @@ public class CategoryServiceImpl implements CategoryService {
     public void deleteCategory(Long id) {
         log.info("Deleting category ID: {}", id);
 
-        Category category = categoryRepository.findById(id)
+        Category category = categoryRepository.findByIdWithChildren(id)
                 .orElseThrow(() -> new IllegalArgumentException("Not found category has ID: " + id));
 
-        String deletedData = requestContextService.toJson(category);
+        CategoryDTO auditDTO = CategoryDTO.builder()
+                .name(category.getName())
+                .slug(category.getSlug())
+                .description(category.getDescription())
+                .isActive(category.getIsActive())
+                .level(category.getLevel())
+                .parent(category.getParent() != null ? category.getParent().getId() : null)
+                .build();
 
-        categoryRepository.deleteById(id);
+        String deletedData = requestContextService.toJson(auditDTO);
 
         // AuditLog
         RequestContextInfo ctx = requestContextService.getInfo();
@@ -185,10 +222,12 @@ public class CategoryServiceImpl implements CategoryService {
      * Get category by ID - Cacheable
      */
     @Override
+    @Transactional(readOnly = true)
     @Cacheable(value = "categories", key = "#id", unless = "#result == null")
-    public Optional<Category> getCategoryById(Long id) {
+    public Optional<CategoryResponse> getCategoryById(Long id) {
         log.info("Fetching category by ID: {} (cache miss)", id);
-        return categoryRepository.findById(id);
+        return categoryRepository.findByIdWithChildren(id)
+                .map(this::mapToResponse);
     }
 
     /**
@@ -205,10 +244,13 @@ public class CategoryServiceImpl implements CategoryService {
      * Get all categories by level - Cacheable
      */
     @Override
+    @Transactional(readOnly = true)
     @Cacheable(value = "categories", key = "'level:' + #level")
-    public List<Category> getAllCategoriesByLevel(int level) {
-        log.info("Fetching categories by level: {} (cache miss)", level);
-        return categoryRepository.findByLevel(level);
+    public List<CategoryResponse> getAllCategoriesByLevel(int level) {
+        return categoryRepository.findByLevel(level)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
     /**
@@ -224,43 +266,63 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<GetAllCategoriesAndPostDTO> getAllCategoriesWithPosts() {
         List<CategoryFlatDTO> categories = categoryRepository.findAllFlat();
+        List<Long> categoryIds = categories.stream().map(CategoryFlatDTO::getId).toList();
 
-        if (categories.isEmpty()) {
-            return new ArrayList<>();
-        }
+        List<Post> posts = postRepository.findByCategoryIds(categoryIds);
 
-        List<GetAllCategoriesAndPostDTO> result = new ArrayList<>();
-
-        for (CategoryFlatDTO category : categories) {
-            if (category.getId() != null) {
-                List<Post> listPost = postRepository.findByCategoryId(category.getId());
-                List<PostDTO> listPostDTO = new ArrayList<>();
-
-                for (Post post : listPost) {
-                    listPostDTO.add(PostDTO.builder()
-                            .id(post.getId())
-                            .name(post.getName())
-                            .slug(post.getSlug())
-                            .build());
-                }
-
-                result.add(new GetAllCategoriesAndPostDTO(
-                        category.getId(),
-                        category.getName(),
-                        category.getIsActive(),
-                        category.getParentId(),
-                        listPostDTO
+        Map<Long, List<PostDTO>> postsByCategory = posts.stream()
+                .collect(Collectors.groupingBy(
+                        p -> p.getCategory().getId(),
+                        Collectors.mapping(p -> PostDTO.builder()
+                                        .id(p.getId())
+                                        .name(p.getName())
+                                        .slug(p.getSlug())
+                                        .build(),
+                                Collectors.toList())
                 ));
-            }
-        }
 
-        return result;
+
+        return categories.stream()
+                .map(c -> new GetAllCategoriesAndPostDTO(
+                        c.getId(),
+                        c.getName(),
+                        c.getIsActive(),
+                        c.getParentId(),
+                        postsByCategory.getOrDefault(c.getId(), Collections.emptyList())
+                ))
+                .toList();
     }
 
     @Override
-    public List<Category> getChildren(Long parentId) {
-        return categoryRepository.findAll().stream()
-                .filter(c -> c.getParent() != null && c.getParent().getId().equals(parentId))
+    @Transactional(readOnly = true)
+    public List<CategoryResponse> getChildren(Long parentId) {
+        return categoryRepository.findByParentId(parentId)
+                .stream()
+                .map(this::mapToResponse)
                 .toList();
     }
+
+
+    private CategoryResponse mapToResponse(Category category) {
+        if (category == null) return null;
+
+        CategoryResponse response = CategoryResponse.builder()
+                .id(category.getId())
+                .name(category.getName())
+                .slug(category.getSlug())
+                .isActive(category.getIsActive())
+                .parentId(category.getParent() != null ? category.getParent().getId() : null)
+                .children(new HashSet<>())
+                .build();
+
+        // Map children recursively
+        if (category.getChildren() != null) {
+            for (Category child : category.getChildren()) {
+                response.getChildren().add(mapToResponse(child));
+            }
+        }
+
+        return response;
+    }
+
 }

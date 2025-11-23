@@ -1,4 +1,4 @@
-package com.cagongu2.be.dto;
+package com.cagongu2.be.dto.category.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -13,7 +13,9 @@ import org.hibernate.annotations.Where;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "categories",
@@ -79,11 +81,13 @@ public class Category {
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     @JsonManagedReference
-    private List<Post> postList;
+    @Builder.Default
+    private Set<Post> postList = new HashSet<>();
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     @JsonManagedReference
-    private List<Category> children;
+    @Builder.Default
+    private Set<Category> children = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {

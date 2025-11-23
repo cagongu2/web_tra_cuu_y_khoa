@@ -24,7 +24,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     /**
      * Find by ID with all relationships loaded
      */
-    @EntityGraph(attributePaths = {"roles", "posts", "avatar"})
+    @EntityGraph(attributePaths = {"posts", "avatar", "roles"})
+    @Query("SELECT u FROM User u WHERE u.id = :id")
     Optional<User> findWithDetailsById(Long id);
 
     boolean existsByUsername(String username);

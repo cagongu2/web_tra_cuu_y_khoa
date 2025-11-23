@@ -8,6 +8,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
@@ -17,17 +18,17 @@ public interface UserMapper {
     @Mapping(source = "avatar.url", target = "avatar_url")
     UserResponse toUserResponse(User user);
 
-    default List<String> mapPostIds(List<Post> posts) {
-        if (posts == null) return List.of();
+    default Set<String> mapPostIds(Set<Post> posts) {
+        if (posts == null) return Set.of();
         return posts.stream()
                 .map(post -> String.valueOf(post.getId()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
-    default List<String> mapRoleSlugs(List<Role> roles) {
-        if (roles == null) return List.of();
+    default Set<String> mapRoleSlugs(Set<Role> roles) {
+        if (roles == null) return Set.of();
         return roles.stream()
                 .map(Role::getSlug)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 }
