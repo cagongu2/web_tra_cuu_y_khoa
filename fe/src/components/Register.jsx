@@ -84,7 +84,7 @@ const Register = () => {
         setSuccess(true);
         setMessage("");
         setTimeout(() => {
-          navigate("/dang-nhap");
+          navigate("/login");
         }, 2000);
       } else {
         setMessage("Đăng ký không thành công. Vui lòng thử lại.");
