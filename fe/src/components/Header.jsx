@@ -92,7 +92,7 @@ export const Header = () => {
 
   return (
     <>
-      <header className="bg-white shadow-sm w-full">
+      <header className="bg-white shadow-sm w-full mb-10">
         {/* Phần trên cùng với logo, hamburger và search */}
         <div className="max-w-[1130px] my-0 mx-auto flex justify-between items-center py-2 px-4">
           <div className="flex items-center">
