@@ -14,10 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {PostMapper.class})
 public interface FooterMapper {
-    FooterMapper INSTANCE = Mappers.getMapper(FooterMapper.class);
-
     @Mapping(target = "postList", ignore = true)
     @Mapping(target = "id", ignore = true)
     Footer toEntity(FooterRequest request);
@@ -28,24 +26,4 @@ public interface FooterMapper {
     @Mapping(target = "postList", ignore = true)
     @Mapping(target = "id", ignore = true)
     void updateEntityFromRequest(FooterRequest request, @MappingTarget Footer footer);
-
-    default List<PostDTO> mapPostList(List<Post> posts) {
-        if (posts == null) {
-            return new ArrayList<>();
-        }
-        return posts.stream()
-                .map(this::mapPostToDTO)
-                .collect(Collectors.toList());
-    }
-
-    default PostDTO mapPostToDTO(Post post) {
-        if (post == null) {
-            return null;
-        }
-        return PostDTO.builder()
-                .id(post.getId())
-                .name(post.getName())
-                .slug(post.getSlug())
-                .build();
-    }
 }

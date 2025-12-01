@@ -1,5 +1,7 @@
 package com.cagongu2.be.service;
 
+import com.cagongu2.be.context.RequestContextInfo;
+import com.cagongu2.be.context.RequestContextService;
 import com.cagongu2.be.dto.user.request.UserRequest;
 import com.cagongu2.be.dto.user.response.UserResponse;
 import com.cagongu2.be.mapper.UserMapper;
@@ -22,6 +24,9 @@ public class UserServiceImpl implements UserService {
     private final FileUploadService fileUploadService;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final AsyncAuditService asyncAuditService;
+    private final RequestContextService requestContextService;
+    private final MetricsService metricsService;
 
     @Override
     @Transactional
@@ -59,6 +64,20 @@ public class UserServiceImpl implements UserService {
 
         var saved = userRepository.save(user);
 
+        // AuditLog
+        RequestContextInfo ctx = requestContextService.getInfo();
+        asyncAuditService.logAudit(
+                "USER",
+                saved.getId(),
+                "CREATE",
+                ctx.getUserId(),
+                ctx.getUsername(),
+                null,
+                requestContextService.toJson(saved),
+                ctx.getIp(),
+                ctx.getUserAgent()
+        );
+
         UserResponse response = userMapper.toUserResponse(saved);
         if (image != null) {
             response.setAvatar_url(image.getUrl());
@@ -71,6 +90,8 @@ public class UserServiceImpl implements UserService {
     public UserResponse updateUser(Long id, UserRequest request) throws IOException {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String oldValue = requestContextService.toJson(user);
 
         if (request.getUsername() != null) user.setUsername(request.getUsername());
         if (request.getEmail() != null) user.setEmail(request.getEmail());
@@ -91,6 +112,23 @@ public class UserServiceImpl implements UserService {
 
         var updated = userRepository.save(user);
 
+        // Track metric
+        metricsService.trackUserRegistration();
+
+        // AuditLog
+        RequestContextInfo ctx = requestContextService.getInfo();
+        asyncAuditService.logAudit(
+                "USER",
+                updated.getId(),
+                "UPDATE",
+                ctx.getUserId(),
+                ctx.getUsername(),
+                oldValue,
+                requestContextService.toJson(updated),
+                ctx.getIp(),
+                ctx.getUserAgent()
+        );
+
         UserResponse response = userMapper.toUserResponse(updated);
         if (updated.getAvatar() != null) {
             response.setAvatar_url(updated.getAvatar().getUrl());
@@ -102,7 +140,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse getUserById(Long id) {
-        return userMapper.toUserResponse(userRepository.findById(id).orElseThrow(() -> new RuntimeException("User has id: " + id + " not found")));
+        return userMapper.toUserResponse(userRepository.findWithDetailsById(id).orElseThrow(() -> new RuntimeException("User has id: " + id + " not found")));
     }
 
     @Override

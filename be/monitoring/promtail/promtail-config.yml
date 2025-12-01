@@ -1,0 +1,49 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Application JSON logs
+  - job_name: application-json
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: medical-platform
+          __path__: /var/log/medical-platform/application.json
+
+  # Error logs
+  - job_name: error-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: medical-platform
+          log_type: error
+          __path__: /var/log/medical-platform/error.log
+
+  # Audit logs
+  - job_name: audit-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: medical-platform
+          log_type: audit
+          __path__: /var/log/medical-platform/audit.log
+
+  # Performance logs
+  - job_name: performance-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: medical-platform
+          log_type: performance
+          __path__: /var/log/medical-platform/performance.log

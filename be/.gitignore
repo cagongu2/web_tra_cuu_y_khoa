@@ -33,7 +33,11 @@ build/
 .vscode/
 
 src/main/java/com/cagongu2/be/config/BootstrapData.java
-src/main/resources/application.properties
+src/main/resources/keystore.p12
 src/main/resources/application.yml
-
-
+.env
+redis.conf
+be/monitoring/grafana/dashboards/medical-platform-dashboard.json
+src/main/resources/truststore.jks
+src/main/resources/client-keystore.p12
+mysqld_exporter.cnf
