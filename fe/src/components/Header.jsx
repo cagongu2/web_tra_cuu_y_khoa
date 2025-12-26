@@ -239,7 +239,7 @@ export const Header = () => {
               {!isLoading &&
                 categories &&
                 categories.length > 0 &&
-                categories.map((category) => (
+                categories.slice(0, 5).map((category) => (
                   <li key={category.id} className="group">
                     <div
                       onMouseEnter={() => setActiveCategory(category.id)}

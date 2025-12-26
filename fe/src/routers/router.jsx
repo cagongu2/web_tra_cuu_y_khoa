@@ -25,6 +25,10 @@ const router = createBrowserRouter([
         element: <SearchPage />,
       },
       {
+        path: "/tra-cuu/tat-ca-thong-tin",
+        element: <SearchPage />,
+      },
+      {
         path: "/tin-tuc/:slug",
         element: <SinglePost />,
       },

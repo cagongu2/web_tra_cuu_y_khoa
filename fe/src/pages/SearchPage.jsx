@@ -2,31 +2,49 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetCategoryBySlugQuery } from "../redux/features/categories/categoryAPI";
+import { useGetAllPostsQuery } from "../redux/features/post/postAPI";
+import { skipToken } from "@reduxjs/toolkit/query";
 
 export const SearchPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
 
-  const { data: category, isLoading, error } = useGetCategoryBySlugQuery(slug);
+  const isAll = !slug || slug === "tat-ca-thong-tin";
 
-  // 🟢 Hook phải nằm trên cùng, không sau return
   const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
+    data: category,
+    isLoading: isCategoryLoading,
+    error: categoryError,
+  } = useGetCategoryBySlugQuery(slug, { skip: isAll });
 
-  // Loading, error check
-  if (isLoading) {
+  const {
+    data: allPosts,
+    isLoading: isAllPostsLoading,
+    error: allPostsError,
+  } = useGetAllPostsQuery(isAll ? { page: 0, size: 1000 } : skipToken);
+
+  const postList = isAll ? allPosts?.content ?? [] : category?.postList ?? [];
+
+  const { register, handleSubmit } = useForm();
+
+  if (isAll && isAllPostsLoading) {
     return <div className="p-4">Đang tải dữ liệu...</div>;
   }
 
-  if (error) {
-    return <div className="p-4 text-red-500">Lỗi tải dữ liệu!</div>;
+  if (!isAll && isCategoryLoading) {
+    return <div className="p-4">Đang tải dữ liệu...</div>;
   }
 
-  if (!category) {
-    return <div className="text-red-500 p-4">Danh mục không tồn tại.</div>;
+  if (isAll && !isAllPostsLoading && allPostsError) {
+    return <div className="p-4 text-red-500">Lỗi tải danh sách bài viết!</div>;
+  }
+
+  if (!isAll && !isCategoryLoading && categoryError) {
+    return <div className="p-4 text-red-500">Lỗi tải danh mục!</div>;
+  }
+
+  if (!isAll && !category) {
+    return <div className="p-4 text-red-500">Danh mục không tồn tại.</div>;
   }
 
   // Khởi tạo nhóm A-Z
@@ -36,7 +54,8 @@ export const SearchPage = () => {
   }
 
   // Nhóm post theo chữ cái
-  category.postList?.forEach((post) => {
+  postList?.forEach((post) => {
+    if (!post?.name) return;
     const firstChar = post.name.charAt(0).toUpperCase();
     if (groupedChildren[firstChar]) {
       groupedChildren[firstChar].push(post);
@@ -63,22 +82,19 @@ export const SearchPage = () => {
         {/* Tiêu đề */}
         <section className="pt-12">
           <h1 className="font-serif text-2xl md:text-4xl font-bold my-4">
-            {category.name}
+            {isAll ? "Tất cả thông tin" : category.name}
           </h1>
         </section>
 
-        {/* Input + A-Z */}
+        {/* Search */}
         <section>
           <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="input-group flex flex-row gap-2">
-              <input
-                type="text"
-                {...register("search-title", { required: true })}
-                placeholder="Nhập thông tin"
-                id="search-title"
-                className="w-full py-3 px-6 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent"
-              />
-            </div>
+            <input
+              type="text"
+              {...register("search-title", { required: true })}
+              placeholder="Nhập thông tin"
+              className="w-full py-3 px-6 border border-gray-300 rounded-sm"
+            />
           </form>
 
           <h2 className="font-bold text-lg my-2">Tìm theo bảng chữ cái</h2>
@@ -89,10 +105,10 @@ export const SearchPage = () => {
                 <button
                   onClick={() =>
                     document
-                      .getElementById(`a-z-listing-letter-${letter}`)
+                      .getElementById(`a-z-${letter}`)
                       ?.scrollIntoView({ behavior: "smooth" })
                   }
-                  className="cursor-pointer w-full h-full bg-slate-100 rounded"
+                  className="w-full h-full bg-slate-100 rounded"
                 >
                   {letter}
                 </button>
@@ -100,40 +116,27 @@ export const SearchPage = () => {
             ))}
           </ul>
 
-          {/* Danh sách chuyên mục theo chữ cái */}
           {Object.keys(groupedChildren).map((letter) => {
             const group = groupedChildren[letter];
             if (group.length === 0) return null;
 
             return (
-              <div
-                key={letter}
-                className="mb-8"
-                id={`a-z-listing-letter-${letter}`}
-              >
+              <div key={letter} id={`a-z-${letter}`} className="mb-8">
                 <h2 className="mb-4 font-semibold text-xl border-b border-gray-200">
                   {letter}
                 </h2>
-                <ul className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 text-base gap-2">
+                <ul className="grid md:grid-cols-2 lg:grid-cols-4 gap-2 mt-4">
                   {group.map((item) => (
                     <li key={item.id}>
                       <a
                         href={`/tin-tuc/${item.slug}`}
-                        className="text-black hover:underline"
+                        className="hover:underline"
                       >
                         {item.name}
                       </a>
                     </li>
                   ))}
                 </ul>
-                <div className="text-right mt-2">
-                  <a
-                    href={`#a-z-listing-letter-${letter}`}
-                    className="text-sm text-gray-500 hover:underline"
-                  >
-                    Back to top
-                  </a>
-                </div>
               </div>
             );
           })}
