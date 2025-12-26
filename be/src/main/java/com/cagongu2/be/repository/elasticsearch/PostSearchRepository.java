@@ -14,7 +14,7 @@ public interface PostSearchRepository extends ElasticsearchRepository<PostDocume
                   {
                     "multi_match": {
                       "query": "?0",
-                      "fields": ["title^5", "name^3", "content^1"],
+                      "fields": ["title^10", "name^3", "content^0.1"],
                       "minimum_should_match": "100%"
                     }
                   }
