@@ -301,50 +301,40 @@ export const Header = () => {
                                 ) && (
                                   <div className="w-full flex space-x-6">
                                     {category.children
+                                      .filter((child) => child.level === 1)
                                       .slice(0, 3)
                                       .map((childLevel1) => (
                                         <div
                                           key={childLevel1.id}
                                           className="flex-1 min-w-0"
                                         >
-                                          <h3 className="font-semibold border-b-1 border-gray-200 text-gray-900 mb-2 py-2">
+                                          <h3 className="font-semibold border-b border-gray-200 text-gray-900 mb-2 py-2">
                                             {childLevel1.name}
                                           </h3>
+
                                           <ul className="space-y-2">
                                             {childLevel1.postList
-                                              ?.slice(
-                                                0,
-                                                childLevel1.id ===
-                                                  category.children[2]?.id
-                                                  ? 6
-                                                  : 7
-                                              )
+                                              ?.slice(0, 7)
                                               .map((post) => (
-                                                <li
-                                                  key={post.id}
-                                                  className="group/child"
-                                                >
+                                                <li key={post.id}>
                                                   <a
                                                     href={`/tin-tuc/${post.slug}`}
-                                                    className="block py-1 text-gray-700 group-hover/child:text-blue-600"
+                                                    className="block py-1 text-gray-700 hover:text-blue-600"
                                                   >
                                                     {post.name}
                                                   </a>
                                                 </li>
                                               ))}
-                                            {childLevel1.id ===
-                                              category.children[2]?.id &&
-                                              childLevel1.postList?.length >
-                                                6 && (
-                                                <li>
-                                                  <a
-                                                    href={`/tra-cuu/${category.slug}`}
-                                                    className="block py-1 text-blue-600 font-semibold"
-                                                  >
-                                                    Tra cứu thêm
-                                                  </a>
-                                                </li>
-                                              )}
+
+                                            {/* LUÔN HIỂN THỊ */}
+                                            <li>
+                                              <a
+                                                href={`/tra-cuu/${childLevel1.slug}`}
+                                                className="block py-1 text-blue-600 font-semibold"
+                                              >
+                                                Tra cứu thêm
+                                              </a>
+                                            </li>
                                           </ul>
                                         </div>
                                       ))}
