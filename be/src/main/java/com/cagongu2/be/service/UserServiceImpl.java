@@ -6,6 +6,7 @@ import com.cagongu2.be.mapper.UserMapper;
 import com.cagongu2.be.model.Image;
 import com.cagongu2.be.model.User;
 import com.cagongu2.be.repository.UserRepository;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,12 +17,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserRepository userRepository;
-    private final FileUploadService fileUploadService;
-    private final PasswordEncoder passwordEncoder;
-    private final UserMapper userMapper;
+   UserRepository userRepository;
+    FileUploadService fileUploadService;
+    PasswordEncoder passwordEncoder;
+    UserMapper userMapper;
 
     @Override
     @Transactional
