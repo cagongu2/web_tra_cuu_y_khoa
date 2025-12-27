@@ -16,6 +16,10 @@
         "path": ""
 
     },
+     "mongodb": {
+        "url": "mongodb://localhost:27017",
+        "db_name": "medical_chatbot"
+    },
     "server": {
         "host": "0.0.0.0",
         "port": "8000"
