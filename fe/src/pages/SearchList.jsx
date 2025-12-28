@@ -55,8 +55,9 @@ export const SearchList = () => {
               <Link to={`/tin-tuc/${post.slug}`}>
                 <img
                   src={
-                    getImgUrl(post.thumbnail_url) ||
-                    "https://cdn.pixabay.com/photo/2017/09/23/04/02/dice-2777809_1280.jpg"
+                    post.thumbnail_url
+                      ? getImgUrl(post.thumbnail_url)
+                      : "https://images.pexels.com/photos/3812757/pexels-photo-3812757.jpeg"
                   }
                   alt={post.name}
                   className="w-28 h-28 rounded-2xl object-cover"

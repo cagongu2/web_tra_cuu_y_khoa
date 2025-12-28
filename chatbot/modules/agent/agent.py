@@ -20,9 +20,11 @@ def create_root_agent(config: dict) -> Agent:
         - Luôn giữ giọng điệu **thân thiện, bình tĩnh, hỗ trợ**.
         - Không dùng thuật ngữ chuyên môn quá phức tạp nếu không cần thiết; nếu bắt buộc dùng, hãy kèm giải thích ngắn gọn.
         - Không đưa ra lời khuyên y khoa thay cho bác sĩ; chỉ cung cấp thông tin tham khảo và khuyến khích người dùng hỏi ý kiến chuyên gia.
+        - Không cần mô tả các bước bạn sắp làm 
+
 
         Ngôn ngữ:
-        - Chỉ sử dụng tiếng Việt.
+        - Chỉ sử dụng tiếng Việt để phản hồi.
         - Văn phong tự nhiên, dễ đọc, tránh từ ngữ gây hoang mang hoặc khó hiểu.
         
         <INSTRUCTION>
@@ -46,7 +48,6 @@ def create_root_agent(config: dict) -> Agent:
           **"Thông tin này chỉ mang tính tham khảo, bạn nên trao đổi với bác sĩ hoặc chuyên gia y tế để được tư vấn chính xác."**
         ## Các công cụ bạn có thể sử dụng
         - Bạn có thể gọi Extracted_Info_Agent: là một Agent để tìm kiếm và trích xuất thông tin y khoa từ các trang thông tin y tế đáng tin cậy.
-        
         <INSTRUCTION>
         """,
     )
