@@ -81,7 +81,7 @@ export const SearchPage = () => {
 
         {/* Tiêu đề */}
         <section className="pt-12">
-          <h1 className="font-serif text-2xl md:text-4xl font-bold my-4">
+          <h1 className="font-sans text-2xl md:text-4xl font-bold my-4">
             {isAll ? "Tất cả thông tin" : category.name}
           </h1>
         </section>
