@@ -14,25 +14,30 @@ public interface PostSearchRepository extends ElasticsearchRepository<PostDocume
                   {
                     "multi_match": {
                       "query": "?0",
-                      "fields": ["title^10", "name^3", "content^0.1"],
-                      "minimum_should_match": "100%"
+                      "fields": [
+                        "title^10",
+                        "name^5",
+                        "content^1"
+                      ],
+                      "operator": "and",
+                      "fuzziness": "AUTO"
                     }
                   }
                 ],
                 "should": [
                   {
-                    "match_phrase": {
-                      "title": {
-                        "query": "?0",
-                        "boost": 5
-                      }
+                    "multi_match": {
+                      "query": "?0",
+                      "fields": ["title", "name"],
+                      "type": "phrase",
+                      "boost": 20
                     }
                   },
                   {
-                    "term": {
-                      "title.keyword": {
-                        "value": "?0",
-                        "boost": 10
+                    "match_phrase": {
+                      "content": {
+                        "query": "?0",
+                        "boost": 5
                       }
                     }
                   }
