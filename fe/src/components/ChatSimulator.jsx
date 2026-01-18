@@ -5,6 +5,8 @@ import { getImgUrl } from "../util/getImgUrl";
 import { Link } from "react-router-dom";
 import { IoChatbubbleEllipsesOutline } from "react-icons/io5";
 import { IoAdd, IoTrashOutline, IoMenuOutline, IoClose, IoSend } from "react-icons/io5";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export const ChatSimulator = () => {
   const [chats, setChats] = useState([]);
@@ -47,16 +49,16 @@ export const ChatSimulator = () => {
       const response = await fetch(
         `${getBaseUrl()}/v1/chats?user_id=${userId}`
       );
-      
+
       if (!response.ok) {
         console.error('Failed to load chats:', response.status);
         setChats([]);
         return;
       }
-      
+
       const data = await response.json();
       setChats(data.chats || []);
-      
+
       if (!skipAutoCreate && (!data.chats || data.chats.length === 0)) {
         await createNewChat();
       }
@@ -75,11 +77,11 @@ export const ChatSimulator = () => {
         `${getBaseUrl()}/v1/chats?user_id=${userId}`,
         { method: "POST" }
       );
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       await loadUserChats(true);
       setCurrentChatId(data.chat_id);
@@ -141,7 +143,7 @@ export const ChatSimulator = () => {
     const esUrl = `${getBaseUrl()}/v1/chatbot?query=${encodeURIComponent(
       input
     )}&user_id=${userId}&chat_id=${currentChatId}`;
-    
+
     const es = new EventSource(esUrl);
     let assistantMessage = "";
 
@@ -161,7 +163,35 @@ export const ChatSimulator = () => {
           if (jsonMatch) {
             try {
               const data = JSON.parse(jsonMatch[1]);
-              content = data.extracted_results || content;
+              let extracted = data.extracted_results || content;
+
+              // Nếu extracted lại là một JSON string (double encoded)
+              if (typeof extracted === 'string' && extracted.includes('```json')) {
+                const innerMatch = extracted.match(/```json\s*([\s\S]*?)```/);
+                if (innerMatch) {
+                  try {
+                    extracted = JSON.parse(innerMatch[1]);
+                  } catch (e) {
+                    console.log('Inner JSON parse failed', e);
+                  }
+                }
+              }
+
+              // Xử lý nếu kết quả là object chứa question/answer
+              if (typeof extracted === 'object' && extracted !== null) {
+                // Nối các câu trả lời lại
+                content = Object.values(extracted)
+                  .map(item => {
+                    if (typeof item === 'object' && item.answer) {
+                      return item.answer;
+                    }
+                    return typeof item === 'string' ? item : JSON.stringify(item);
+                  })
+                  .join('\n\n');
+              } else {
+                content = String(extracted);
+              }
+
             } catch (err) {
               console.error("Không parse được JSON trong text:", err);
             }
@@ -172,7 +202,7 @@ export const ChatSimulator = () => {
           setMessages((prev) => {
             const newMessages = [...prev];
             const lastMsg = newMessages[newMessages.length - 1];
-            
+
             if (lastMsg && lastMsg.role === "assistant") {
               lastMsg.content = assistantMessage;
             } else {
@@ -181,7 +211,7 @@ export const ChatSimulator = () => {
                 content: assistantMessage,
               });
             }
-            
+
             return newMessages;
           });
         }
@@ -211,9 +241,8 @@ export const ChatSimulator = () => {
     <div className="flex h-screen bg-gradient-to-br from-sky-50 to-white">
       {/* Sidebar */}
       <div
-        className={`${
-          sidebarOpen ? "w-80 translate-x-0" : "w-0 -translate-x-full"
-        } transition-all duration-300 ease-in-out bg-white flex flex-col shadow-xl border-r border-gray-100 overflow-hidden`}
+        className={`${sidebarOpen ? "w-80 translate-x-0" : "w-0 -translate-x-full"
+          } transition-all duration-300 ease-in-out bg-white flex flex-col shadow-xl border-r border-gray-100 overflow-hidden`}
       >
         {/* Header */}
         <div className="p-6 border-b border-gray-100">
@@ -231,7 +260,7 @@ export const ChatSimulator = () => {
           <div className="text-xs font-semibold text-sky-600 mb-4 px-3 uppercase tracking-wider">
             Lịch sử trò chuyện
           </div>
-          
+
           {isLoadingChats ? (
             <div className="flex flex-col items-center justify-center py-8 space-y-4">
               <div className="relative">
@@ -255,17 +284,15 @@ export const ChatSimulator = () => {
                 <div
                   key={chat.id}
                   onClick={() => setCurrentChatId(chat.id)}
-                  className={`group flex items-center gap-4 p-4 rounded-xl mb-2 cursor-pointer transition-all duration-200 ${
-                    currentChatId === chat.id 
-                      ? "bg-gradient-to-r from-sky-50 to-cyan-50 shadow-sm border-l-4 border-sky-500" 
-                      : "hover:bg-gray-50 hover:shadow-sm border-l-4 border-transparent"
-                  }`}
+                  className={`group flex items-center gap-4 p-4 rounded-xl mb-2 cursor-pointer transition-all duration-200 ${currentChatId === chat.id
+                    ? "bg-gradient-to-r from-sky-50 to-cyan-50 shadow-sm border-l-4 border-sky-500"
+                    : "hover:bg-gray-50 hover:shadow-sm border-l-4 border-transparent"
+                    }`}
                 >
-                  <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${
-                    currentChatId === chat.id 
-                      ? "bg-sky-100 text-sky-600" 
-                      : "bg-gray-100 text-gray-500"
-                  }`}>
+                  <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${currentChatId === chat.id
+                    ? "bg-sky-100 text-sky-600"
+                    : "bg-gray-100 text-gray-500"
+                    }`}>
                     <IoChatbubbleEllipsesOutline size={20} />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -337,43 +364,41 @@ export const ChatSimulator = () => {
               {messages.map((msg, idx) => (
                 <div
                   key={idx}
-                  className={`flex ${
-                    msg.role === "user" ? "justify-end" : "justify-start"
-                  } animate-fadeIn`}
+                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"
+                    } animate-fadeIn`}
                 >
                   <div
-                    className={`flex gap-4 max-w-[80%] ${
-                      msg.role === "user" ? "flex-row-reverse" : ""
-                    }`}
+                    className={`flex gap-4 max-w-[80%] ${msg.role === "user" ? "flex-row-reverse" : ""
+                      }`}
                   >
                     <div className="flex-shrink-0">
                       <div
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center text-base font-bold shadow-md ${
-                          msg.role === "user"
-                            ? "bg-gradient-to-br from-sky-500 to-cyan-500 text-white"
-                            : "bg-white text-gray-700 border border-gray-200"
-                        }`}
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center text-base font-bold shadow-md ${msg.role === "user"
+                          ? "bg-gradient-to-br from-sky-500 to-cyan-500 text-white"
+                          : "bg-white text-gray-700 border border-gray-200"
+                          }`}
                       >
                         {msg.role === "user" ? "U" : "AI"}
                       </div>
                     </div>
                     <div className="flex flex-col">
                       <div
-                        className={`rounded-2xl px-5 py-4 shadow-sm ${
-                          msg.role === "user"
-                            ? "bg-gradient-to-r from-sky-500 to-cyan-500 text-white rounded-tr-none"
-                            : "bg-white text-gray-800 border border-gray-200 rounded-tl-none"
-                        }`}
+                        className={`rounded-2xl px-5 py-4 shadow-sm ${msg.role === "user"
+                          ? "bg-gradient-to-r from-sky-500 to-cyan-500 text-white rounded-tr-none"
+                          : "bg-white text-gray-800 border border-gray-200 rounded-tl-none"
+                          }`}
                       >
-                        <div className="whitespace-pre-wrap text-[15px] leading-relaxed">
-                          {msg.content}
+                        <div className={`text-[15px] leading-relaxed  ${msg.role === "assistant" ? "prose prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-li:my-0.5 text-black" : ""
+                          }`}>
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {msg.content}
+                          </ReactMarkdown>
                         </div>
                       </div>
-                      <div className={`text-xs mt-2 px-1 ${
-                        msg.role === "user" 
-                          ? "text-right text-sky-600" 
-                          : "text-left text-gray-500"
-                      }`}>
+                      <div className={`text-xs mt-2 px-1 ${msg.role === "user"
+                        ? "text-right text-sky-600"
+                        : "text-left text-gray-500"
+                        }`}>
                         {msg.role === "user" ? "Bạn" : "Trợ lý AI"}
                       </div>
                     </div>
@@ -416,7 +441,7 @@ export const ChatSimulator = () => {
                   Chào mừng đến với Y Khoa Trí Tuệ
                 </h2>
                 <p className="text-gray-600 mb-8 leading-relaxed">
-                  Hãy bắt đầu cuộc trò chuyện với trợ lý AI của chúng tôi. 
+                  Hãy bắt đầu cuộc trò chuyện với trợ lý AI của chúng tôi.
                   Chọn một chat có sẵn hoặc tạo chat mới để được tư vấn sức khỏe.
                 </p>
                 <button
@@ -452,11 +477,10 @@ export const ChatSimulator = () => {
                 <button
                   onClick={handleSend}
                   disabled={isLoading || !input.trim()}
-                  className={`p-4 rounded-2xl shadow-lg transition-all duration-200 active:scale-95 ${
-                    isLoading || !input.trim()
-                      ? "bg-gray-200 cursor-not-allowed"
-                      : "bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 hover:shadow-xl"
-                  }`}
+                  className={`p-4 rounded-2xl shadow-lg transition-all duration-200 active:scale-95 ${isLoading || !input.trim()
+                    ? "bg-gray-200 cursor-not-allowed"
+                    : "bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 hover:shadow-xl"
+                    }`}
                 >
                   <IoSend size={22} className="text-white" />
                 </button>
