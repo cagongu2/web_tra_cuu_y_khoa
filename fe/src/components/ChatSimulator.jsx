@@ -351,7 +351,7 @@ export const ChatSimulator = () => {
           </Link>
           <div className="flex-1">
             <h1 className="text-xl font-bold bg-gradient-to-r from-sky-600 to-cyan-500 bg-clip-text text-transparent">
-              Y Khoa Trí Tuệ
+              Chatbot Y Khoa
             </h1>
             <p className="text-gray-600 text-sm">Trợ lý y tế AI thông minh</p>
           </div>
