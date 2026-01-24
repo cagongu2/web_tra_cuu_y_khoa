@@ -1,5 +1,9 @@
-import json
+import sys
 import os
+# Ensure project root is in path
+sys.path.append(r'd:\web_tra_cuu_y_khoa\chatbot')
+
+import json
 import numpy as np
 import faiss
 import pickle
@@ -30,11 +34,35 @@ def create_vector_db():
     # 1. Load Chunks
     with open(CHUNKS_FILE, 'r', encoding='utf-8') as f:
         data = json.load(f)
-    chunks = data['chunks']
-    texts = [c['text'] for c in chunks]
-    metadatas = [c['metadata'] for c in chunks]
+    all_chunks = data['chunks']
     
-    print(f"📦 Loaded {len(texts)} chunks.")
+    # --- Deduplication logic ---
+    print("🔍 Checking for duplicate chunks...")
+    seen_hashes = set()
+    unique_chunks = []
+    duplicate_count = 0
+    
+    import hashlib
+    for chunk in all_chunks:
+        # Create a unique hash based on disease, section, and text content
+        content_key = f"{chunk['metadata']['disease_id']}_{chunk['metadata']['section_key']}_{chunk['text']}"
+        chunk_hash = hashlib.sha256(content_key.encode('utf-8')).hexdigest()
+        
+        if chunk_hash not in seen_hashes:
+            seen_hashes.add(chunk_hash)
+            unique_chunks.append(chunk)
+        else:
+            duplicate_count += 1
+            
+    if duplicate_count > 0:
+        print(f"⚠️ Warning: Found and removed {duplicate_count} duplicate chunks.")
+    else:
+        print("✅ No duplicates found.")
+        
+    texts = [c['text'] for c in unique_chunks]
+    metadatas = [c['metadata'] for c in unique_chunks]
+    
+    print(f"📦 Processing {len(texts)} unique chunks.")
 
     # 2. Initialize Embedder
     embedder = RotatingEmbeddings(api_keys=api_keys)
@@ -46,22 +74,31 @@ def create_vector_db():
     
     print(f"✅ Generated {embeddings.shape[0]} embeddings with dimension {embeddings.shape[1]}.")
 
-    # 4. Create FAISS Index
-    dimension = embeddings.shape[1]
-    index = faiss.IndexFlatL2(dimension)
-    index.add(embeddings)
+    # 4. Create LangChain FAISS Index
+    from langchain_community.vectorstores import FAISS
+    from langchain_core.documents import Document
+    
+    print("🏗️ Creating LangChain FAISS index...")
+    documents = [
+        Document(page_content=t, metadata=m) 
+        for t, m in zip(texts, metadatas)
+    ]
+    
+    # We initialize from texts and current embeddings
+    # Using a workaround to avoid re-embedding since we already have them
+    vector_store = FAISS.from_embeddings(
+        text_embeddings=zip(texts, embeddings),
+        embedding=embedder,
+        metadatas=metadatas
+    )
     
     # 5. Save everything
     if not os.path.exists(FAISS_DIR):
         os.makedirs(FAISS_DIR)
         
-    faiss.write_index(index, INDEX_FILE)
+    vector_store.save_local(FAISS_DIR)
     
-    # Save metadata mapping
-    with open(METADATA_FILE, 'wb') as f:
-        pickle.dump(chunks, f)
-        
-    print(f"🎉 FAISS DB saved successfully to {FAISS_DIR}")
+    print(f"🎉 FAISS DB (LangChain format) saved successfully to {FAISS_DIR}")
 
 if __name__ == "__main__":
     # Ensure we are in the right directory to import modules
