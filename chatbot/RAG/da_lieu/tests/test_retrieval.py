@@ -1,6 +1,15 @@
+import sys
+import os
+# Force UTF-8 encoding for Windows terminal
+if sys.platform == "win32":
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
+# Ensure project root is in path
+sys.path.append(r'd:\web_tra_cuu_y_khoa\chatbot')
+
 import faiss
 import pickle
-import os
 import numpy as np
 from dotenv import load_dotenv
 from modules.embedding import RotatingEmbeddings
@@ -19,7 +28,7 @@ import ast
 api_keys = ast.literal_eval(raw_keys) if raw_keys.startswith('[') else [raw_keys]
 
 def test_retrieval(query_text: str, k=3):
-    print(f"\n🔍 Query: {query_text}")
+    print(f"\nQuery: {query_text}")
     
     # 1. Load FAISS Index
     index = faiss.read_index(INDEX_FILE)
@@ -39,11 +48,11 @@ def test_retrieval(query_text: str, k=3):
     distances, indices = index.search(query_vector, k)
     
     # 6. Show Results
-    print(f"✅ Top {k} results:")
+    print(f"Top {k} results:")
     for i, (dist, idx) in enumerate(zip(distances[0], indices[0])):
         if idx < len(chunks):
             chunk = chunks[idx]
-            print(f"\n--- Result {i+1} (Dist: {dist:.4f}) ---")
+            print(f"\nResult {i+1} (Dist: {dist:.4f})")
             print(f"ID: {chunk['id']}")
             print(f"Disease: {chunk['metadata']['disease_name']}")
             print(f"Section: {chunk['metadata']['section_title']}")
@@ -53,9 +62,6 @@ def test_retrieval(query_text: str, k=3):
             print(f"⚠️ Index {idx} out of range for chunks list.")
 
 if __name__ == "__main__":
-    import sys
-    sys.path.append(r'd:\web_tra_cuu_y_khoa\chatbot')
-    
     # Sample Test Queries
     test_retrieval("Cách điều trị bệnh chốc ở trẻ em?")
     test_retrieval("Nguyên nhân gây bệnh nhọt")

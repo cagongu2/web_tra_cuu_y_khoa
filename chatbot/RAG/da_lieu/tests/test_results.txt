@@ -1,0 +1,63 @@
+﻿
+Query: C├ích ─æiß╗üu trß╗ï bß╗çnh chß╗æc ß╗ƒ trß║╗ em?
+Top 3 results:
+
+Result 1 (Dist: 0.3981)
+ID: chunk_000006
+Disease: Bß╗åNH CHß╗ÉC
+Section: ─ÉIß╗ÇU TRß╗è
+Snippet: a) Nguy├¬n tß║»c - Kß║┐t hß╗úp thuß╗æc ─æiß╗üu trß╗ï tß║íi chß╗ù v├á to├án th├ón. - Chß╗æng ngß╗®a: tr├ính tß╗▒ l├óy truyß╗ün. - ─Éiß╗üu trß╗ï biß║┐n chß╗®ng nß║┐u c├│. b) ─Éiß╗üu trß╗ï cß╗Ñ thß╗â - Tß║íi chß╗ù: + Ng├óm tß║»m ng├áy mß╗Öt lß║ºn bß║▒ng nã░ß╗øc thuß╗æc t├¡m ...
+
+Result 2 (Dist: 0.4674)
+ID: chunk_000000
+Disease: Bß╗åNH CHß╗ÉC
+Section: ─Éß║áI Cã»ãáNG
+Snippet: Chß╗æc l├á mß╗Öt bß╗çnh nhiß╗àm khuß║®n da rß║Ñt phß╗ò biß║┐n, ─æß║Àc trã░ng bß╗ƒi c├íc thã░ãíng tß╗òn cãí bß║ún l├á bß╗ìng nã░ß╗øc n├┤ng, rß║úi r├íc, nhanh ch├│ng ho├í mß╗º, dß║¡p vß╗í ─æ├│ng vß║úy tiß║┐t. Bß╗çnh hay gß║Àp ß╗ƒ trß║╗ nhß╗Å. Tuy nhi├¬n, ngã░ß╗Øi lß╗øn c┼®n...
+
+Result 3 (Dist: 0.4898)
+ID: chunk_000007
+Disease: Bß╗åNH CHß╗ÉC
+Section: BIß║¥N CHß╗¿NG
+Snippet: ### Bß║úng | Kh├íng sinh | Liß╗üu lã░ß╗úng | | | --- | --- | --- | | | Ngã░ß╗Øi lß╗øn | Trß║╗ em | | Cephalexin | m gx lß║ºn/ ng├áy, uß╗æng | mg/kg/ng├áy chia lß║ºn, uß╗æng | | Docloxacin | m gx lß║ºn/ ng├áy, uß╗æng | mg/kg/ng├áy c...
+
+Query: Nguy├¬n nh├ón g├óy bß╗çnh nhß╗ìt
+Top 3 results:
+
+Result 1 (Dist: 0.4024)
+ID: chunk_000011
+Disease: NHß╗îT
+Section: NGUY├èN NH├éN
+Snippet: Nguy├¬n nh├ón g├óy bß╗çnh l├á tß╗Ñ cß║ºu v├áng (Staphylococcus aereus). B├¼nh thã░ß╗Øng, vi khuß║®n n├áy sß╗æng k├¢ sinh tr├¬n da, nhß║Ñt l├á c├íc nang l├┤ng ß╗ƒ c├íc nß║┐p gß║Ñp nhã░ r├únh m┼®i m├í, r├únh li├¬n m├┤ngÔÇªhoß║Àc c├íc hß╗æc tß╗▒ nhi├¬n n...
+
+Result 2 (Dist: 0.4857)
+ID: chunk_000012
+Disease: NHß╗îT
+Section: CHß║¿N ─ÉO├üN
+Snippet: a) L├óm s├áng - Ban ─æß║ºu l├á sß║®n nhß╗Å, m├áu ─æß╗Å, sã░ng nß╗ü, chß║»c, tß║Ñy ─æß╗Å ß╗ƒ nang l├┤ng. Sau ng├áy ─æß║┐n ng├áy, tß╗òn thã░ãíng lan rß╗Öng h├│a mß╗º tß║ío th├ánh ß╗ò ├íp xe, ß╗ƒ giß╗»a h├¼nh th├ánh ng├▓i mß╗º. ─Éau nhß╗®c l├á triß╗çu chß╗®ng cãí n─âng...
+
+Result 3 (Dist: 0.5030)
+ID: chunk_000001
+Disease: Bß╗åNH CHß╗ÉC
+Section: NGUY├èN NH├éN
+Snippet: - Do tß╗Ñ cß║ºu v├áng, li├¬n cß║ºu hoß║Àc phß╗æi hß╗úp cß║ú hai. - Yß║┐u tß╗æ thuß║¡n lß╗úi: tuß╗òi nhß╗Å, thß╗Øi tiß║┐t n├│ng ß║®m, m├╣a h├¿, ─æiß╗üu kiß╗çn vß╗ç sinh k├®m hoß║Àc c├│ bß╗çnh da phß╗æi hß╗úp nhã░ chß║Ñy rß║¡n, ghß║╗, c├┤n tr├╣ng cß║»n, vi├¬m da cãí ─æß╗ï...
+
+Query: Lupus ban ─æß╗Å hß╗ç thß╗æng l├á g├¼?
+Top 3 results:
+
+Result 1 (Dist: 0.4197)
+ID: chunk_000129
+Disease: B. LUPUS BAN ─Éß╗Ä Hß╗å THß╗ÉNG
+Section: ─Éß║áI Cã»ãáNG
+Snippet: Lupus ban ─æß╗Å hß╗ç thß╗æng l├á mß╗Öt trong c├íc bß╗çnh tß╗▒ miß╗àn hay gß║Àp ß╗ƒ phß╗Ñ nß╗» trß║╗ tuß╗òi. Bß╗çnh g├óy thã░ãíng tß╗òn nhiß╗üu cãí quan nß╗Öi tß║íng nhã░ da, ni├¬m mß║íc, gan, thß║¡n, khß╗øp, tim, phß╗òi, hß╗ç thß║ºn kinh....
+
+Result 2 (Dist: 0.4557)
+ID: chunk_000132
+Disease: B. LUPUS BAN ─Éß╗Ä Hß╗å THß╗ÉNG
+Section: CHß║¿N ─ÉO├üN
+Snippet: sau ─æiß╗üu trß╗ï bß║▒ng corticoid. + Tß╗òn thã░ãíng thß║¡n: thã░ãíng tß╗òn thß║¡n gß║Àp khoß║úng % ß╗ƒ nhß╗»ng ngã░ß╗Øi bß╗çnh lupus ─æß╗Å hß╗ç thß╗æng. ─É├óy l├á biß╗âu hiß╗çn nß║Àng v├á c├│ ├¢ ngh─®a ─æß╗â ti├¬n lã░ß╗úng bß╗çnh. + Tim mß║ích . Vi├¬m ngoß║íi t├óm m...
+
+Result 3 (Dist: 0.4637)
+ID: chunk_000133
+Disease: B. LUPUS BAN ─Éß╗Ä Hß╗å THß╗ÉNG
+Section: CHß║¿N ─ÉO├üN
+Snippet: Bß║ích cß║ºu: < . /dl . Tiß╗âu cß║ºu: < . /dl Chß║®n ─æo├ín x├íc ─æß╗ïnh: dß╗▒a v├áo c├íc triß╗çu chß╗®ng l├óm s├áng v├á x├®t nghiß╗çm. N─âm , Hß╗Öi Khß╗øp hß╗ìc Mß╗╣ (ARA) ─æß╗ü xuß║Ñt ti├¬u chuß║®n chß║®n ─æo├ín lupus ─æß╗Å hß╗ç thß╗æng bao gß╗ôm biß╗âu hiß╗çn q...
