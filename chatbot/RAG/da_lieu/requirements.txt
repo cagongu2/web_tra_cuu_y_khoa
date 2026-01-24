@@ -1,0 +1,8 @@
+pdfplumber
+faiss-cpu
+numpy
+sentence-transformers
+google-generativeai
+python-dotenv
+pathlib
+pickle-mixin

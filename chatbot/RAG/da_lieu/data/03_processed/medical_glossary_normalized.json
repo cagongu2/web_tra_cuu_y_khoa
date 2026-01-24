@@ -1,0 +1,550 @@
+{
+  "acronym_map": {
+    "ACD": {
+      "full_name": "Allergic Contact Dermatitis",
+      "vietnamese": "Viêm da tiếp xúc dị ứng",
+      "variations": [
+        "ACD",
+        "A.C.D",
+        "A.C.D."
+      ]
+    },
+    "AIDS": {
+      "full_name": "Acquired Immunodeficiency Syndrome",
+      "vietnamese": "Hội chứng suy giảm miễn dịch mắc phải",
+      "variations": [
+        "AIDS",
+        "A.I.D.S",
+        "A.I.D.S."
+      ]
+    },
+    "ANA": {
+      "full_name": "Antinuclear Antibody",
+      "vietnamese": "Kháng thể kháng nhân",
+      "variations": [
+        "ANA",
+        "A.N.A",
+        "A.N.A."
+      ]
+    },
+    "BBS": {
+      "full_name": "Besnier-Boeck-Schaumann",
+      "vietnamese": "Besnier-Boeck-Schaumann",
+      "variations": [
+        "BBS",
+        "B.B.S",
+        "B.B.S."
+      ]
+    },
+    "BCG": {
+      "full_name": "Bacillus Calmette-Guerin",
+      "vietnamese": "Bacillus Calmette-Guerin",
+      "variations": [
+        "BCG",
+        "B.C.G",
+        "B.C.G."
+      ]
+    },
+    "CPA": {
+      "full_name": "Cyproterone Acetate",
+      "vietnamese": "Cyproterone Acetate",
+      "variations": [
+        "CPA",
+        "C.P.A",
+        "C.P.A."
+      ]
+    },
+    "CPBP": {
+      "full_name": "Cellular Retinol Binding Protein",
+      "vietnamese": "Protein gắn kết Retinol tế bào",
+      "variations": [
+        "CPBP",
+        "C.P.B.P",
+        "C.P.B.P."
+      ]
+    },
+    "CRABP": {
+      "full_name": "Cellular Retinoic Acid Binding Protein",
+      "vietnamese": "Protein gắn kết axit Retinoic tế bào",
+      "variations": [
+        "CRABP",
+        "C.R.A.B.P",
+        "C.R.A.B.P."
+      ]
+    },
+    "CRP": {
+      "full_name": "C-Reactive Protein",
+      "vietnamese": "Protein phản ứng C",
+      "variations": [
+        "CRP",
+        "C.R.P",
+        "C.R.P."
+      ]
+    },
+    "DLE": {
+      "full_name": "Discoid Lupus Erythematosus",
+      "vietnamese": "Lupus ban đỏ dạng đĩa",
+      "variations": [
+        "DLE",
+        "D.L.E",
+        "D.L.E."
+      ]
+    },
+    "DNA": {
+      "full_name": "Deoxyribonucleic Acid",
+      "vietnamese": "Axit deoxyribonucleic",
+      "variations": [
+        "DNA",
+        "D.N.A",
+        "D.N.A."
+      ]
+    },
+    "DRESS": {
+      "full_name": "Drug Reaction with Eosinophilia and Systemic Symptoms",
+      "vietnamese": "Phản ứng thuốc với tăng bạch cầu ái toan và triệu chứng toàn thân",
+      "variations": [
+        "DRESS",
+        "D.R.E.S.S",
+        "D.R.E.S.S."
+      ]
+    },
+    "EB": {
+      "full_name": "Elementary Body",
+      "vietnamese": "Thể sơ cấp",
+      "variations": [
+        "EB",
+        "E.B",
+        "E.B."
+      ]
+    },
+    "ETA": {
+      "full_name": "Exfoliative Toxin A",
+      "vietnamese": "Độc tố bong vảy A",
+      "variations": [
+        "ETA",
+        "E.T.A",
+        "E.T.A."
+      ]
+    },
+    "ETB": {
+      "full_name": "Exfoliative Toxin B",
+      "vietnamese": "Độc tố bong vảy B",
+      "variations": [
+        "ETB",
+        "E.T.B",
+        "E.T.B."
+      ]
+    },
+    "FTA": {
+      "full_name": "Fluorescent Treponema Antibody",
+      "vietnamese": "Kháng thể Treponema huỳnh quang",
+      "variations": [
+        "FTA",
+        "F.T.A",
+        "F.T.A."
+      ]
+    },
+    "FTA-ABS": {
+      "full_name": "Fluorescent Treponema Antibody Absorption",
+      "vietnamese": "Hấp thụ kháng thể Treponema huỳnh quang",
+      "variations": [
+        "FTA-ABS",
+        "F.T.A.-.A.B.S",
+        "F.T.A.-.A.B.S."
+      ]
+    },
+    "HHV": {
+      "full_name": "Human Herpes Virus",
+      "vietnamese": "Virus Herpes người",
+      "variations": [
+        "HHV",
+        "H.H.V",
+        "H.H.V."
+      ]
+    },
+    "HIV": {
+      "full_name": "Human Immunodeficiency Virus",
+      "vietnamese": "Virus suy giảm miễn dịch người",
+      "variations": [
+        "HIV",
+        "H.I.V",
+        "H.I.V."
+      ]
+    },
+    "HLA": {
+      "full_name": "Human Leukocyte Antigen",
+      "vietnamese": "Kháng nguyên bạch cầu người",
+      "variations": [
+        "HLA",
+        "H.L.A",
+        "H.L.A."
+      ]
+    },
+    "HPV": {
+      "full_name": "Human Papilloma Virus",
+      "vietnamese": "Virus u nhú người",
+      "variations": [
+        "HPV",
+        "H.P.V",
+        "H.P.V."
+      ]
+    },
+    "HSV": {
+      "full_name": "Herpes Simplex Virus",
+      "vietnamese": "Virus Herpes đơn giản",
+      "variations": [
+        "HSV",
+        "H.S.V",
+        "H.S.V."
+      ]
+    },
+    "MB": {
+      "full_name": "Multibacillary",
+      "vietnamese": "Đa trực khuẩn",
+      "variations": [
+        "MB",
+        "M.B",
+        "M.B."
+      ]
+    },
+    "CMV": {
+      "full_name": "Cytomegalovirus",
+      "vietnamese": "Virus Cytomegalo",
+      "variations": [
+        "CMV",
+        "C.M.V",
+        "C.M.V."
+      ]
+    },
+    "MDT": {
+      "full_name": "Multidrug Therapy",
+      "vietnamese": "Liệu pháp đa thuốc",
+      "variations": [
+        "MDT",
+        "M.D.T",
+        "M.D.T."
+      ]
+    },
+    "MRI": {
+      "full_name": "Magnetic Resonance Imaging",
+      "vietnamese": "Chụp cộng hưởng từ",
+      "variations": [
+        "MRI",
+        "M.R.I",
+        "M.R.I."
+      ]
+    },
+    "NB": {
+      "full_name": "Narrow Band",
+      "vietnamese": "Băng hẹp",
+      "variations": [
+        "NB",
+        "N.B",
+        "N.B."
+      ]
+    },
+    "NST": {
+      "full_name": "Nhiễm sắc thể",
+      "vietnamese": "Nhiễm sắc thể",
+      "variations": [
+        "NST",
+        "N.S.T",
+        "N.S.T."
+      ]
+    },
+    "PB": {
+      "full_name": "Paucibacillary",
+      "vietnamese": "Ít trực khuẩn",
+      "variations": [
+        "PB",
+        "P.B",
+        "P.B."
+      ]
+    },
+    "PCR": {
+      "full_name": "Polymerase Chain Reaction",
+      "vietnamese": "Phản ứng chuỗi Polymerase",
+      "variations": [
+        "PCR",
+        "P.C.R",
+        "P.C.R."
+      ]
+    },
+    "PCB": {
+      "full_name": "Potato-Carrot-Bile",
+      "vietnamese": "Khoai tây-Cà rốt-Mật",
+      "variations": [
+        "PCB",
+        "P.C.B",
+        "P.C.B."
+      ]
+    },
+    "PHN": {
+      "full_name": "Post Herpetic Neuralgia",
+      "vietnamese": "Đau thần kinh sau Herpes",
+      "variations": [
+        "PHN",
+        "P.H.N",
+        "P.H.N."
+      ]
+    },
+    "PUVA": {
+      "full_name": "Psoralen + UVA",
+      "vietnamese": "Psoralen + UVA",
+      "variations": [
+        "PUVA",
+        "P.U.V.A",
+        "P.U.V.A."
+      ]
+    },
+    "RPR": {
+      "full_name": "Rapid Plasma Reagin",
+      "vietnamese": "Reagin huyết tương nhanh",
+      "variations": [
+        "RPR",
+        "R.P.R",
+        "R.P.R."
+      ]
+    },
+    "SJS": {
+      "full_name": "Stevens Johnson Syndrome",
+      "vietnamese": "Hội chứng Stevens Johnson",
+      "variations": [
+        "SJS",
+        "S.J.S",
+        "S.J.S."
+      ]
+    },
+    "SLE": {
+      "full_name": "Systemic Lupus Erythematosus",
+      "vietnamese": "Lupus ban đỏ hệ thống",
+      "variations": [
+        "SLE",
+        "S.L.E",
+        "S.L.E."
+      ]
+    },
+    "TPI": {
+      "full_name": "Treponema Pallidum Immobilisation",
+      "vietnamese": "Bất động Treponema Pallidum",
+      "variations": [
+        "TPI",
+        "T.P.I",
+        "T.P.I."
+      ]
+    },
+    "TEN": {
+      "full_name": "Toxic Epidermal Necrolysis",
+      "vietnamese": "Hoại tử thượng bì nhiễm độc",
+      "variations": [
+        "TEN",
+        "T.E.N",
+        "T.E.N."
+      ]
+    },
+    "TLR": {
+      "full_name": "Toll-Like Receptor",
+      "vietnamese": "Thụ thể giống Toll",
+      "variations": [
+        "TLR",
+        "T.L.R",
+        "T.L.R."
+      ]
+    },
+    "UV": {
+      "full_name": "Ultraviolet",
+      "vietnamese": "Tia cực tím",
+      "variations": [
+        "UV",
+        "U.V",
+        "U.V."
+      ]
+    },
+    "UVA": {
+      "full_name": "Ultraviolet A",
+      "vietnamese": "Tia cực tím A",
+      "variations": [
+        "UVA",
+        "U.V.A",
+        "U.V.A."
+      ]
+    },
+    "UVB": {
+      "full_name": "Ultraviolet B",
+      "vietnamese": "Tia cực tím B",
+      "variations": [
+        "UVB",
+        "U.V.B",
+        "U.V.B."
+      ]
+    },
+    "VDRL": {
+      "full_name": "Venereal Disease Research Laboratory",
+      "vietnamese": "Phòng nghiên cứu bệnh hoa liễu",
+      "variations": [
+        "VDRL",
+        "V.D.R.L",
+        "V.D.R.L."
+      ]
+    },
+    "VZV": {
+      "full_name": "Varicella-Zoster Virus",
+      "vietnamese": "Virus Varicella-Zoster",
+      "variations": [
+        "VZV",
+        "V.Z.V",
+        "V.Z.V."
+      ]
+    },
+    "WHO": {
+      "full_name": "World Health Organization",
+      "vietnamese": "Tổ chức Y tế Thế giới",
+      "variations": [
+        "WHO",
+        "W.H.O",
+        "W.H.O."
+      ]
+    }
+  },
+  "reverse_map": {
+    "Allergic Contact Dermatitis": "ACD",
+    "Viêm da tiếp xúc dị ứng": "ACD",
+    "Acquired Immunodeficiency Syndrome": "AIDS",
+    "Hội chứng suy giảm miễn dịch mắc phải": "AIDS",
+    "Antinuclear Antibody": "ANA",
+    "Kháng thể kháng nhân": "ANA",
+    "Besnier-Boeck-Schaumann": "BBS",
+    "Bacillus Calmette-Guerin": "BCG",
+    "Cyproterone Acetate": "CPA",
+    "Cellular Retinol Binding Protein": "CPBP",
+    "Protein gắn kết Retinol tế bào": "CPBP",
+    "Cellular Retinoic Acid Binding Protein": "CRABP",
+    "Protein gắn kết axit Retinoic tế bào": "CRABP",
+    "C-Reactive Protein": "CRP",
+    "Protein phản ứng C": "CRP",
+    "Discoid Lupus Erythematosus": "DLE",
+    "Lupus ban đỏ dạng đĩa": "DLE",
+    "Deoxyribonucleic Acid": "DNA",
+    "Axit deoxyribonucleic": "DNA",
+    "Drug Reaction with Eosinophilia and Systemic Symptoms": "DRESS",
+    "Phản ứng thuốc với tăng bạch cầu ái toan và triệu chứng toàn thân": "DRESS",
+    "Elementary Body": "EB",
+    "Thể sơ cấp": "EB",
+    "Exfoliative Toxin A": "ETA",
+    "Độc tố bong vảy A": "ETA",
+    "Exfoliative Toxin B": "ETB",
+    "Độc tố bong vảy B": "ETB",
+    "Fluorescent Treponema Antibody": "FTA",
+    "Kháng thể Treponema huỳnh quang": "FTA",
+    "Fluorescent Treponema Antibody Absorption": "FTA-ABS",
+    "Hấp thụ kháng thể Treponema huỳnh quang": "FTA-ABS",
+    "Human Herpes Virus": "HHV",
+    "Virus Herpes người": "HHV",
+    "Human Immunodeficiency Virus": "HIV",
+    "Virus suy giảm miễn dịch người": "HIV",
+    "Human Leukocyte Antigen": "HLA",
+    "Kháng nguyên bạch cầu người": "HLA",
+    "Human Papilloma Virus": "HPV",
+    "Virus u nhú người": "HPV",
+    "Herpes Simplex Virus": "HSV",
+    "Virus Herpes đơn giản": "HSV",
+    "Multibacillary": "MB",
+    "Đa trực khuẩn": "MB",
+    "Cytomegalovirus": "CMV",
+    "Virus Cytomegalo": "CMV",
+    "Multidrug Therapy": "MDT",
+    "Liệu pháp đa thuốc": "MDT",
+    "Magnetic Resonance Imaging": "MRI",
+    "Chụp cộng hưởng từ": "MRI",
+    "Narrow Band": "NB",
+    "Băng hẹp": "NB",
+    "Nhiễm sắc thể": "NST",
+    "Paucibacillary": "PB",
+    "Ít trực khuẩn": "PB",
+    "Polymerase Chain Reaction": "PCR",
+    "Phản ứng chuỗi Polymerase": "PCR",
+    "Potato-Carrot-Bile": "PCB",
+    "Khoai tây-Cà rốt-Mật": "PCB",
+    "Post Herpetic Neuralgia": "PHN",
+    "Đau thần kinh sau Herpes": "PHN",
+    "Psoralen + UVA": "PUVA",
+    "Rapid Plasma Reagin": "RPR",
+    "Reagin huyết tương nhanh": "RPR",
+    "Stevens Johnson Syndrome": "SJS",
+    "Hội chứng Stevens Johnson": "SJS",
+    "Systemic Lupus Erythematosus": "SLE",
+    "Lupus ban đỏ hệ thống": "SLE",
+    "Treponema Pallidum Immobilisation": "TPI",
+    "Bất động Treponema Pallidum": "TPI",
+    "Toxic Epidermal Necrolysis": "TEN",
+    "Hoại tử thượng bì nhiễm độc": "TEN",
+    "Toll-Like Receptor": "TLR",
+    "Thụ thể giống Toll": "TLR",
+    "Ultraviolet": "UV",
+    "Tia cực tím": "UV",
+    "Ultraviolet A": "UVA",
+    "Tia cực tím A": "UVA",
+    "Ultraviolet B": "UVB",
+    "Tia cực tím B": "UVB",
+    "Venereal Disease Research Laboratory": "VDRL",
+    "Phòng nghiên cứu bệnh hoa liễu": "VDRL",
+    "Varicella-Zoster Virus": "VZV",
+    "Virus Varicella-Zoster": "VZV",
+    "World Health Organization": "WHO",
+    "Tổ chức Y tế Thế giới": "WHO"
+  },
+  "regex_patterns": {
+    "ACD": "\\b(ACD|A\\.C\\.D|A\\.C\\.D\\.)\\b",
+    "AIDS": "\\b(AIDS|A\\.I\\.D\\.S|A\\.I\\.D\\.S\\.)\\b",
+    "ANA": "\\b(ANA|A\\.N\\.A|A\\.N\\.A\\.)\\b",
+    "BBS": "\\b(BBS|B\\.B\\.S|B\\.B\\.S\\.)\\b",
+    "BCG": "\\b(BCG|B\\.C\\.G|B\\.C\\.G\\.)\\b",
+    "CPA": "\\b(CPA|C\\.P\\.A|C\\.P\\.A\\.)\\b",
+    "CPBP": "\\b(CPBP|C\\.P\\.B\\.P|C\\.P\\.B\\.P\\.)\\b",
+    "CRABP": "\\b(CRABP|C\\.R\\.A\\.B\\.P|C\\.R\\.A\\.B\\.P\\.)\\b",
+    "CRP": "\\b(CRP|C\\.R\\.P|C\\.R\\.P\\.)\\b",
+    "DLE": "\\b(DLE|D\\.L\\.E|D\\.L\\.E\\.)\\b",
+    "DNA": "\\b(DNA|D\\.N\\.A|D\\.N\\.A\\.)\\b",
+    "DRESS": "\\b(DRESS|D\\.R\\.E\\.S\\.S|D\\.R\\.E\\.S\\.S\\.)\\b",
+    "EB": "\\b(EB|E\\.B|E\\.B\\.)\\b",
+    "ETA": "\\b(ETA|E\\.T\\.A|E\\.T\\.A\\.)\\b",
+    "ETB": "\\b(ETB|E\\.T\\.B|E\\.T\\.B\\.)\\b",
+    "FTA": "\\b(FTA|F\\.T\\.A|F\\.T\\.A\\.)\\b",
+    "FTA-ABS": "\\b(FTA\\-ABS|F\\.T\\.A\\.\\-\\.A\\.B\\.S|F\\.T\\.A\\.\\-\\.A\\.B\\.S\\.)\\b",
+    "HHV": "\\b(HHV|H\\.H\\.V|H\\.H\\.V\\.)\\b",
+    "HIV": "\\b(HIV|H\\.I\\.V|H\\.I\\.V\\.)\\b",
+    "HLA": "\\b(HLA|H\\.L\\.A|H\\.L\\.A\\.)\\b",
+    "HPV": "\\b(HPV|H\\.P\\.V|H\\.P\\.V\\.)\\b",
+    "HSV": "\\b(HSV|H\\.S\\.V|H\\.S\\.V\\.)\\b",
+    "MB": "\\b(MB|M\\.B|M\\.B\\.)\\b",
+    "CMV": "\\b(CMV|C\\.M\\.V|C\\.M\\.V\\.)\\b",
+    "MDT": "\\b(MDT|M\\.D\\.T|M\\.D\\.T\\.)\\b",
+    "MRI": "\\b(MRI|M\\.R\\.I|M\\.R\\.I\\.)\\b",
+    "NB": "\\b(NB|N\\.B|N\\.B\\.)\\b",
+    "NST": "\\b(NST|N\\.S\\.T|N\\.S\\.T\\.)\\b",
+    "PB": "\\b(PB|P\\.B|P\\.B\\.)\\b",
+    "PCR": "\\b(PCR|P\\.C\\.R|P\\.C\\.R\\.)\\b",
+    "PCB": "\\b(PCB|P\\.C\\.B|P\\.C\\.B\\.)\\b",
+    "PHN": "\\b(PHN|P\\.H\\.N|P\\.H\\.N\\.)\\b",
+    "PUVA": "\\b(PUVA|P\\.U\\.V\\.A|P\\.U\\.V\\.A\\.)\\b",
+    "RPR": "\\b(RPR|R\\.P\\.R|R\\.P\\.R\\.)\\b",
+    "SJS": "\\b(SJS|S\\.J\\.S|S\\.J\\.S\\.)\\b",
+    "SLE": "\\b(SLE|S\\.L\\.E|S\\.L\\.E\\.)\\b",
+    "TPI": "\\b(TPI|T\\.P\\.I|T\\.P\\.I\\.)\\b",
+    "TEN": "\\b(TEN|T\\.E\\.N|T\\.E\\.N\\.)\\b",
+    "TLR": "\\b(TLR|T\\.L\\.R|T\\.L\\.R\\.)\\b",
+    "UV": "\\b(UV|U\\.V|U\\.V\\.)\\b",
+    "UVA": "\\b(UVA|U\\.V\\.A|U\\.V\\.A\\.)\\b",
+    "UVB": "\\b(UVB|U\\.V\\.B|U\\.V\\.B\\.)\\b",
+    "VDRL": "\\b(VDRL|V\\.D\\.R\\.L|V\\.D\\.R\\.L\\.)\\b",
+    "VZV": "\\b(VZV|V\\.Z\\.V|V\\.Z\\.V\\.)\\b",
+    "WHO": "\\b(WHO|W\\.H\\.O|W\\.H\\.O\\.)\\b"
+  },
+  "metadata": {
+    "total_terms": 45,
+    "source": "medical_glossary.json",
+    "created_date": "2026-01-24",
+    "version": "1.0",
+    "description": "Glossary chuẩn hóa với acronym_map, reverse_map và regex patterns"
+  }
+}

@@ -1,0 +1,236 @@
+{
+    "medical_glossary": [
+        {
+            "acronym": "ACD",
+            "definition": "Allergic Contact Dermatitis",
+            "vietnamese": "Viêm da tiếp xúc dị ứng"
+        },
+        {
+            "acronym": "AIDS",
+            "definition": "Acquired Immunodeficiency Syndrome",
+            "vietnamese": "Hội chứng suy giảm miễn dịch mắc phải"
+        },
+        {
+            "acronym": "ANA",
+            "definition": "Antinuclear Antibody",
+            "vietnamese": "Kháng thể kháng nhân"
+        },
+        {
+            "acronym": "BBS",
+            "definition": "Besnier-Boeck-Schaumann",
+            "vietnamese": "Besnier-Boeck-Schaumann"
+        },
+        {
+            "acronym": "BCG",
+            "definition": "Bacillus Calmette-Guerin",
+            "vietnamese": "Bacillus Calmette-Guerin"
+        },
+        {
+            "acronym": "CPA",
+            "definition": "Cyproterone Acetate",
+            "vietnamese": "Cyproterone Acetate"
+        },
+        {
+            "acronym": "CPBP",
+            "definition": "Cellular Retinol Binding Protein",
+            "vietnamese": "Protein gắn kết Retinol tế bào"
+        },
+        {
+            "acronym": "CRABP",
+            "definition": "Cellular Retinoic Acid Binding Protein",
+            "vietnamese": "Protein gắn kết axit Retinoic tế bào"
+        },
+        {
+            "acronym": "CRP",
+            "definition": "C-Reactive Protein",
+            "vietnamese": "Protein phản ứng C"
+        },
+        {
+            "acronym": "DLE",
+            "definition": "Discoid Lupus Erythematosus",
+            "vietnamese": "Lupus ban đỏ dạng đĩa"
+        },
+        {
+            "acronym": "DNA",
+            "definition": "Deoxyribonucleic Acid",
+            "vietnamese": "Axit deoxyribonucleic"
+        },
+        {
+            "acronym": "DRESS",
+            "definition": "Drug Reaction with Eosinophilia and Systemic Symptoms",
+            "vietnamese": "Phản ứng thuốc với tăng bạch cầu ái toan và triệu chứng toàn thân"
+        },
+        {
+            "acronym": "EB",
+            "definition": "Elementary Body",
+            "vietnamese": "Thể sơ cấp"
+        },
+        {
+            "acronym": "ETA",
+            "definition": "Exfoliative Toxin A",
+            "vietnamese": "Độc tố bong vảy A"
+        },
+        {
+            "acronym": "ETB",
+            "definition": "Exfoliative Toxin B",
+            "vietnamese": "Độc tố bong vảy B"
+        },
+        {
+            "acronym": "FTA",
+            "definition": "Fluorescent Treponema Antibody",
+            "vietnamese": "Kháng thể Treponema huỳnh quang"
+        },
+        {
+            "acronym": "FTA-ABS",
+            "definition": "Fluorescent Treponema Antibody Absorption",
+            "vietnamese": "Hấp thụ kháng thể Treponema huỳnh quang"
+        },
+        {
+            "acronym": "HHV",
+            "definition": "Human Herpes Virus",
+            "vietnamese": "Virus Herpes người"
+        },
+        {
+            "acronym": "HIV",
+            "definition": "Human Immunodeficiency Virus",
+            "vietnamese": "Virus suy giảm miễn dịch người"
+        },
+        {
+            "acronym": "HLA",
+            "definition": "Human Leukocyte Antigen",
+            "vietnamese": "Kháng nguyên bạch cầu người"
+        },
+        {
+            "acronym": "HPV",
+            "definition": "Human Papilloma Virus",
+            "vietnamese": "Virus u nhú người"
+        },
+        {
+            "acronym": "HSV",
+            "definition": "Herpes Simplex Virus",
+            "vietnamese": "Virus Herpes đơn giản"
+        },
+        {
+            "acronym": "MB",
+            "definition": "Multibacillary",
+            "vietnamese": "Đa trực khuẩn"
+        },
+        {
+            "acronym": "CMV",
+            "definition": "Cytomegalovirus",
+            "vietnamese": "Virus Cytomegalo"
+        },
+        {
+            "acronym": "MDT",
+            "definition": "Multidrug Therapy",
+            "vietnamese": "Liệu pháp đa thuốc"
+        },
+        {
+            "acronym": "MRI",
+            "definition": "Magnetic Resonance Imaging",
+            "vietnamese": "Chụp cộng hưởng từ"
+        },
+        {
+            "acronym": "NB",
+            "definition": "Narrow Band",
+            "vietnamese": "Băng hẹp"
+        },
+        {
+            "acronym": "NST",
+            "definition": "Nhiễm sắc thể",
+            "vietnamese": "Nhiễm sắc thể"
+        },
+        {
+            "acronym": "PB",
+            "definition": "Paucibacillary",
+            "vietnamese": "Ít trực khuẩn"
+        },
+        {
+            "acronym": "PCR",
+            "definition": "Polymerase Chain Reaction",
+            "vietnamese": "Phản ứng chuỗi Polymerase"
+        },
+        {
+            "acronym": "PCB",
+            "definition": "Potato-Carrot-Bile",
+            "vietnamese": "Khoai tây-Cà rốt-Mật"
+        },
+        {
+            "acronym": "PHN",
+            "definition": "Post Herpetic Neuralgia",
+            "vietnamese": "Đau thần kinh sau Herpes"
+        },
+        {
+            "acronym": "PUVA",
+            "definition": "Psoralen + UVA",
+            "vietnamese": "Psoralen + UVA"
+        },
+        {
+            "acronym": "RPR",
+            "definition": "Rapid Plasma Reagin",
+            "vietnamese": "Reagin huyết tương nhanh"
+        },
+        {
+            "acronym": "SJS",
+            "definition": "Stevens Johnson Syndrome",
+            "vietnamese": "Hội chứng Stevens Johnson"
+        },
+        {
+            "acronym": "SLE",
+            "definition": "Systemic Lupus Erythematosus",
+            "vietnamese": "Lupus ban đỏ hệ thống"
+        },
+        {
+            "acronym": "TPI",
+            "definition": "Treponema Pallidum Immobilisation",
+            "vietnamese": "Bất động Treponema Pallidum"
+        },
+        {
+            "acronym": "TEN",
+            "definition": "Toxic Epidermal Necrolysis",
+            "vietnamese": "Hoại tử thượng bì nhiễm độc"
+        },
+        {
+            "acronym": "TLR",
+            "definition": "Toll-Like Receptor",
+            "vietnamese": "Thụ thể giống Toll"
+        },
+        {
+            "acronym": "UV",
+            "definition": "Ultraviolet",
+            "vietnamese": "Tia cực tím"
+        },
+        {
+            "acronym": "UVA",
+            "definition": "Ultraviolet A",
+            "vietnamese": "Tia cực tím A"
+        },
+        {
+            "acronym": "UVB",
+            "definition": "Ultraviolet B",
+            "vietnamese": "Tia cực tím B"
+        },
+        {
+            "acronym": "VDRL",
+            "definition": "Venereal Disease Research Laboratory",
+            "vietnamese": "Phòng nghiên cứu bệnh hoa liễu"
+        },
+        {
+            "acronym": "VZV",
+            "definition": "Varicella-Zoster Virus",
+            "vietnamese": "Virus Varicella-Zoster"
+        },
+        {
+            "acronym": "WHO",
+            "definition": "World Health Organization",
+            "vietnamese": "Tổ chức Y tế Thế giới"
+        }
+    ],
+    "metadata": {
+        "total_terms": 46,
+        "source": "medical_glossary.md",
+        "created_date": "2026-01-24",
+        "description": "Danh sách thuật ngữ y khoa viết tắt đã được chuẩn hóa cho hệ thống RAG y khoa",
+        "version": "1.0"
+    }
+}
