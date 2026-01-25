@@ -181,13 +181,13 @@ def main():
     enricher = DiseaseEnricher(diseases_file, glossary_file)
     result, stats = enricher.save(output_file)
     
-    print(f"\n✅ Hoàn thành!")
-    print(f"\n📊 Thống kê:")
+    print(f"\nHoàn thành!")
+    print(f"\nThống kê:")
     print(f"  - Tổng số bệnh: {stats['total_diseases']}")
     print(f"  - Bệnh có thuật ngữ: {stats['total_enriched']}")
     print(f"  - Tổng acronyms tìm thấy: {stats['total_acronyms_found']}")
     print(f"  - Tỷ lệ: {stats['total_enriched']/stats['total_diseases']*100:.1f}%")
-    print(f"\n💾 File đã lưu: {output_file}")
+    print(f"\nFile đã lưu: {output_file}")
     
     # In ví dụ
     print(f"\n📝 Ví dụ bệnh đã enrich:")

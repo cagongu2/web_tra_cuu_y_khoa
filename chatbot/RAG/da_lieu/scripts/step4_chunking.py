@@ -177,7 +177,7 @@ def process_chunking():
             indent=2
         )
 
-    print(f"✅ Semantic chunking DONE — {len(chunks)} chunks created.")
+    print(f"Semantic chunking DONE — {len(chunks)} chunks created.")
 
 if __name__ == "__main__":
     process_chunking()

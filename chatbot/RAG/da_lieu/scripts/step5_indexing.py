@@ -29,7 +29,7 @@ else:
     raise ValueError("No API keys found in .env")
 
 def create_vector_db():
-    print("🚀 Starting Embedding and Vector DB Creation...")
+    print("Starting Embedding and Vector DB Creation...")
     
     # 1. Load Chunks
     with open(CHUNKS_FILE, 'r', encoding='utf-8') as f:
@@ -37,7 +37,7 @@ def create_vector_db():
     all_chunks = data['chunks']
     
     # --- Deduplication logic ---
-    print("🔍 Checking for duplicate chunks...")
+    print("Checking for duplicate chunks...")
     seen_hashes = set()
     unique_chunks = []
     duplicate_count = 0
@@ -55,30 +55,30 @@ def create_vector_db():
             duplicate_count += 1
             
     if duplicate_count > 0:
-        print(f"⚠️ Warning: Found and removed {duplicate_count} duplicate chunks.")
+        print(f"Warning: Found and removed {duplicate_count} duplicate chunks.")
     else:
-        print("✅ No duplicates found.")
+        print("No duplicates found.")
         
     texts = [c['text'] for c in unique_chunks]
     metadatas = [c['metadata'] for c in unique_chunks]
     
-    print(f"📦 Processing {len(texts)} unique chunks.")
+    print(f"Processing {len(texts)} unique chunks.")
 
     # 2. Initialize Embedder
     embedder = RotatingEmbeddings(api_keys=api_keys)
     
     # 3. Generate Embeddings
-    print("🧠 Generating embeddings (this may take a while depending on quota)...")
+    print("Generating embeddings (this may take a while depending on quota)...")
     embeddings = embedder.embed_documents(texts)
     embeddings = np.array(embeddings).astype('float32')
     
-    print(f"✅ Generated {embeddings.shape[0]} embeddings with dimension {embeddings.shape[1]}.")
+    print(f"Generated {embeddings.shape[0]} embeddings with dimension {embeddings.shape[1]}.")
 
     # 4. Create LangChain FAISS Index
     from langchain_community.vectorstores import FAISS
     from langchain_core.documents import Document
     
-    print("🏗️ Creating LangChain FAISS index...")
+    print("Creating LangChain FAISS index...")
     documents = [
         Document(page_content=t, metadata=m) 
         for t, m in zip(texts, metadatas)
@@ -98,7 +98,7 @@ def create_vector_db():
         
     vector_store.save_local(FAISS_DIR)
     
-    print(f"🎉 FAISS DB (LangChain format) saved successfully to {FAISS_DIR}")
+    print(f"FAISS DB (LangChain format) saved successfully to {FAISS_DIR}")
 
 if __name__ == "__main__":
     # Ensure we are in the right directory to import modules

@@ -241,10 +241,10 @@ def main():
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     
-    print(f"✅ Hoàn thành! File đã được lưu tại: {output_file}")
+    print(f"Hoàn thành! File đã được lưu tại: {output_file}")
     
     # In thông tin chi tiết
-    print(f"\n📊 Chi tiết các chương:")
+    print(f"\nChi tiết các chương:")
     for chapter in data['medical_diseases']['chapters']:
         print(f"  - Chương {chapter['chapter_number']}: {chapter['chapter_name']} ({len(chapter['diseases'])} bệnh)")
 
