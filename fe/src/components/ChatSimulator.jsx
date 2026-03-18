@@ -158,12 +158,17 @@ export const ChatSimulator = () => {
           es.close();
           loadUserChats(true);
         } else {
-          let content = parsed.text;
-          const jsonMatch = content.match(/```json\s*([\s\S]*?)```/);
+          assistantMessage += parsed.text;
+
+          let displayMessage = assistantMessage;
+          const jsonMatch = displayMessage.match(/```json\s*([\s\S]*?)```/);
+
           if (jsonMatch) {
+            console.log("Tìm thấy JSON block rùi nha!", jsonMatch[0]);
             try {
               const data = JSON.parse(jsonMatch[1]);
-              let extracted = data.extracted_results || content;
+              console.log("Parse thành công dữ liệu JSON:", data);
+              let extracted = data.extracted_results || data.answer || "";
 
               // Nếu extracted lại là một JSON string (double encoded)
               if (typeof extracted === 'string' && extracted.includes('```json')) {
@@ -171,44 +176,55 @@ export const ChatSimulator = () => {
                 if (innerMatch) {
                   try {
                     extracted = JSON.parse(innerMatch[1]);
-                  } catch (e) {
-                    console.log('Inner JSON parse failed', e);
-                  }
+                  } catch (e) { }
                 }
               }
 
               // Xử lý nếu kết quả là object chứa question/answer
+              let formattedContent = "";
               if (typeof extracted === 'object' && extracted !== null) {
-                // Nối các câu trả lời lại
-                content = Object.values(extracted)
+                formattedContent = Object.values(extracted)
                   .map(item => {
-                    if (typeof item === 'object' && item.answer) {
-                      return item.answer;
-                    }
+                    if (typeof item === 'object' && item.answer) return item.answer;
                     return typeof item === 'string' ? item : JSON.stringify(item);
                   })
                   .join('\n\n');
               } else {
-                content = String(extracted);
+                formattedContent = String(extracted);
               }
 
-            } catch (err) {
-              console.error("Không parse được JSON trong text:", err);
-            }
-          }
+              // Hiển thị nguồn và độ tương thích
+              if (data.source) {
+                console.log("Phát hiện source thành công:", data.source, "Score:", data.similarity_score);
+                const scoreHtml = (data.similarity_score && data.similarity_score !== "N/A")
+                  ? ` | **Độ tương thích:** ${data.similarity_score}`
+                  : '';
+                formattedContent += `\n\n---\n*🔍 Nguồn: ${data.source}${scoreHtml}*`;
+              } else {
+                console.log("Không tìm thấy trường 'source' trong JSON trả về!");
+              }
 
-          assistantMessage += content;
+              // Thay thế cục JSON bằng chuỗi hiển thị
+              displayMessage = displayMessage.replace(jsonMatch[0], formattedContent);
+
+            } catch (err) {
+              console.log("JSON lấp lửng / lỗi cú pháp:", err.message);
+              // JSON chưa parse được (có thể đang stream chưa xong dấu ```)
+            }
+          } else {
+             // console.log("Chunk này ko chứa format markdown json...");
+          }
 
           setMessages((prev) => {
             const newMessages = [...prev];
             const lastMsg = newMessages[newMessages.length - 1];
 
             if (lastMsg && lastMsg.role === "assistant") {
-              lastMsg.content = assistantMessage;
+              lastMsg.content = displayMessage;
             } else {
               newMessages.push({
                 role: "assistant",
-                content: assistantMessage,
+                content: displayMessage,
               });
             }
 

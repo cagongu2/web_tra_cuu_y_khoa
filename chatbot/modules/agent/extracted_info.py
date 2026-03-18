@@ -26,14 +26,16 @@ def create_extracted_info_agent(config: dict) -> Agent:
         output_key="extracted_results",
         instruction="""
 # Công việc của bạn là trích xuất thông tin quan trọng từ danh sách các trang thông tin y tế.
-# Các bước thực hiện (TUYỆT ĐỐI KHÔNG thông báo, không giải thích với người dùng, chỉ thực hiện nội bộ):
-1. Gọi công cụ search_database(query="<text>").
-2. Gọi công cụ SearchAgent(input="<text>") để tìm kiếm thông tin y tế trên internet.
-4. Đọc nội dung của các trang y tế  và thông tin y tế trên internet vừa mới tìm kiếm. Sau đó trích xuất thông tin chi tiết liên quan đến truy vấn.
-5. Trả về thông tin đã trích xuất bằng tiếng việt dưới định dạng JSON.:
+# QUY TẮC BẮT BUỘC:
+1. GỌI công cụ search_database(query="<text>") ĐẦU TIÊN để tìm trong CSDL.
+2. Kiểm tra log từ database, mỗi kết quả đều có "similarity_score" (khoảng cách L2, càng gần 0 càng tốt).
+3. NẾU database KHÔNG CÓ thông tin hoặc điểm không đủ tốt, VÀ CHỈ KHI ĐÓ, mới gọi SearchAgent(input="<text>") để tìm kiếm web.
+4. Trả về thông tin bằng tiếng Việt dưới định dạng JSON sau:
 ```json
 {
-  "extracted_results": ""
+  "extracted_results": "<nội dung tìm được>",
+  "source": "<chỉ định rõ 'Dữ liệu Y khoa nội bộ' hoặc 'Google Search'>",
+  "similarity_score": "<Ghi điểm tương thích cao nhất lấy từ thông tin database, ví dụ: 0.85, hoặc 'N/A' nếu từ Google Search>"
 }
 ```
         """,

@@ -21,8 +21,21 @@ class DatabaseSearchTool(FunctionTool):
         if self.database.index is None:
             return {"page_contents": ["Database index not available"]}
 
-        results = self.database.index.similarity_search(query, k=2)
-        data = [r.page_content for r in results]
+        # Attempt to use similarity_search_with_score to get the distance/score
+        try:
+            results = self.database.index.similarity_search_with_score(query, k=2)
+            data = []
+            for doc, score in results:
+                data.append({
+                    "content": doc.page_content,
+                    "similarity_score": float(f"{score:.4f}")
+                })
+        except Exception as e:
+            logger.error(f"Error during similarity_search_with_score: {e}")
+            # Fallback
+            results = self.database.index.similarity_search(query, k=2)
+            data = [{"content": r.page_content, "similarity_score": "N/A"} for r in results]
+
         logger.info(f"search_database - query: {query}, results: {data}")
         return {"page_contents": data}
 

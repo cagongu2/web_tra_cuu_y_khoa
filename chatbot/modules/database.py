@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 from modules.embedding import RotatingEmbeddings
 from langchain_community.vectorstores import FAISS
 
