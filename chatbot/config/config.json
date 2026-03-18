@@ -5,18 +5,16 @@
         "save_path": "./checkpoint"
     },
     "verbose": false,
-    "genmini":{
-        "api":[],
-        "model": "gemini-2.0-flash",
-        "model_embed" : "models/gemini-embedding-001"
-        
+    "genmini": {
+        "api": [],
+        "model": "gemini-2.5-flash",
+        "model_embed": "models/gemini-embedding-001"
     },
     "database": {
         "type": "faiss",
         "path": ""
-
     },
-     "mongodb": {
+    "mongodb": {
         "url": "mongodb://localhost:27017",
         "db_name": "medical_chatbot"
     },
@@ -26,7 +24,6 @@
     },
     "logging": {
         "folder": "logs",
-        "name"  : "app.log"
+        "name": "app.log"
     }
-    
 }
